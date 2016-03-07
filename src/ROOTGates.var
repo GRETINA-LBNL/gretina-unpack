@@ -1,0 +1,187 @@
+/* This file has the ROOT user gates for incoming and
+   outgoing beam cuts. Make sure to assign the gate of 
+   interest as 'incomingBeam' and 'outgoingBeam' at the 
+   end of the file. */
+
+{
+
+  /* E12029 Incoming Beam Gates */
+
+  TCutG *incomingCa48 = new TCutG("incomingCa48",9);
+  incomingCa48->SetVarX("tof.tac_obj");
+  incomingCa48->SetVarY("tof.tac_xfp");
+  incomingCa48->SetPoint(0,2202.66,2907.59);
+  incomingCa48->SetPoint(1,1801.44,2510.63);
+  incomingCa48->SetPoint(2,1798.48,2487.23);
+  incomingCa48->SetPoint(3,1826.59,2508.17);
+  incomingCa48->SetPoint(4,2037.43,2717.95);
+  incomingCa48->SetPoint(5,2075.14,2741.99);
+  incomingCa48->SetPoint(6,2103.33,2779.09);
+  incomingCa48->SetPoint(7,2215.23,2896.9);
+  incomingCa48->SetPoint(8,2202.66,2907.59);
+   
+  TCutG *incomingCa49 = new TCutG("incomingCa49",9);
+  incomingCa49->SetVarX("tof.tac_obj");
+  incomingCa49->SetVarY("tof.tac_xfp");
+  incomingCa49->SetPoint(0,2201.76,2889.04);
+  incomingCa49->SetPoint(1,1819.22,2510.33);
+  incomingCa49->SetPoint(2,1812.93,2483.85);
+  incomingCa49->SetPoint(3,1822.81,2489.14);
+  incomingCa49->SetPoint(4,2019.47,2682.45);
+  incomingCa49->SetPoint(5,2052.69,2705.81);
+  incomingCa49->SetPoint(6,2098.49,2763.24);
+  incomingCa49->SetPoint(7,2214.33,2877.12);
+  incomingCa49->SetPoint(8,2201.76,2889.04);
+  
+  TCutG *incomingCa50 = new TCutG("incomingCa50",9);	
+  incomingCa50->SetVarX("tof.tac_obj");
+  incomingCa50->SetVarY("tof.tac_xfp");
+  incomingCa50->SetPoint(0,2238.66,2939.28);
+  incomingCa50->SetPoint(1,1856.7,2560.21);
+  incomingCa50->SetPoint(2,1850.32,2534.26);
+  incomingCa50->SetPoint(3,1859.89,2539.9);
+  incomingCa50->SetPoint(4,2056.85,2732.82);
+  incomingCa50->SetPoint(5,2089.54,2756.51);
+  incomingCa50->SetPoint(6,2135.79,2812.92);
+  incomingCa50->SetPoint(7,2251.42,2926.87);
+  incomingCa50->SetPoint(8,2238.66,2939.28);
+
+  /* E12029 Outgoing PID Gates */
+  
+  TCutG *cafromca48 = new TCutG("cafromca48",5);
+  cafromca48->SetVarX("tof.tac_obje1");
+  cafromca48->SetVarY("fp.ic.de");
+  cafromca48->SetPoint(0,2014.92,634.899);
+  cafromca48->SetPoint(1,2118.64,528.43);
+  cafromca48->SetPoint(2,2124.84,586.135);
+  cafromca48->SetPoint(3,2035.13,685.289);
+  cafromca48->SetPoint(4,2014.92,634.899);
+  
+  TCutG *ca47fromca48 = new TCutG("ca47fromca48",8);
+  ca47fromca48->SetVarX("tof.tac_obje1");
+  ca47fromca48->SetVarY("fp.ic.de");
+  ca47fromca48->SetPoint(0,2053.91,598.944);
+  ca47fromca48->SetPoint(1,2061.33,643.34);
+  ca47fromca48->SetPoint(2,2072.8,643.845);
+  ca47fromca48->SetPoint(3,2079.04,620.637);
+  ca47fromca48->SetPoint(4,2072.8,584.818);
+  ca47fromca48->SetPoint(5,2062.17,585.322);
+  ca47fromca48->SetPoint(6,2054.59,597.935);
+  ca47fromca48->SetPoint(7,2053.91,598.944);
+ 
+  TCutG *cafromca49 = new TCutG("cafromca49",5);
+  cafromca49->SetVarX("tof.tac_obje1");
+  cafromca49->SetVarY("fp.ic.de");
+  cafromca49->SetPoint(0,2004.15,637.288);
+  cafromca49->SetPoint(1,2089.55,557.265);
+  cafromca49->SetPoint(2,2103.29,605.442);
+  cafromca49->SetPoint(3,2022.74,696.081);
+  cafromca49->SetPoint(4,2004.15,637.288);
+
+  TCutG *cafromca50 = new TCutG("cafromca50",5);
+  cafromca50->SetVarX("tof.tac_obje1");
+  cafromca50->SetVarY("fp.ic.de");
+  cafromca50->SetPoint(0,2031.92,612.058);
+  cafromca50->SetPoint(1,2142.55,498.785);
+  cafromca50->SetPoint(2,2138.2,580.075);
+  cafromca50->SetPoint(3,2039.03,672.026);
+  cafromca50->SetPoint(4,2031.92,612.058);
+  
+  TCutG *ca49fromca50 = new TCutG("ca49fromca50",8);
+  ca49fromca50->SetVarX("tof.tac_obje1");
+  ca49fromca50->SetVarY("fp.ic.de");
+  ca49fromca50->SetPoint(0,2065.85,580.855);
+  ca49fromca50->SetPoint(1,2079.2,625.559);
+  ca49fromca50->SetPoint(2,2088.1,623.783);
+  ca49fromca50->SetPoint(3,2095.19,605.724);
+  ca49fromca50->SetPoint(4,2084.97,559.539);
+  ca49fromca50->SetPoint(5,2071.78,573.454);
+  ca49fromca50->SetPoint(6,2067.16,578.487);
+  ca49fromca50->SetPoint(7,2065.85,580.855);
+
+  /* E11007 Outgoing Gates */	
+  
+  TCutG *si28fromar36 = new TCutG("si28fromar36",7);
+  si28fromar36->SetVarX("tof.rfe1");
+  si28fromar36->SetVarY("fp.ic.de");
+  si28fromar36->SetPoint(0,-1133.43,228.385);
+  si28fromar36->SetPoint(1,-1119.63,249.844);
+  si28fromar36->SetPoint(2,-1086.94,251.02);
+  si28fromar36->SetPoint(3,-1072.54,236.322);
+  si28fromar36->SetPoint(4,-1085.14,215.45);
+  si28fromar36->SetPoint(5,-1116.33,214.274);
+  si28fromar36->SetPoint(6,-1133.43,228.385);
+
+  /* E11029 Incoming Gate */
+  TCutG *incomingAllE11029 = new TCutG("incomingAllE11029", 4);
+  incomingAllE11029->SetVarX("tof.tac_obj");
+  incomingAllE11029->SetVarY("tof.tac_xfp");
+  incomingAllE11029->SetPoint(0, -85000, -85000);
+  incomingAllE11029->SetPoint(1, -85000, 85000);
+  incomingAllE11029->SetPoint(2, 85000, 85000);
+  incomingAllE11029->SetPoint(3, 85000, -85000);
+
+  /* E11029 Outgoing Gates */	
+  TCutG *crdcBlob1 = new TCutG("crdcBlob1",7);
+  crdcBlob1->SetVarX("tof.rfe1");
+  crdcBlob1->SetVarY("fp.ic.de");
+  crdcBlob1->SetPoint(0,-489.926,779.88);
+  crdcBlob1->SetPoint(1,-489.926,764.147);
+  crdcBlob1->SetPoint(2,-474.906,755.565);
+  crdcBlob1->SetPoint(3,-460.887,765.577);
+  crdcBlob1->SetPoint(4,-460.887,782.741);
+  crdcBlob1->SetPoint(5,-480.914,791.322);
+  crdcBlob1->SetPoint(6,-489.926,779.88);
+
+  TCutG *crdcBlob2 = new TCutG("crdcBlob2",7);
+  crdcBlob2->SetVarX("tof.rfe1");
+  crdcBlob2->SetVarY("fp.ic.de");
+  crdcBlob2->SetPoint(0,-590.061,704.335);
+  crdcBlob2->SetPoint(1,-590.061,685.355);
+  crdcBlob2->SetPoint(2,-568.122,672.702);
+  crdcBlob2->SetPoint(3,-551.667,689.573);
+  crdcBlob2->SetPoint(4,-554.409,708.552);
+  crdcBlob2->SetPoint(5,-570.864,716.988);
+  crdcBlob2->SetPoint(6,-590.061,704.335);
+      
+  TCutG *crdcBlob3 = new TCutG("crdcBlob3",7);
+  crdcBlob3->SetVarX("tof.rfe1");
+  crdcBlob3->SetVarY("fp.ic.de");
+  crdcBlob3->SetPoint(0,-587.319,531.407);
+  crdcBlob3->SetPoint(1,-590.061,510.319);
+  crdcBlob3->SetPoint(2,-568.122,503.992);
+  crdcBlob3->SetPoint(3,-548.925,508.21);
+  crdcBlob3->SetPoint(4,-552.581,529.298);
+  crdcBlob3->SetPoint(5,-569.95,535.625);
+  crdcBlob3->SetPoint(6,-587.319,531.407);
+  
+  TCutG *mgBig = new TCutG("mgBig",5);
+  mgBig->SetVarX("tof.rfe1");
+  mgBig->SetVarY("fp.ic.de");
+  mgBig->SetPoint(0,-700.297,427.003);
+  mgBig->SetPoint(1,-273.435,351.297);
+  mgBig->SetPoint(2,-258.291,203.16);
+  mgBig->SetPoint(3,-708.816,288.212);
+  mgBig->SetPoint(4,-700.297,427.003);
+    
+  /* E11007 24Mg gates */	
+
+  TCutG *e11007Big = new TCutG("bigBlob",7);
+  e11007Big->SetVarX("tof.rfe1");
+  e11007Big->SetVarY("fp.ic.de");
+  e11007Big->SetPoint(0,-1138.49,403.872);
+  e11007Big->SetPoint(1,-1098.44,417.117);
+  e11007Big->SetPoint(2,-1059.43,385.33);
+  e11007Big->SetPoint(3,-1061.5,247.591);
+  e11007Big->SetPoint(4,-1105.91,223.751);
+  e11007Big->SetPoint(5,-1143.47,272.313);
+  e11007Big->SetPoint(6,-1138.49,403.872);
+
+  incomingBeam = incomingAllE11029;
+  outgoingBeam = e11007Big;
+
+  cout << "Set S800 gates to " << endl
+       << " incomingBeam = " << incomingBeam->GetName() << endl
+       << " outgoingBeam = " << outgoingBeam->GetName() << endl;
+
+}

@@ -1,0 +1,185 @@
+GRETINA
+Doppler Correction
+bbeta 0.3909
+ATAcor 0.204
+BTAcor -0.168
+targetX 0.
+targetY 0.
+targetZ 0.2
+# radial corrections => crystal# factor
+28
+1 1.05
+2 1.02
+3 1.05
+4 1.05
+5 1.05
+6 1.08
+7 1.1
+8 1.05
+9 1.0
+10 1.0
+11 1.0
+12 1.0
+13 1.04
+14 1.12
+15 1.02
+16 1.0
+17 1.14
+18 1.15
+19 1.05
+20 1.1
+21 1.12
+22 1.09
+23 1.1
+24 1.11
+25 1.06
+26 1.06
+27 1.06
+28 1.09
+
+# MSU 7 Close-packed Configuration
+
+#Geometry
+# QNumber HoleNumber
+#1 28
+#2 9
+#3 29
+#4 24
+#5 25
+#6 19
+#7 20
+
+# LBNL 5 Close-packed
+
+#Geometry
+# QNumber HoleNumber
+#1 26
+#2 27
+#3 28
+#4 29
+#5 30
+#6 -1
+#7 -1
+
+# MSU Standard In-Beam Configuration
+
+Geometry
+# QNumber HoleNumber
+7
+1 15
+2 6
+3 16
+4 8
+5 9
+6 7
+7 17
+
+# MSU 90 degree configuration
+
+#Geometry
+# QNumber HoleNumber
+#7
+#1 16
+#2 19
+#3 14
+#4 15
+#5 11
+#6 17
+#7 12
+
+# LBNL Scanning
+
+#Geometry
+# QNumber HoleNumber 
+#1
+#4 9
+
+#Electronics Order
+#
+#1 
+#4 9
+
+# ANL CHICO configuration
+
+#Geometry
+# QNumber HoleNumber
+#1 24
+#2 15
+#3 17
+#4 8
+#5 25
+#6 16
+#7 19
+
+# GRETINA ER-5 Configuration?
+
+#Geometry
+# QNumber HoleNumber
+#1 14
+#2 15
+#3 26
+#4 27
+#5 30
+#6 -1
+#7 22
+
+Electronics Order
+# QNumber OrderNumber (from 0)
+7
+1 0
+2 1
+3 2
+4 3
+5 4
+6 5
+7 6
+
+#Electronics Order
+# QNumber OrderNumber (from 0)
+#1 0
+#2 5
+#3 4
+#4 1
+#5 3
+#6 -1
+#7 6
+
+# NSCL LH Configuration
+
+#Geometry
+# QNumber HoleNumber
+#1 6
+#2 15
+#3 7
+#4 12
+#5 22
+#6 14
+#7 11
+
+# Max packing for 7 modules
+
+#Geometry
+# QNumber HoleNumber
+#1 18
+#2 19
+#3 20
+#4 24
+#5 25
+#6 28
+#7 29
+
+# Doppler corrections from e11029ThickTargetThinScint.C?
+#Doppler Correction
+#bbeta 0.41
+#ATAcor 2.5
+#BTAcor 0.15
+#targetX -0.2
+#targetY -5
+#targetZ -1.1
+
+#bbeta 0.41
+#ATAcor 2.4
+#BTAcor -0.35
+#targetX -0.5
+#targetY -6.0
+#targetZ -0.3
