@@ -5,21 +5,21 @@ dataType 1
 
 ##### Calibration filenames
 # Calibration file for 'A', 'B' and 'C' amplitudes
-ACalibrationFile Acoeff-433-8x8.xy
-BCalibrationFile Bcoeff-433-8x8.xy
-CCalibrationFile Ccoeff-433-8x8.xy
-TCalibrationFile Tcoeff-322-8x8.xy
+ACalibrationFile phosWallCalibrations/Acoeff-433-8x8.xy
+BCalibrationFile phosWallCalibrations/Bcoeff-433-8x8.xy
+CCalibrationFile phosWallCalibrations/Ccoeff-433-8x8.xy
+TCalibrationFile phosWallCalibrations/Tcoeff-322-8x8.xy
 
 # Gain files for 'A', 'B', and 'C' 
-AGainFile Again_coeff-433-8x8.xy
-BGainFile Bgain_coeff-433-8x8.xy
-CGainFile Cgain_coeff-433-8x8.xy
+AGainFile phosWallCalibrations/Again_coeff-433-8x8.xy
+BGainFile phosWallCalibrations/Bgain_coeff-433-8x8.xy
+CGainFile phosWallCalibrations/Cgain_coeff-433-8x8.xy
 
 # Coordinates file
-CoordinatesFile Fit_pars-test.xy
+CoordinatesFile phosWallCalibrations/Fit_pars-test.xy
 
 # Neighbour pixel file
-NeighbourFile all_neighbors256-8x8.xy
+NeighbourFile phosWallCalibrations/all_neighbors256-8x8.xy
 
 ##### Control parameters
 # Show the setup details on initialization

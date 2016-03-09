@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
     RdGeCalFile(ctrl->calibrationFile.Data(), gVar);
   } else {
     cout << "Using default GRETINA energy calibration file. " << endl;
-    RdGeCalFile("EhiGainCor-Run0296Scanning.dat", gVar);
+    RdGeCalFile("gCalibration.dat", gVar);
   }
 
   /* Read in baseline values for all segments. These are only
@@ -203,15 +203,16 @@ int main(int argc, char *argv[]) {
 #ifdef WITH_CHICO
   chico = new CHICOFull();
   chico->Initialize();
-  chico->InitializeCHICOVariables("ppacTheta.cal", "ppacPhi.cal", 
-                                  "beta_76Ge_May14.dat");
+  chico->InitializeCHICOVariables("chicoCalibrations/ppacTheta.cal", 
+				  "chicoCalibrations/ppacPhi.cal", 
+                                  "chicoCalibrations/beta.dat");
   chico->offsetTarget = 15.8; 
 #endif
   
   /* Phoswich Wall */
 #ifdef WITH_PWALL
   phosWall = new phosWallFull();
-  phosWall->InitializeParameters("phosParam.set");
+  phosWall->InitializeParameters("phosWallCalibrations/phosParam.set");
   phosWall->Initialize();
   phosWall->SetPwallPositions();
 #endif
@@ -224,7 +225,7 @@ int main(int argc, char *argv[]) {
   if (ctrl->s800File) {
     ctrl->SetS800Controls(ctrl->s800ControlFile);
     s800->InitializeS800Variables(ctrl->s800VariableFile);
-  } else { s800->InitializeS800Variables("s800.set"); }
+  } else { s800->InitializeS800Variables("s800Calibrations/s800.set"); }
   
   s800->fp.ic.BuildLookUp();
   s800->fp.track.map.LoadInverseMap(s800->fp.track.map.mapFilename);
@@ -241,7 +242,7 @@ int main(int argc, char *argv[]) {
   s800Scaler = new S800Scaler();
   s800Scaler->Initialize();
 
-  s800Scaler->InitializeS800ScalerParameters("S800Scaler.definition");
+  s800Scaler->InitializeS800ScalerParameters("s800Calibrations/S800Scaler.definition");
   cout << endl;
 #endif /* WITH_S800 */
 

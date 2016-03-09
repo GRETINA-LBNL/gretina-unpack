@@ -38,9 +38,9 @@ targetZ 0.2
 28 1.09
 
 # MSU 7 Close-packed Configuration
-
 #Geometry
 # QNumber HoleNumber
+#7
 #1 28
 #2 9
 #3 29
@@ -50,7 +50,6 @@ targetZ 0.2
 #7 20
 
 # LBNL 5 Close-packed
-
 #Geometry
 # QNumber HoleNumber
 #1 26
@@ -61,8 +60,7 @@ targetZ 0.2
 #6 -1
 #7 -1
 
-# MSU Standard In-Beam Configuration
-
+# MSU Standard In-Beam Configuration - First campaign
 Geometry
 # QNumber HoleNumber
 7
@@ -75,7 +73,6 @@ Geometry
 7 17
 
 # MSU 90 degree configuration
-
 #Geometry
 # QNumber HoleNumber
 #7
@@ -88,7 +85,6 @@ Geometry
 #7 12
 
 # LBNL Scanning
-
 #Geometry
 # QNumber HoleNumber 
 #1
@@ -100,9 +96,9 @@ Geometry
 #4 9
 
 # ANL CHICO configuration
-
 #Geometry
 # QNumber HoleNumber
+#7
 #1 24
 #2 15
 #3 17
@@ -111,17 +107,17 @@ Geometry
 #6 16
 #7 19
 
-# GRETINA ER-5 Configuration?
-
+# NSCL LH Configuration
 #Geometry
 # QNumber HoleNumber
-#1 14
+#7
+#1 6
 #2 15
-#3 26
-#4 27
-#5 30
-#6 -1
-#7 22
+#3 7
+#4 12
+#5 22
+#6 14
+#7 11
 
 Electronics Order
 # QNumber OrderNumber (from 0)
@@ -134,52 +130,5 @@ Electronics Order
 6 5
 7 6
 
-#Electronics Order
-# QNumber OrderNumber (from 0)
-#1 0
-#2 5
-#3 4
-#4 1
-#5 3
-#6 -1
-#7 6
 
-# NSCL LH Configuration
 
-#Geometry
-# QNumber HoleNumber
-#1 6
-#2 15
-#3 7
-#4 12
-#5 22
-#6 14
-#7 11
-
-# Max packing for 7 modules
-
-#Geometry
-# QNumber HoleNumber
-#1 18
-#2 19
-#3 20
-#4 24
-#5 25
-#6 28
-#7 29
-
-# Doppler corrections from e11029ThickTargetThinScint.C?
-#Doppler Correction
-#bbeta 0.41
-#ATAcor 2.5
-#BTAcor 0.15
-#targetX -0.2
-#targetY -5
-#targetZ -1.1
-
-#bbeta 0.41
-#ATAcor 2.4
-#BTAcor -0.35
-#targetX -0.5
-#targetY -6.0
-#targetZ -0.3
