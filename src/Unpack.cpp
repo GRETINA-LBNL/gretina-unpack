@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
   GRETINAVariables*  gVar = new GRETINAVariables();
   gVar->Initialize();
   gVar->InitializeGRETINAVariables("gretina.set");
-  RdGeDINOCalFile(37, "Co60Pairs-dino.dat", gVar);
+  //RdGeDINOCalFile(37, "Co60Pairs-dino.dat", gVar);
 
   gret = new GRETINA();
   gret->Initialize();
@@ -607,6 +607,9 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
   case RAW:
     { gret->getMode3(inf, gHeader.length, cnt, ctrl, gVar); }
     break;
+  case RAWHISTORY:
+    { gret->getMode3History(inf, gHeader.length, gHeader.timestamp, cnt, gVar); }
+    break;
 #ifdef WITH_BGS
   case BGS:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
@@ -730,6 +733,10 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
   if (gHeader.type < 50) {
     cnt->headerType[gHeader.type]++;
     cnt->setEventBit(gHeader.type);
+  }
+  if (gHeader.type == RAWHISTORY) {
+    cnt->setEventBit(RAW);
+    cnt->headerType[RAW]++;
   }
 }
 

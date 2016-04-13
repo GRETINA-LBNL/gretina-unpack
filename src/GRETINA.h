@@ -265,6 +265,31 @@ class g3OUT : public TObject {
   ClassDef(g3OUT, 1);
 };
 
+struct mode3HistoryPacket {
+  unsigned short aahdr[2];
+  unsigned short hdr[8];
+  unsigned short data[MAX_TRACE_LENGTH];
+};
+
+struct historyEvent{
+  Float_t energy;
+  long long int TS;
+};
+
+class g3HistoryEvent : public TObject {
+  
+ public:
+  std::vector<historyEvent> past;
+  
+ public:
+  g3HistoryEvent() { ; }
+  ~g3HistoryEvent() { ; }
+  UInt_t lengthOfPast() { return past.size(); }
+
+ private: 
+  ClassDef(g3HistoryEvent, 1);
+};
+
 class cloverCrystalEvent : public TObject {
  public:
   Float_t eRaw;
@@ -765,9 +790,11 @@ class GRETINA : public TObject {
   g3CrystalEvent g3X; g3ChannelEvent g3ch;
   cloverCrystalEvent cloverX;
   vector<g3ChannelEvent> g3Temp;
- 
+  historyEvent gH; 
+
   unsigned char gBuf[32*32*1024];
 
+  g3HistoryEvent g3H;
   g3OUT g3out;
   g2OUT g2out;
   g1OUT g1out;
@@ -806,6 +833,8 @@ class GRETINA : public TObject {
 
   Int_t getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
 		 controlVariables *ctrl, GRETINAVariables *gVar);
+  Int_t getMode3History(FILE *inf, Int_t evtLength, long long int hTS, counterVariables *cnt,
+			GRETINAVariables *gVar);
   Int_t getMode2(FILE *inf, Int_t evtLength, GRETINAVariables *gVar,
 		 counterVariables *cnt);
   Int_t getMode1(FILE *inf, GRETINAVariables *gVar,

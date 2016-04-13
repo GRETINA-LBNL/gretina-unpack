@@ -1525,6 +1525,7 @@ void GRETINA::Reset() {
   g3X.Clear();
 
   g3out.Reset();  g3out.Clear();
+  g3H.past.clear(); g3H.Clear();
   g2out.Reset();  g2out.Clear();
   g1out.Reset();  g1out.Clear();
   gSimOut.Reset();  gSimOut.Clear();
@@ -2829,4 +2830,98 @@ Bool_t cloverOUT::middleB() {
   if (top < 100. && bottom < 100.) { return 1; }
   else { return 0; }
 
+}
+
+Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, counterVariables *cnt,
+			       GRETINAVariables *gVar) {
+
+  Int_t siz = 0, remaining = 0;
+  mode3HistoryPacket *dp;
+
+  siz = fread(gBuf, evtLength, 1, inf);
+  if (siz != 1) {
+    cout << ALERTTEXT;
+    printf("getMode3History(): Error in read attempt (A).  Aborting now...\n");
+    cout << RESET_COLOR;  fflush(stdout);
+    return 5;
+  }
+  cnt->Increment(evtLength);
+  
+  /* Byte swapping, due to little/big endian problem */
+  for (Int_t j=0; j<evtLength; j=j+2) {
+    swap(*(gBuf + j), *(gBuf + j + 1));
+  }
+  
+  unsigned char *tmp = (gBuf);
+  
+  /* Allocate memory... */
+  if ( !(dp = (mode3HistoryPacket*)malloc(sizeof(dp->aahdr) +
+					  sizeof(dp->hdr) + 
+					  sizeof(dp->data))) ) {
+    cout << ALERTTEXT;
+    printf("getMode3History(): Failed in memory allocation.\n");
+    cout << RESET_COLOR;  fflush(stdout);
+    exit(-1);
+  }
+  memset(dp->data, 1, MAX_TRACE_LENGTH * sizeof(UShort_t));
+  
+  /* Copy 'AAAA' header */
+  memmove(&dp->aahdr[0], tmp, sizeof(dp->aahdr));
+  if ((dp->aahdr[0] != 0xAAAA) || (dp->aahdr[1] != 0xAAAA)) {
+    cout << ALERTTEXT;
+    printf("getMode3History(): Didn't get 'AAAA' header as expected!\n");
+    printf("getMode3History(): Found this instead: %x %x\n", dp->aahdr[0], dp->aahdr[1]);
+    cout << RESET_COLOR;  fflush(stdout);
+    exit(-1);
+  }
+  
+  tmp = (gBuf + (sizeof(dp->aahdr)));
+  
+  /* Now copy the rest of the event */  
+  memmove(&dp->hdr[0], tmp, (evtLength - sizeof(dp->aahdr)));
+
+  /* We've got the data, pull out the information now... */
+  if ( (dp->hdr[1] & 0xf) == 0xB) {
+    Int_t eventsize = (dp->hdr[0] & 0x3ff);
+
+    gH.energy = 0.;
+    gH.TS = 0;
+    
+    gH.TS = (ULong64_t)( ((ULong64_t)(dp->hdr[3])) +  
+			 ((ULong64_t)(dp->hdr[2]) << 16) +
+			 ((ULong64_t)(dp->hdr[5] & 0x0fff) << 32) +
+			 ((ULong64_t)(hTS & 0x800000000000)) );
+    Int_t overflow = (dp->hdr[5] & 0x8000);
+    gH.energy = dp->hdr[4] + ((dp->hdr[7] & 0xff)<< 16);
+    gH.energy /= 32.;
+    
+    eventsize -= (sizeof(dp->hdr)/4);
+
+    g3H.past.push_back(gH);
+    gH.energy = 0; gH.TS = 0;
+        
+    int i=0;
+    while (eventsize) {
+     
+      long long int TSintermediate = ((dp->data[i+3]) + ((dp->data[i+2] & 0x7fff) << 16));
+
+      gH.TS = (ULong64_t)( ((ULong64_t)(dp->data[i] & 0xfe00) >> 9) + 
+			   ((ULong64_t)(TSintermediate) << 7) + 
+			   ((ULong64_t)(dp->hdr[5] & 0x7fc0) << 38) +
+			   ((ULong64_t)(hTS & 0x800000000000)) );    
+      gH.energy = dp->data[i+1] + ((dp->hdr[i] & 0x1ff) << 16);
+      gH.energy /= 32;
+      overflow = (dp->data[i+2] & 0x8000);
+
+      i+=4;
+      eventsize -= (sizeof(unsigned short));
+      g3H.past.insert(g3H.past.end(), gH);
+      gH.energy = 0; gH.TS = 0;
+    }
+  }
+
+  free(dp);
+
+  return (0);
+  
 }

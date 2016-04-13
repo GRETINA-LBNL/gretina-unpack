@@ -269,12 +269,12 @@ void InitializeTree(controlVariables* ctrl) {
   teb->Branch("clover", "cloverOUT", &(gret->cloverOut));
   teb->Branch("gSim", "g4SimOUT", &(gret->gSimOut));
   teb->Branch("b29", "Bank29", &(gret->b29));
+  teb->Branch("g3H", "g3HistoryEvent", &(gret->g3H));
 
   /* Clover */
   teb->Branch("clover", "cloverEvent", &(cloverEventOUT));
 
   /* Tree for waveforms, if being used. */
-
   if (ctrl->withWAVE) {
     if (ctrl->WITH_TRACETREE) {
       wave = new TTree("wave", "Tree - waveforms");

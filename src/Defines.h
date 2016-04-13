@@ -23,7 +23,8 @@
 /********** GEB Header Types **********/
 
 #define DECOMP 1
-#define RAW    2
+#define RAW    0x2
+#define RAWHISTORY 0x2B
 #define TRACK  3
 #define BGS    4
 #define S800   5

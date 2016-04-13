@@ -20,6 +20,9 @@
 #pragma link C++ class vector<g3ChannelEvent>+;
 #pragma link C++ class vector<g3Waveform>+;
 #pragma link C++ class vector<g3CrystalEvent>+;
+#pragma link C++ struct mode3HistoryPacket+;
+#pragma link C++ struct historyEvent+;
+#pragma link C++ class g3HistoryEvent+;
 
 #pragma link C++ class cloverCrystalEvent+;
 #pragma link C++ class cloverOUT+;
