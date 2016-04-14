@@ -3,9 +3,6 @@
 ClassImp(rotationMatrix);
 ClassImp(globalHeader);
 
-ClassImp(cloverPacket);
-ClassImp(cloverEvent);
-
 ClassImp(mode3DataPacket);
 
 ClassImp(ipOLD);
@@ -1293,124 +1290,100 @@ void GRETINA::Initialize() {
 
   wfMinCrossTime = 70.; wfMaxCrossTime = 90.;
   
-  cloverModuleNumber = 99999; /* No clover in setup; 
-				 all GlobalID should be available. */
-
-  // cloverModuleNumber = 37;
-  /* Old clover calibration */
-  cloverSlope[30] = 0.0980; cloverOffset[30] = 0.2323;
-  cloverSlope[31] = 0.1331; cloverOffset[31] = 1.1686;
-  cloverSlope[32] = 0.1299; cloverOffset[32] = 0.8119;
-  cloverSlope[33] = 0.0973; cloverOffset[33] = -1.1761;
-  cloverSlope[35] = 0.1342; cloverOffset[35] = 0.1717;
-  cloverSlope[36] = 0.1299; cloverOffset[36] = 0.1809;
-  cloverSlope[37] = 0.1319; cloverOffset[37] = 1.0462;
-  cloverSlope[38] = 0.1313; cloverOffset[38] = 1.3180;
-
-  /* Run0296 Calibration */
-  //cloverSlope[30] = 0.0980; cloverOffset[30] = 0.2323;
-  //cloverSlope[31] = 0.1331; cloverOffset[31] = 1.1686;
-  //cloverSlope[32] = 0.1299; cloverOffset[32] = 0.8119;
-  //cloverSlope[33] = 0.0973; cloverOffset[33] = -1.1761;
-  //cloverSlope[35] = 0.1342; cloverOffset[35] = 0.1717;
-  //cloverSlope[36] = 0.1299; cloverOffset[36] = 0.1809;
-  //cloverSlope[37] = 0.1319; cloverOffset[37] = 1.0462;
-  //cloverSlope[38] = 0.1313; cloverOffset[38] = 1.3180;
-
-    /* Segment positions for Doppler corrections */
-    xA[0] = 20.6;    yA[0] = 0.0;     zA[0] = 4.1;
-    xA[1] = 9.7;     yA[1] = -17.2;   zA[1] = 4.1;
-    xA[2] = -10.3;   yA[2] = -15.7;   zA[2] = 4.1;
-    xA[3] = -18.3;   yA[3] = 0.9;     zA[3] = 4.1;
-    xA[4] = -8.4;    yA[4] = 16.2;    zA[4] = 4.1;
-    xA[5] = 11.1;    yA[5] = 16.6;    zA[5] = 4.1;
-    xA[6] = 22.2;    yA[6] = 0.0;     zA[6] = 15.1;
-    xA[7] = 10.4;    yA[7] = -18.7;   zA[7] = 15.1;
-    xA[8] = -11.2;   yA[8] = -17.0;   zA[8] = 15.1;
-    xA[9] = -20.0;   yA[9] = 0.9;     zA[9] = 15.1;
-    xA[10] = -9.2;   yA[10] = 17.6;   zA[10] = 15.1;
-    xA[11] = 12.0;   yA[11] = 18.0;   zA[11] = 15.1;
-    xA[12] = 24.0;   yA[12] = 0.0;    zA[12] = 30.2;
-    xA[13] = 11.2;   yA[13] = -20.4;  zA[13] = 30.2;
-    xA[14] = -12.4;  yA[14] = -18.7;  zA[14] = 30.2;
-    xA[15] = -21.9;  yA[15] = 1.1;    zA[15] = 30.2;
-    xA[16] = -10.1;  yA[16] = 19.3;   zA[16] = 30.2;
-    xA[17] = 12.9;   yA[17] = 19.7;   zA[17] = 30.2;
-    xA[18] = 25.3;   yA[18] = 0.0;    zA[18] = 46.7;
-    xA[19] = 11.7;   yA[19] = -21.8;  zA[19] = 46.7;
-    xA[20] = -13.4;  yA[20] = -20.2;  zA[20] = 46.7;
-    xA[21] = -23.7;  yA[21] = 1.2;    zA[21] = 46.7;
-    xA[22] = -11.0;  yA[22] = 20.9;   zA[22] = 46.7;
-    xA[23] = 13.6;   yA[23] = 21.1;   zA[23] = 46.7;
-    xA[24] = 25.9;   yA[24] = -0.3;   zA[24] = 65.6;
-    xA[25] = 12.1;   yA[25] = -22.7;  zA[25] = 65.6;
-    xA[26] = -14.2;  yA[26] = -21.3;  zA[26] = 65.7;
-    xA[27] = -25.5;  yA[27] = 1.2;    zA[27] = 65.7;
-    xA[28] = -11.9;  yA[28] = 22.4;   zA[28] = 65.7;
-    xA[29] = 13.7;   yA[29] = 22.0;   zA[29] = 65.6;
-    xA[30] = 26.1;   yA[30] = -0.4;   zA[30] = 82.9;
-    xA[31] = 12.1;   yA[31] = -23.1;  zA[31] = 82.9;
-    xA[32] = -14.6;  yA[32] = -21.7;  zA[32] = 82.9;
-    xA[33] = -26.2;  yA[33] = 1.4;    zA[33] = 82.9;
-    xA[34] = -12.3;  yA[34] = 23.1;   zA[34] = 82.9;
-    xA[35] = 13.6;   yA[35] = 22.4;   zA[35] = 82.9;
-    
-    xB[0] = 18.0;    yB[0] = 10.0;    zB[0] = 4.1;
-    xB[1] = 18.4;    yB[1] = -9.8;    zB[1] = 4.1;
-    xB[2] = 1.8;     yB[2] = -19.9;   zB[2] = 4.1;
-    xB[3] = -16.1;   yB[3] = -10.1;   zB[3] = 4.1;
-    xB[4] = -17.5;   yB[4] = 9.1;     zB[4] = 4.1;
-    xB[5] = -0.3;    yB[5] = 19.8;    zB[5] = 4.1;
-    xB[6] = 19.4;    yB[6] = 10.8;    zB[6] = 15.1;
-    xB[7] = 19.9;    yB[7] = -10.6;   zB[7] = 15.1;
-    xB[8] = 1.9;     yB[8] = -21.5;   zB[8] = 15.1;
-    xB[9] = -17.6;   yB[9] = -11.0;   zB[9] = 15.1;
-    xB[10] = -19.0;  yB[10] = 9.9;    zB[10] = 15.1;
-    xB[11] = -0.5;   yB[11] = 21.5;   zB[11] = 15.1;
-    xB[12] = 20.9;   yB[12] = 11.8;   zB[12] = 30.2;
-    xB[13] = 21.5;   yB[13] = -11.6;  zB[13] = 30.2;
-    xB[14] = 1.9;    yB[14] = -23.4;  zB[14] = 30.2;
-    xB[15] = -19.3;  yB[15] = -12.0;  zB[15] = 30.2;
-    xB[16] = -20.9;  yB[16] = 10.8;   zB[16] = 30.2;
-    xB[17] = -0.7;   yB[17] = 23.4;   zB[17] = 30.2;
-    xB[18] = 22.1;   yB[18] = 12.4;   zB[18] = 46.6;
-    xB[19] = 22.6;   yB[19] = -12.2;  zB[19] = 46.6;
-    xB[20] = 1.9;    yB[20] = -25.0;  zB[20] = 46.7;
-    xB[21] = -20.9;  yB[21] = -12.9;  zB[21] = 46.7;
-    xB[22] = -22.3;  yB[22] = 11.6;   zB[22] = 46.7;
-    xB[23] = -0.8;   yB[23] = 24.9;   zB[23] = 46.7;
-    xB[24] = 22.4;   yB[24] = 13.0;   zB[24] = 65.6;
-    xB[25] = 22.9;   yB[25] = -12.5;  zB[25] = 65.5;
-    xB[26] = 1.5;    yB[26] = -25.8;  zB[26] = 65.6;
-    xB[27] = -21.8;  yB[27] = -13.7;  zB[27] = 65.6;
-    xB[28] = -23.1;  yB[28] = 11.9;   zB[28] = 65.6;
-    xB[29] = -0.9;   yB[29] = 25.8;   zB[29] = 65.6;
-    xB[30] = 22.5;   yB[30] = 13.2;   zB[30] = 82.9;
-    xB[31] = 23.1;   yB[31] = -12.6;  zB[31] = 82.9;
-    xB[32] = 1.3;    yB[32] = -26.1;  zB[32] = 82.9;
-    xB[33] = -22.1;  yB[33] = -14.0;  zB[33] = 82.9;
-    xB[34] = -23.3;  yB[34] = 12.0;   zB[34] = 82.9;
-    xB[35] = -1.0;   yB[35] = 26.0;   zB[35] = 82.9;
-
-    QNormal[0][0] = 0;   QNormal[1][0] = 0;   QNormal[2][0] = 0;   QNormal[3][0] = 0;  
-    QNormal[0][1] = 1;   QNormal[1][1] = 1;   QNormal[2][1] = 1;   QNormal[3][1] = 1;  
-    QNormal[0][2] = 2;   QNormal[1][2] = 2;   QNormal[2][2] = 2;   QNormal[3][2] = 2;  
-    QNormal[0][3] = 3;   QNormal[1][3] = 3;   QNormal[2][3] = 3;   QNormal[3][3] = 3;  
-    QNormal[0][4] = 4;   QNormal[1][4] = 4;   QNormal[2][4] = 4;   QNormal[3][4] = 4;  
-    QNormal[0][5] = 5;   QNormal[1][5] = 5;   QNormal[2][5] = 5;   QNormal[3][5] = 5;  
-    QNormal[0][6] = 6;   QNormal[1][6] = 6;   QNormal[2][6] = 6;   QNormal[3][6] = 6;  
-    QNormal[0][7] = 7;   QNormal[1][7] = 7;   QNormal[2][7] = 7;   QNormal[3][7] = 7;  
-    QNormal[0][8] = 8;   QNormal[1][8] = 8;   QNormal[2][8] = 8;   QNormal[3][8] = 8;  
-    QNormal[0][9] = 36;  QNormal[1][9] = 36;  QNormal[2][9] = 36;  QNormal[3][9] = 36; 
-    QNormal[0][10] = 9;  QNormal[1][10] = 9;  QNormal[2][10] = 9;  QNormal[3][10] = 9; 
-    QNormal[0][11] = 10; QNormal[1][11] = 10; QNormal[2][11] = 10; QNormal[3][11] = 10;
-    QNormal[0][12] = 11; QNormal[1][12] = 11; QNormal[2][12] = 11; QNormal[3][12] = 11;
-    QNormal[0][13] = 12; QNormal[1][13] = 12; QNormal[2][13] = 12; QNormal[3][13] = 12;
-    QNormal[0][14] = 13; QNormal[1][14] = 13; QNormal[2][14] = 13; QNormal[3][14] = 13;
-    QNormal[0][15] = 14; QNormal[1][15] = 14; QNormal[2][15] = 14; QNormal[3][15] = 14;
-    QNormal[0][16] = 15; QNormal[1][16] = 15; QNormal[2][16] = 15; QNormal[3][16] = 15;
-    QNormal[0][17] = 16; QNormal[1][17] = 16; QNormal[2][17] = 16; QNormal[3][17] = 16;
-    QNormal[0][18] = 17; QNormal[1][18] = 17; QNormal[2][18] = 17; QNormal[3][18] = 17;
+  /* Segment positions for Doppler corrections */
+  xA[0] = 20.6;    yA[0] = 0.0;     zA[0] = 4.1;
+  xA[1] = 9.7;     yA[1] = -17.2;   zA[1] = 4.1;
+  xA[2] = -10.3;   yA[2] = -15.7;   zA[2] = 4.1;
+  xA[3] = -18.3;   yA[3] = 0.9;     zA[3] = 4.1;
+  xA[4] = -8.4;    yA[4] = 16.2;    zA[4] = 4.1;
+  xA[5] = 11.1;    yA[5] = 16.6;    zA[5] = 4.1;
+  xA[6] = 22.2;    yA[6] = 0.0;     zA[6] = 15.1;
+  xA[7] = 10.4;    yA[7] = -18.7;   zA[7] = 15.1;
+  xA[8] = -11.2;   yA[8] = -17.0;   zA[8] = 15.1;
+  xA[9] = -20.0;   yA[9] = 0.9;     zA[9] = 15.1;
+  xA[10] = -9.2;   yA[10] = 17.6;   zA[10] = 15.1;
+  xA[11] = 12.0;   yA[11] = 18.0;   zA[11] = 15.1;
+  xA[12] = 24.0;   yA[12] = 0.0;    zA[12] = 30.2;
+  xA[13] = 11.2;   yA[13] = -20.4;  zA[13] = 30.2;
+  xA[14] = -12.4;  yA[14] = -18.7;  zA[14] = 30.2;
+  xA[15] = -21.9;  yA[15] = 1.1;    zA[15] = 30.2;
+  xA[16] = -10.1;  yA[16] = 19.3;   zA[16] = 30.2;
+  xA[17] = 12.9;   yA[17] = 19.7;   zA[17] = 30.2;
+  xA[18] = 25.3;   yA[18] = 0.0;    zA[18] = 46.7;
+  xA[19] = 11.7;   yA[19] = -21.8;  zA[19] = 46.7;
+  xA[20] = -13.4;  yA[20] = -20.2;  zA[20] = 46.7;
+  xA[21] = -23.7;  yA[21] = 1.2;    zA[21] = 46.7;
+  xA[22] = -11.0;  yA[22] = 20.9;   zA[22] = 46.7;
+  xA[23] = 13.6;   yA[23] = 21.1;   zA[23] = 46.7;
+  xA[24] = 25.9;   yA[24] = -0.3;   zA[24] = 65.6;
+  xA[25] = 12.1;   yA[25] = -22.7;  zA[25] = 65.6;
+  xA[26] = -14.2;  yA[26] = -21.3;  zA[26] = 65.7;
+  xA[27] = -25.5;  yA[27] = 1.2;    zA[27] = 65.7;
+  xA[28] = -11.9;  yA[28] = 22.4;   zA[28] = 65.7;
+  xA[29] = 13.7;   yA[29] = 22.0;   zA[29] = 65.6;
+  xA[30] = 26.1;   yA[30] = -0.4;   zA[30] = 82.9;
+  xA[31] = 12.1;   yA[31] = -23.1;  zA[31] = 82.9;
+  xA[32] = -14.6;  yA[32] = -21.7;  zA[32] = 82.9;
+  xA[33] = -26.2;  yA[33] = 1.4;    zA[33] = 82.9;
+  xA[34] = -12.3;  yA[34] = 23.1;   zA[34] = 82.9;
+  xA[35] = 13.6;   yA[35] = 22.4;   zA[35] = 82.9;
+  
+  xB[0] = 18.0;    yB[0] = 10.0;    zB[0] = 4.1;
+  xB[1] = 18.4;    yB[1] = -9.8;    zB[1] = 4.1;
+  xB[2] = 1.8;     yB[2] = -19.9;   zB[2] = 4.1;
+  xB[3] = -16.1;   yB[3] = -10.1;   zB[3] = 4.1;
+  xB[4] = -17.5;   yB[4] = 9.1;     zB[4] = 4.1;
+  xB[5] = -0.3;    yB[5] = 19.8;    zB[5] = 4.1;
+  xB[6] = 19.4;    yB[6] = 10.8;    zB[6] = 15.1;
+  xB[7] = 19.9;    yB[7] = -10.6;   zB[7] = 15.1;
+  xB[8] = 1.9;     yB[8] = -21.5;   zB[8] = 15.1;
+  xB[9] = -17.6;   yB[9] = -11.0;   zB[9] = 15.1;
+  xB[10] = -19.0;  yB[10] = 9.9;    zB[10] = 15.1;
+  xB[11] = -0.5;   yB[11] = 21.5;   zB[11] = 15.1;
+  xB[12] = 20.9;   yB[12] = 11.8;   zB[12] = 30.2;
+  xB[13] = 21.5;   yB[13] = -11.6;  zB[13] = 30.2;
+  xB[14] = 1.9;    yB[14] = -23.4;  zB[14] = 30.2;
+  xB[15] = -19.3;  yB[15] = -12.0;  zB[15] = 30.2;
+  xB[16] = -20.9;  yB[16] = 10.8;   zB[16] = 30.2;
+  xB[17] = -0.7;   yB[17] = 23.4;   zB[17] = 30.2;
+  xB[18] = 22.1;   yB[18] = 12.4;   zB[18] = 46.6;
+  xB[19] = 22.6;   yB[19] = -12.2;  zB[19] = 46.6;
+  xB[20] = 1.9;    yB[20] = -25.0;  zB[20] = 46.7;
+  xB[21] = -20.9;  yB[21] = -12.9;  zB[21] = 46.7;
+  xB[22] = -22.3;  yB[22] = 11.6;   zB[22] = 46.7;
+  xB[23] = -0.8;   yB[23] = 24.9;   zB[23] = 46.7;
+  xB[24] = 22.4;   yB[24] = 13.0;   zB[24] = 65.6;
+  xB[25] = 22.9;   yB[25] = -12.5;  zB[25] = 65.5;
+  xB[26] = 1.5;    yB[26] = -25.8;  zB[26] = 65.6;
+  xB[27] = -21.8;  yB[27] = -13.7;  zB[27] = 65.6;
+  xB[28] = -23.1;  yB[28] = 11.9;   zB[28] = 65.6;
+  xB[29] = -0.9;   yB[29] = 25.8;   zB[29] = 65.6;
+  xB[30] = 22.5;   yB[30] = 13.2;   zB[30] = 82.9;
+  xB[31] = 23.1;   yB[31] = -12.6;  zB[31] = 82.9;
+  xB[32] = 1.3;    yB[32] = -26.1;  zB[32] = 82.9;
+  xB[33] = -22.1;  yB[33] = -14.0;  zB[33] = 82.9;
+  xB[34] = -23.3;  yB[34] = 12.0;   zB[34] = 82.9;
+  xB[35] = -1.0;   yB[35] = 26.0;   zB[35] = 82.9;
+  
+  QNormal[0][0] = 0;   QNormal[1][0] = 0;   QNormal[2][0] = 0;   QNormal[3][0] = 0;  
+  QNormal[0][1] = 1;   QNormal[1][1] = 1;   QNormal[2][1] = 1;   QNormal[3][1] = 1;  
+  QNormal[0][2] = 2;   QNormal[1][2] = 2;   QNormal[2][2] = 2;   QNormal[3][2] = 2;  
+  QNormal[0][3] = 3;   QNormal[1][3] = 3;   QNormal[2][3] = 3;   QNormal[3][3] = 3;  
+  QNormal[0][4] = 4;   QNormal[1][4] = 4;   QNormal[2][4] = 4;   QNormal[3][4] = 4;  
+  QNormal[0][5] = 5;   QNormal[1][5] = 5;   QNormal[2][5] = 5;   QNormal[3][5] = 5;  
+  QNormal[0][6] = 6;   QNormal[1][6] = 6;   QNormal[2][6] = 6;   QNormal[3][6] = 6;  
+  QNormal[0][7] = 7;   QNormal[1][7] = 7;   QNormal[2][7] = 7;   QNormal[3][7] = 7;  
+  QNormal[0][8] = 8;   QNormal[1][8] = 8;   QNormal[2][8] = 8;   QNormal[3][8] = 8;  
+  QNormal[0][9] = 36;  QNormal[1][9] = 36;  QNormal[2][9] = 36;  QNormal[3][9] = 36; 
+  QNormal[0][10] = 9;  QNormal[1][10] = 9;  QNormal[2][10] = 9;  QNormal[3][10] = 9; 
+  QNormal[0][11] = 10; QNormal[1][11] = 10; QNormal[2][11] = 10; QNormal[3][11] = 10;
+  QNormal[0][12] = 11; QNormal[1][12] = 11; QNormal[2][12] = 11; QNormal[3][12] = 11;
+  QNormal[0][13] = 12; QNormal[1][13] = 12; QNormal[2][13] = 12; QNormal[3][13] = 12;
+  QNormal[0][14] = 13; QNormal[1][14] = 13; QNormal[2][14] = 13; QNormal[3][14] = 13;
+  QNormal[0][15] = 14; QNormal[1][15] = 14; QNormal[2][15] = 14; QNormal[3][15] = 14;
+  QNormal[0][16] = 15; QNormal[1][16] = 15; QNormal[2][16] = 15; QNormal[3][16] = 15;
+  QNormal[0][17] = 16; QNormal[1][17] = 16; QNormal[2][17] = 16; QNormal[3][17] = 16;
+  QNormal[0][18] = 17; QNormal[1][18] = 17; QNormal[2][18] = 17; QNormal[3][18] = 17;
     QNormal[0][19] = 37; QNormal[1][19] = 37; QNormal[2][19] = 37; QNormal[3][19] = 37;
     QNormal[0][20] = 18; QNormal[1][20] = 18; QNormal[2][20] = 18; QNormal[3][20] = 18;
     QNormal[0][21] = 19; QNormal[1][21] = 19; QNormal[2][21] = 19; QNormal[3][21] = 19;
@@ -2498,9 +2471,8 @@ void GRETINA::analyzeMode3(GRETINAVariables *gVar, controlVariables *ctrl) {
 
   for (UInt_t ui = 0; ui<g3out.crystalMult(); ui++) {
 
-    if (g3out.xtals[ui].module/4 != cloverModuleNumber) {
-      g3out.xtals[ui].OrderChannels();
-      g3out.xtals[ui].crystalNum += 1; /* And now crystalNum goes from 1 */
+    g3out.xtals[ui].OrderChannels();
+    g3out.xtals[ui].crystalNum += 1; /* And now crystalNum goes from 1 */
       
       for (Int_t qN=0; qN<MAXQUADS; qN++) {
 	if ((g3out.xtals[ui].crystalNum-1) < (gVar->electronicsOrder[qN]+1)*4 &&
@@ -2648,33 +2620,8 @@ void GRETINA::analyzeMode3(GRETINAVariables *gVar, controlVariables *ctrl) {
 	xyzL = rot.crys2Lab(g3out.xtals[ui].module/4, TVector3(0., 0., 0.));
 	g3out.xtals[ui].dopplerCrystal = getDopplerSimple(xyzL, gVar->beta);
       }
-      
-    } else { /* Clover module ID -- relevant to coincidence scanning only at this point */
-
-      cloverOut.Reset();
-
-      /* Map mode3 channel data into clover output structure */
-      for (Int_t m=0; m<g3out.xtals[ui].chn.size(); m++) {
-	cloverX.Clear();
-	if (g3out.xtals[ui].chn[m].eRaw > 0) {
-	  cloverX.eRaw = g3out.xtals[ui].chn[m].eRaw;
-	  cloverX.eCal = ( (cloverSlope[g3out.xtals[ui].chn[m].chnNum()] * cloverX.eRaw) +
-			   cloverOffset[g3out.xtals[ui].chn[m].chnNum()] );
-	  cloverX.ID = g3out.xtals[ui].chn[m].chnNum() - 29;
-	  if (ctrl->withWAVE) { cloverX.CFD = g3out.xtals[ui].chn[m].wf.CFD(10); }
-	  if (cloverX.ID > 4) { cloverX.ID -= 1; }
-	  if (cloverX.ID < 0) { cloverX.ID = g3out.xtals[ui].chn[m].chnNum() - 9; }
-	  cloverX.TS = g3out.xtals[ui].chn[m].timestamp;
-	  cloverOut.xtals.push_back(cloverX);
-	}
-      }
-
-      g3out.xtals.erase(g3out.xtals.begin() + ui);
-
-    }
-
   } /* Loop over hit crystals */
-    
+  
 }
 
 gHistos::gHistos() { ; }
@@ -2760,78 +2707,6 @@ void GRETINA::fillHistos(Int_t ctrl) {
   }
 }
 
-void cloverCrystalEvent::Clear() {
-  eRaw = 0.0; eCal = 0.0; ID = 0; TS = 0;
-}
-
-void cloverOUT::Reset() {
-  xtals.clear();
-};
-
-UInt_t cloverOUT::cloverMult(Float_t thresh) {
-  Int_t mult = 0;
-  for (UInt_t i=0; i<xtals.size(); i++) {
-    if (xtals[i].eCal > thresh && xtals[i].ID < 10) { mult++; }
-  }
-  return mult;
-}
-
-Int_t cloverOUT::maxCloverID() {
-  Float_t maxE = 0; Int_t maxID = 0;
-  for (UInt_t i=0; i<xtals.size(); i++) {
-    if (xtals[i].eCal > maxE && xtals[i].ID < 10) {
-      maxE = xtals[i].eCal;
-      maxID = xtals[i].ID;
-    }
-  }
-  return maxID;
-}
-
-Float_t cloverOUT::maxCloverE() {
-  Float_t maxE = 0; Int_t maxID = 0;
-  for (UInt_t i=0; i<xtals.size(); i++) {
-    if (xtals[i].eCal > maxE && xtals[i].ID < 10) {
-      maxE = xtals[i].eCal;
-      maxID = xtals[i].ID;
-    }
-  }
-  return maxE;
-}
-
-Bool_t cloverOUT::middleA() {
-  
-  Float_t top = 0., bottom = 0., middle = 0.;
-
-  if (maxCloverID() <= 4) { /* Crystal A! */ 
-    for (UInt_t i=0; i<xtals.size(); i++) {
-      if (xtals[i].ID == 14) { top = xtals[i].eRaw; }
-      if (xtals[i].ID == 15) { middle = xtals[i].eRaw; }
-      if (xtals[i].ID == 16) { bottom = xtals[i].eRaw; }
-    }
-  }
-  
-  if (middle > top && middle > bottom) { return 1; }
-  else { return 0; }
-
-}
-
-Bool_t cloverOUT::middleB() {
-  
-  Float_t top = 0., bottom = 0., middle = 0.;
-
-  if (maxCloverID() > 4) { /* Crystal B! */ 
-    for (UInt_t i=0; i<xtals.size(); i++) {
-      if (xtals[i].ID == 11) { top = xtals[i].eRaw; }
-      if (xtals[i].ID == 12) { middle = xtals[i].eRaw; }
-      if (xtals[i].ID == 13) { bottom = xtals[i].eRaw; }
-    }
-  }
-  
-  if (top < 100. && bottom < 100.) { return 1; }
-  else { return 0; }
-
-}
-
 Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, counterVariables *cnt,
 			       GRETINAVariables *gVar) {
 
@@ -2889,8 +2764,11 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
     
     gH.TS = (ULong64_t)( ((ULong64_t)(dp->hdr[3])) +  
 			 ((ULong64_t)(dp->hdr[2]) << 16) +
-			 ((ULong64_t)(dp->hdr[5] & 0x0fff) << 32) +
+			 ((ULong64_t)(dp->hdr[5] & 0x7fff) << 32) +
 			 ((ULong64_t)(hTS & 0x800000000000)) );
+
+    long long int headerTS = gH.TS;
+
     Int_t overflow = (dp->hdr[5] & 0x8000);
     gH.energy = dp->hdr[4] + ((dp->hdr[7] & 0xff)<< 16);
     gH.energy /= 32.;
@@ -2903,13 +2781,20 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
     int i=0;
     while (eventsize) {
      
+      /**************************************************/
+      /* Pairs of 32-bit words:                         */
+      /* 0:   31 -- 25   24 -- 0                        */
+      /*       TS(6-0)   E(24-0)                        */
+      /* 1:    31          30 -- 0                      */
+      /*    Overflow       TS(37-7)                     */
+      /**************************************************/
+
       long long int TSintermediate = ((dp->data[i+3]) + ((dp->data[i+2] & 0x7fff) << 16));
 
       gH.TS = (ULong64_t)( ((ULong64_t)(dp->data[i] & 0xfe00) >> 9) + 
 			   ((ULong64_t)(TSintermediate) << 7) + 
-			   ((ULong64_t)(dp->hdr[5] & 0x7fc0) << 38) +
-			   ((ULong64_t)(hTS & 0x800000000000)) );    
-      gH.energy = dp->data[i+1] + ((dp->hdr[i] & 0x1ff) << 16);
+			   ((ULong64_t)(headerTS & 0xffc000000000)) );   
+      gH.energy = dp->data[i+1] + ((dp->data[i] & 0x1ff) << 16);
       gH.energy /= 32;
       overflow = (dp->data[i+2] & 0x8000);
 

@@ -9,12 +9,6 @@
 globalHeader gHeader;
 globalHeader gHeaderOUT;
 
-cloverPacket clover;
-cloverEvent *cloverEventOUT;
-
-//GRawPacket gMode3;
-//GRawEvent *gMode3Event;
-
 /* Waveforms...easier as globals */
 GRETINAWF *gWf;
 

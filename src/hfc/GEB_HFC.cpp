@@ -419,7 +419,7 @@ int main(int argc, char** argv) {
       }
       break;
 
-    case 0xC10: // Contrived clover for coincidence
+    case 0x2B: // Contrived clover for coincidence
       if(!hfc_list.add(aGeb, cBuf) && success) {
 	success = false;
 	if (!pipeflag) {

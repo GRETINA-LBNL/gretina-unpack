@@ -106,24 +106,6 @@ struct globalHeader {
   long long timestamp;
 };
 
-struct cloverPacket {
-  long long timestamp;
-  Float_t energy;
-  UShort_t id;
-};
-
-class cloverEvent : public TObject {
- public:
-  std::vector<cloverPacket> obj;
-  
-  cloverEvent() { ; }
-  ~cloverEvent() { ; }
-  
-  Int_t GetVecSize() { return obj.size(); }
-  
-  ClassDef(cloverEvent, 1);
-};  
-
 /*--------------------------------------------------------*/
 /*---       GRETINA MODE 3 - RAW DATA STRUCTURES       ---*/
 /*--------------------------------------------------------*/
@@ -288,41 +270,6 @@ class g3HistoryEvent : public TObject {
 
  private: 
   ClassDef(g3HistoryEvent, 1);
-};
-
-class cloverCrystalEvent : public TObject {
- public:
-  Float_t eRaw;
-  Float_t eCal;
-  Float_t CFD;
-  Int_t ID;
-  long long int TS;
-
- public:
-  cloverCrystalEvent() { ; }
-  ~cloverCrystalEvent() { ; }
-  void Clear();
-
- private:
-  ClassDef(cloverCrystalEvent, 2);
-};
-
-class cloverOUT : public TObject {
- public:
-  vector<cloverCrystalEvent> xtals;
-  
- public: 
-  cloverOUT() { ; }
-  ~cloverOUT() { ; }
-  void Reset();
-  UInt_t cloverMult(Float_t thresh);
-  Int_t maxCloverID();
-  Float_t maxCloverE();
-  Bool_t middleA();
-  Bool_t middleB();
-
- private:
-  ClassDef(cloverOUT, 2);
 };
 
 class Bank29 : public TObject {
@@ -788,7 +735,6 @@ class GRETINA : public TObject {
   g1GammaEvent g1X;
   g2CrystalEvent g2X; g2IntPt pt;
   g3CrystalEvent g3X; g3ChannelEvent g3ch;
-  cloverCrystalEvent cloverX;
   vector<g3ChannelEvent> g3Temp;
   historyEvent gH; 
 
@@ -799,7 +745,6 @@ class GRETINA : public TObject {
   g2OUT g2out;
   g1OUT g1out;
   g4SimOUT gSimOut;
-  cloverOUT cloverOut;
   
   Bank29 b29;
 

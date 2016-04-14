@@ -427,9 +427,6 @@ void ResetEvent(controlVariables* ctrl, counterVariables* cnt) {
       (cnt->getEventBit(TRACK)) || (cnt->getEventBit(GRETSCALER))) {
     gret->Reset();
   }
-  cloverEventOUT->obj.clear();
-  cloverEventOUT->Clear();
-     
   /* Reset temporary crystal event structures, BGS structures too. */
 #ifdef WITH_S800
   if ((cnt->event & 0x10) || (cnt->event & 0x100)) { s800->Reset(); }

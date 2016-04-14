@@ -156,12 +156,7 @@ int main(int argc, char *argv[]) {
   /* INL correction parameters */
   INLCorrection *inlCor = new INLCorrection();
   inlCor->Initialize(ctrl, gVar);
-
-  /* GRETINA Raw data - mode 3... */
-  // gMode3Event = new GRawEvent();
    
-  cloverEventOUT = new cloverEvent();
-
   /* Initialize tracking stuff. */
   if (ctrl->doTRACK) {
     gret->track.Initialize();
@@ -425,14 +420,6 @@ int main(int argc, char *argv[]) {
 		  gret->sp.trLength = gret->g3Temp[0].wf.raw.size();
 		}
 	      }
-
-	      /* Add to event, as necessary -- trying to get rid of this... */
-	      switch(gHeader.type) {
-	      case 0xC10:
-		cloverEventOUT->obj.push_back(clover);
-		break;
-	      default:  break;
-	      }
 	      
 	    } else { /* Time difference is big...old event should be closed. */
 	      
@@ -475,12 +462,6 @@ int main(int argc, char *argv[]) {
 	      
 	      GetData(inf, ctrl, cnt, gVar, inlCor, junk);
 	      
-	      switch(gHeader.type) {
-	      case 0xC10:
-		cloverEventOUT->obj.push_back(clover);
-		break;
-	      default:  break;
-	      }
 	    }
 	  } else { /* End of "if (GO_FOR_BUILD)" */	
 	    SkipData(inf, junk);
@@ -699,15 +680,6 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
 #endif
-  case 0xC10:
-    { 
-      Int_t siz = fread(&clover, 1, gHeader.length, inf);
-      if (siz != gHeader.length) {
-	cerr << "GetClover failed in bytes read." << endl;
-      }
-      cnt->Increment(gHeader.length); 
-    }
-    break;
   case 0:
     {
       cout << "GlobalHeader type = 0.  Ignoring." << endl;
@@ -809,7 +781,7 @@ void PrintHelpInformation() {
 #endif
   printf("                       -zip (compressed data file, will append .gz to filename)\n");
   printf("                       -bzip (compressed data file, will append .bz2 to filename)\n");
-  printf("                       -noHistos (turn OFF histograms, as defined in Histos.h, default is ON)\n");
+  printf("                       -withHistos (turn ON histograms, as defined in Histos.h, default is OFF)\n");
   printf("                       -noTree (turn OFF root tree, default is ON)\n");
   printf("                       -noHFC (turn OFF HFC presort piping; default is ON)\n");
   printf("                       -dopplerSimple (use simple GRETINA decomp position for Doppler correction)\n");

@@ -8,10 +8,6 @@
 
 #pragma link C++ struct globalHeader+;
 
-#pragma link C++ struct cloverPacket+;
-#pragma link C++ class cloverEvent+;
-#pragma link C++ class vector<cloverPacket>+;
-
 #pragma link C++ struct mode3DataPacket+;
 #pragma link C++ class g3ChannelEvent+;
 #pragma link C++ class g3Waveform+;
@@ -23,10 +19,6 @@
 #pragma link C++ struct mode3HistoryPacket+;
 #pragma link C++ struct historyEvent+;
 #pragma link C++ class g3HistoryEvent+;
-
-#pragma link C++ class cloverCrystalEvent+;
-#pragma link C++ class cloverOUT+;
-#pragma link C++ class vector<cloverCrystalEvent>+;
 
 #pragma link C++ class Bank29+;
 

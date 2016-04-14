@@ -33,9 +33,6 @@
 extern globalHeader gHeader;
 extern globalHeader gHeaderOUT;
 
-extern cloverPacket clover;
-extern cloverEvent *cloverEventOUT;
-
 /* Waveforms...easier as globals */
 extern GRETINAWF *gWf;
 
