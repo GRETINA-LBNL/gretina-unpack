@@ -1365,128 +1365,45 @@ void GRETINA::Initialize() {
   xB[34] = -23.3;  yB[34] = 12.0;   zB[34] = 82.9;
   xB[35] = -1.0;   yB[35] = 26.0;   zB[35] = 82.9;
   
-  QNormal[0][0] = 0;   QNormal[1][0] = 0;   QNormal[2][0] = 0;   QNormal[3][0] = 0;  
-  QNormal[0][1] = 1;   QNormal[1][1] = 1;   QNormal[2][1] = 1;   QNormal[3][1] = 1;  
-  QNormal[0][2] = 2;   QNormal[1][2] = 2;   QNormal[2][2] = 2;   QNormal[3][2] = 2;  
-  QNormal[0][3] = 3;   QNormal[1][3] = 3;   QNormal[2][3] = 3;   QNormal[3][3] = 3;  
-  QNormal[0][4] = 4;   QNormal[1][4] = 4;   QNormal[2][4] = 4;   QNormal[3][4] = 4;  
-  QNormal[0][5] = 5;   QNormal[1][5] = 5;   QNormal[2][5] = 5;   QNormal[3][5] = 5;  
-  QNormal[0][6] = 6;   QNormal[1][6] = 6;   QNormal[2][6] = 6;   QNormal[3][6] = 6;  
-  QNormal[0][7] = 7;   QNormal[1][7] = 7;   QNormal[2][7] = 7;   QNormal[3][7] = 7;  
-  QNormal[0][8] = 8;   QNormal[1][8] = 8;   QNormal[2][8] = 8;   QNormal[3][8] = 8;  
-  QNormal[0][9] = 36;  QNormal[1][9] = 36;  QNormal[2][9] = 36;  QNormal[3][9] = 36; 
-  QNormal[0][10] = 9;  QNormal[1][10] = 9;  QNormal[2][10] = 9;  QNormal[3][10] = 9; 
-  QNormal[0][11] = 10; QNormal[1][11] = 10; QNormal[2][11] = 10; QNormal[3][11] = 10;
-  QNormal[0][12] = 11; QNormal[1][12] = 11; QNormal[2][12] = 11; QNormal[3][12] = 11;
-  QNormal[0][13] = 12; QNormal[1][13] = 12; QNormal[2][13] = 12; QNormal[3][13] = 12;
-  QNormal[0][14] = 13; QNormal[1][14] = 13; QNormal[2][14] = 13; QNormal[3][14] = 13;
-  QNormal[0][15] = 14; QNormal[1][15] = 14; QNormal[2][15] = 14; QNormal[3][15] = 14;
-  QNormal[0][16] = 15; QNormal[1][16] = 15; QNormal[2][16] = 15; QNormal[3][16] = 15;
-  QNormal[0][17] = 16; QNormal[1][17] = 16; QNormal[2][17] = 16; QNormal[3][17] = 16;
-  QNormal[0][18] = 17; QNormal[1][18] = 17; QNormal[2][18] = 17; QNormal[3][18] = 17;
-    QNormal[0][19] = 37; QNormal[1][19] = 37; QNormal[2][19] = 37; QNormal[3][19] = 37;
-    QNormal[0][20] = 18; QNormal[1][20] = 18; QNormal[2][20] = 18; QNormal[3][20] = 18;
-    QNormal[0][21] = 19; QNormal[1][21] = 19; QNormal[2][21] = 19; QNormal[3][21] = 19;
-    QNormal[0][22] = 20; QNormal[1][22] = 20; QNormal[2][22] = 20; QNormal[3][22] = 20;
-    QNormal[0][23] = 21; QNormal[1][23] = 21; QNormal[2][23] = 21; QNormal[3][23] = 21;
-    QNormal[0][24] = 22; QNormal[1][24] = 22; QNormal[2][24] = 22; QNormal[3][24] = 22;
-    QNormal[0][25] = 23; QNormal[1][25] = 23; QNormal[2][25] = 23; QNormal[3][25] = 23;
-    QNormal[0][26] = 24; QNormal[1][26] = 24; QNormal[2][26] = 24; QNormal[3][26] = 24;
-    QNormal[0][27] = 25; QNormal[1][27] = 25; QNormal[2][27] = 25; QNormal[3][27] = 25;
-    QNormal[0][28] = 26; QNormal[1][28] = 26; QNormal[2][28] = 26; QNormal[3][28] = 26;
-    QNormal[0][29] = 38; QNormal[1][29] = 38; QNormal[2][29] = 38; QNormal[3][29] = 38;
-    QNormal[0][30] = 27; QNormal[1][30] = 27; QNormal[2][30] = 27; QNormal[3][30] = 27;
-    QNormal[0][31] = 28; QNormal[1][31] = 28; QNormal[2][31] = 28; QNormal[3][31] = 28;
-    QNormal[0][32] = 29; QNormal[1][32] = 29; QNormal[2][32] = 29; QNormal[3][32] = 29;
-    QNormal[0][33] = 30; QNormal[1][33] = 30; QNormal[2][33] = 30; QNormal[3][33] = 30;
-    QNormal[0][34] = 31; QNormal[1][34] = 31; QNormal[2][34] = 31; QNormal[3][34] = 31;
-    QNormal[0][35] = 32; QNormal[1][35] = 32; QNormal[2][35] = 32; QNormal[3][35] = 32;
-    QNormal[0][36] = 33; QNormal[1][36] = 33; QNormal[2][36] = 33; QNormal[3][36] = 33;
-    QNormal[0][37] = 34; QNormal[1][37] = 34; QNormal[2][37] = 34; QNormal[3][37] = 34;
-    QNormal[0][38] = 35; QNormal[1][38] = 35; QNormal[2][38] = 35; QNormal[3][38] = 35;
-    QNormal[0][39] = 39; QNormal[1][39] = 39; QNormal[2][39] = 39; QNormal[3][39] = 39;
+  for (Int_t i=0; i<4; i++) {
+    for (Int_t j=0; j<40; j++) {
+      if (j<9) { 
+	QNormal[i][j] = j;  Q1Special[i][j] = j;  Q2Special[i][j] = j; 
+      } else if (j < 19) {
+	QNormal[i][j] = j-1;  Q1Special[i][j] = j-1;  Q2Special[i][j] = j-1; 
+      } else if (j < 29) {
+	QNormal[i][j] = j-2;  Q1Special[i][j] = j-2;  Q2Special[i][j] = j-2; 
+      } else if (j < 39) {
+	QNormal[i][j] = j-3;  Q1Special[i][j] = j-3;  Q2Special[i][j] = j-3; 
+      }
+    }
+    QNormal[i][9] = 36;    QNormal[i][19] = 37;    QNormal[i][29] = 38;    QNormal[i][39] = 39;
+    Q1Special[i][9] = 36;  Q1Special[i][19] = 37;  Q1Special[i][29] = 38;  Q1Special[i][39] = 39;
+    Q2Special[i][9] = 36;  Q2Special[i][19] = 37;  Q2Special[i][29] = 38;  Q2Special[i][39] = 39;
+  }
 
-    Q1Special[0][0] = 1;   Q1Special[1][0] = 0;   Q1Special[2][0] = 1;   Q1Special[3][0] = 0;  
-    Q1Special[0][1] = 8;   Q1Special[1][1] = 1;   Q1Special[2][1] = 8;   Q1Special[3][1] = 1;  
-    Q1Special[0][2] = 3;   Q1Special[1][2] = 2;   Q1Special[2][2] = 3;   Q1Special[3][2] = 2;  
-    Q1Special[0][3] = 4;   Q1Special[1][3] = 3;   Q1Special[2][3] = 4;   Q1Special[3][3] = 3;  
-    Q1Special[0][4] = 35;  Q1Special[1][4] = 4;   Q1Special[2][4] = 35;  Q1Special[3][4] = 4;  
-    Q1Special[0][5] = 0;   Q1Special[1][5] = 5;   Q1Special[2][5] = 0;   Q1Special[3][5] = 5;  
-    Q1Special[0][6] = 7;   Q1Special[1][6] = 6;   Q1Special[2][6] = 7;   Q1Special[3][6] = 6;  
-    Q1Special[0][7] = 14;  Q1Special[1][7] = 7;   Q1Special[2][7] = 14;  Q1Special[3][7] = 7;  
-    Q1Special[0][8] = 9;   Q1Special[1][8] = 8;   Q1Special[2][8] = 9;   Q1Special[3][8] = 8;  
-    Q1Special[0][9] = 36;  Q1Special[1][9] = 36;  Q1Special[2][9] = 36;  Q1Special[3][9] = 36; 
-    Q1Special[0][10] = 10; Q1Special[1][10] = 9;  Q1Special[2][10] = 10; Q1Special[3][10] = 9; 
-    Q1Special[0][11] = 29; Q1Special[1][11] = 10; Q1Special[2][11] = 29; Q1Special[3][11] = 10;
-    Q1Special[0][12] = 30; Q1Special[1][12] = 11; Q1Special[2][12] = 30; Q1Special[3][12] = 11;
-    Q1Special[0][13] = 13; Q1Special[1][13] = 12; Q1Special[2][13] = 13; Q1Special[3][13] = 12;
-    Q1Special[0][14] = 20; Q1Special[1][14] = 13; Q1Special[2][14] = 20; Q1Special[3][14] = 13;
-    Q1Special[0][15] = 15; Q1Special[1][15] = 14; Q1Special[2][15] = 15; Q1Special[3][15] = 14;
-    Q1Special[0][16] = 16; Q1Special[1][16] = 15; Q1Special[2][16] = 16; Q1Special[3][16] = 15;
-    Q1Special[0][17] = 23; Q1Special[1][17] = 16; Q1Special[2][17] = 23; Q1Special[3][17] = 16;
-    Q1Special[0][18] = 24; Q1Special[1][18] = 17; Q1Special[2][18] = 24; Q1Special[3][18] = 17;
-    Q1Special[0][19] = 37; Q1Special[1][19] = 37; Q1Special[2][19] = 37; Q1Special[3][19] = 37;
-    Q1Special[0][20] = 19; Q1Special[1][20] = 18; Q1Special[2][20] = 19; Q1Special[3][20] = 18;
-    Q1Special[0][21] = 26; Q1Special[1][21] = 19; Q1Special[2][21] = 26; Q1Special[3][21] = 19;
-    Q1Special[0][22] = 21; Q1Special[1][22] = 20; Q1Special[2][22] = 21; Q1Special[3][22] = 20;
-    Q1Special[0][23] = 22; Q1Special[1][23] = 21; Q1Special[2][23] = 22; Q1Special[3][23] = 21;
-    Q1Special[0][24] = 17; Q1Special[1][24] = 22; Q1Special[2][24] = 17; Q1Special[3][24] = 22;
-    Q1Special[0][25] = 18; Q1Special[1][25] = 23; Q1Special[2][25] = 18; Q1Special[3][25] = 23;
-    Q1Special[0][26] = 25; Q1Special[1][26] = 24; Q1Special[2][26] = 25; Q1Special[3][26] = 24;
-    Q1Special[0][27] = 32; Q1Special[1][27] = 25; Q1Special[2][27] = 32; Q1Special[3][27] = 25;
-    Q1Special[0][28] = 27; Q1Special[1][28] = 26; Q1Special[2][28] = 27; Q1Special[3][28] = 26;
-    Q1Special[0][29] = 38; Q1Special[1][29] = 38; Q1Special[2][29] = 38; Q1Special[3][29] = 38;
-    Q1Special[0][30] = 28; Q1Special[1][30] = 27; Q1Special[2][30] = 28; Q1Special[3][30] = 27;
-    Q1Special[0][31] = 11; Q1Special[1][31] = 28; Q1Special[2][31] = 11; Q1Special[3][31] = 28;
-    Q1Special[0][32] = 12; Q1Special[1][32] = 29; Q1Special[2][32] = 12; Q1Special[3][32] = 29;
-    Q1Special[0][33] = 31; Q1Special[1][33] = 30; Q1Special[2][33] = 31; Q1Special[3][33] = 30;
-    Q1Special[0][34] = 2;  Q1Special[1][34] = 31; Q1Special[2][34] = 2;  Q1Special[3][34] = 31;
-    Q1Special[0][35] = 33; Q1Special[1][35] = 32; Q1Special[2][35] = 33; Q1Special[3][35] = 32;
-    Q1Special[0][36] = 34; Q1Special[1][36] = 33; Q1Special[2][36] = 34; Q1Special[3][36] = 33;
-    Q1Special[0][37] = 5;  Q1Special[1][37] = 34; Q1Special[2][37] = 5;  Q1Special[3][37] = 34;
-    Q1Special[0][38] = 6;  Q1Special[1][38] = 35; Q1Special[2][38] = 6;  Q1Special[3][38] = 35;
-    Q1Special[0][39] = 39; Q1Special[1][39] = 39; Q1Special[2][39] = 39; Q1Special[3][39] = 39;
-
-    Q2Special[0][0] = 0;   Q2Special[1][0] = 0;   Q2Special[2][0] = 0;   Q2Special[3][0] = 0;  
-    Q2Special[0][1] = 1;   Q2Special[1][1] = 1;   Q2Special[2][1] = 1;   Q2Special[3][1] = 1;  
-    Q2Special[0][2] = 2;   Q2Special[1][2] = 2;   Q2Special[2][2] = 2;   Q2Special[3][2] = 2;  
-    Q2Special[0][3] = 3;   Q2Special[1][3] = 3;   Q2Special[2][3] = 3;   Q2Special[3][3] = 3;  
-    Q2Special[0][4] = 4;   Q2Special[1][4] = 4;   Q2Special[2][4] = 4;   Q2Special[3][4] = 4;  
-    Q2Special[0][5] = 5;   Q2Special[1][5] = 5;   Q2Special[2][5] = 5;   Q2Special[3][5] = 5;  
-    Q2Special[0][6] = 6;   Q2Special[1][6] = 6;   Q2Special[2][6] = 6;   Q2Special[3][6] = 6;  
-    Q2Special[0][7] = 7;   Q2Special[1][7] = 7;   Q2Special[2][7] = 7;   Q2Special[3][7] = 7;  
-    Q2Special[0][8] = 8;   Q2Special[1][8] = 8;   Q2Special[2][8] = 8;   Q2Special[3][8] = 8;  
-    Q2Special[0][9] = 36;  Q2Special[1][9] = 36;  Q2Special[2][9] = 36;  Q2Special[3][9] = 36; 
-    Q2Special[0][10] = 9;  Q2Special[1][10] = 9;  Q2Special[2][10] = 9;  Q2Special[3][10] = 9; 
-    Q2Special[0][11] = 10; Q2Special[1][11] = 10; Q2Special[2][11] = 10; Q2Special[3][11] = 10;
-    Q2Special[0][12] = 11; Q2Special[1][12] = 11; Q2Special[2][12] = 11; Q2Special[3][12] = 11;
-    Q2Special[0][13] = 12; Q2Special[1][13] = 12; Q2Special[2][13] = 12; Q2Special[3][13] = 12;
-    Q2Special[0][14] = 13; Q2Special[1][14] = 13; Q2Special[2][14] = 13; Q2Special[3][14] = 13;
-    Q2Special[0][15] = 14; Q2Special[1][15] = 14; Q2Special[2][15] = 14; Q2Special[3][15] = 14;
-    Q2Special[0][16] = 15; Q2Special[1][16] = 15; Q2Special[2][16] = 15; Q2Special[3][16] = 15;
-    Q2Special[0][17] = 22; Q2Special[1][17] = 16; Q2Special[2][17] = 22; Q2Special[3][17] = 16;
-    Q2Special[0][18] = 17; Q2Special[1][18] = 17; Q2Special[2][18] = 17; Q2Special[3][18] = 17;
-    Q2Special[0][19] = 37; Q2Special[1][19] = 37; Q2Special[2][19] = 37; Q2Special[3][19] = 37;
-    Q2Special[0][20] = 18; Q2Special[1][20] = 18; Q2Special[2][20] = 18; Q2Special[3][20] = 18;
-    Q2Special[0][21] = 19; Q2Special[1][21] = 19; Q2Special[2][21] = 19; Q2Special[3][21] = 19;
-    Q2Special[0][22] = 20; Q2Special[1][22] = 20; Q2Special[2][22] = 20; Q2Special[3][22] = 20;
-    Q2Special[0][23] = 21; Q2Special[1][23] = 21; Q2Special[2][23] = 21; Q2Special[3][23] = 21;
-    Q2Special[0][24] = 16; Q2Special[1][24] = 22; Q2Special[2][24] = 16; Q2Special[3][24] = 22;
-    Q2Special[0][25] = 23; Q2Special[1][25] = 23; Q2Special[2][25] = 23; Q2Special[3][25] = 23;
-    Q2Special[0][26] = 24; Q2Special[1][26] = 24; Q2Special[2][26] = 24; Q2Special[3][26] = 24;
-    Q2Special[0][27] = 25; Q2Special[1][27] = 25; Q2Special[2][27] = 25; Q2Special[3][27] = 25;
-    Q2Special[0][28] = 26; Q2Special[1][28] = 26; Q2Special[2][28] = 26; Q2Special[3][28] = 26;
-    Q2Special[0][29] = 38; Q2Special[1][29] = 38; Q2Special[2][29] = 38; Q2Special[3][29] = 38;
-    Q2Special[0][30] = 27; Q2Special[1][30] = 27; Q2Special[2][30] = 27; Q2Special[3][30] = 27;
-    Q2Special[0][31] = 28; Q2Special[1][31] = 28; Q2Special[2][31] = 28; Q2Special[3][31] = 28;
-    Q2Special[0][32] = 29; Q2Special[1][32] = 29; Q2Special[2][32] = 29; Q2Special[3][32] = 29;
-    Q2Special[0][33] = 30; Q2Special[1][33] = 30; Q2Special[2][33] = 30; Q2Special[3][33] = 30;
-    Q2Special[0][34] = 31; Q2Special[1][34] = 31; Q2Special[2][34] = 31; Q2Special[3][34] = 31;
-    Q2Special[0][35] = 32; Q2Special[1][35] = 32; Q2Special[2][35] = 32; Q2Special[3][35] = 32;
-    Q2Special[0][36] = 33; Q2Special[1][36] = 33; Q2Special[2][36] = 33; Q2Special[3][36] = 33;
-    Q2Special[0][37] = 34; Q2Special[1][37] = 34; Q2Special[2][37] = 34; Q2Special[3][37] = 34;
-    Q2Special[0][38] = 35; Q2Special[1][38] = 35; Q2Special[2][38] = 35; Q2Special[3][38] = 35;
-    Q2Special[0][39] = 39; Q2Special[1][39] = 39; Q2Special[2][39] = 39; Q2Special[3][39] = 39;
+  /* The special cases... */
+  Q1Special[0][0] = 1;    Q1Special[2][0] = 1;    Q1Special[0][1] = 8;    Q1Special[2][1] = 8;   
+  Q1Special[0][2] = 3;    Q1Special[2][2] = 3;    Q1Special[0][3] = 4;    Q1Special[2][3] = 4;   
+  Q1Special[0][4] = 35;   Q1Special[2][4] = 35;   Q1Special[0][5] = 0;    Q1Special[2][5] = 0;   
+  Q1Special[0][6] = 7;    Q1Special[2][6] = 7;    Q1Special[0][7] = 14;   Q1Special[2][7] = 14;  
+  Q1Special[0][8] = 9;    Q1Special[2][8] = 9;    Q1Special[0][10] = 10;  Q1Special[2][10] = 10; 
+  Q1Special[0][11] = 29;  Q1Special[2][11] = 29;  Q1Special[0][12] = 30;  Q1Special[2][12] = 30; 
+  Q1Special[0][13] = 13;  Q1Special[2][13] = 13;  Q1Special[0][14] = 20;  Q1Special[2][14] = 20; 
+  Q1Special[0][15] = 15;  Q1Special[2][15] = 15;  Q1Special[0][16] = 16;  Q1Special[2][16] = 16; 
+  Q1Special[0][17] = 23;  Q1Special[2][17] = 23;  Q1Special[0][18] = 24;  Q1Special[2][18] = 24; 
+  Q1Special[0][20] = 19;  Q1Special[2][20] = 19;  Q1Special[0][21] = 26;  Q1Special[2][21] = 26; 
+  Q1Special[0][22] = 21;  Q1Special[2][22] = 21;  Q1Special[0][23] = 22;  Q1Special[2][23] = 22; 
+  Q1Special[0][24] = 17;  Q1Special[2][24] = 17;  Q1Special[0][25] = 18;  Q1Special[2][25] = 18; 
+  Q1Special[0][26] = 25;  Q1Special[2][26] = 25;  Q1Special[0][27] = 32;  Q1Special[2][27] = 32; 
+  Q1Special[0][28] = 27;  Q1Special[2][28] = 27;  Q1Special[0][30] = 28;  Q1Special[2][30] = 28; 
+  Q1Special[0][31] = 11;  Q1Special[2][31] = 11;  Q1Special[0][32] = 12;  Q1Special[2][32] = 12; 
+  Q1Special[0][33] = 31;  Q1Special[2][33] = 31;  Q1Special[0][34] = 2;   Q1Special[2][34] = 2;  
+  Q1Special[0][35] = 33;  Q1Special[2][35] = 33;  Q1Special[0][36] = 34;  Q1Special[2][36] = 34; 
+  Q1Special[0][37] = 5;   Q1Special[2][37] = 5;   Q1Special[0][38] = 6;   Q1Special[2][38] = 6;  
+  
+  Q2Special[0][17] = 22;  Q2Special[2][17] = 22;  Q2Special[0][24] = 16;  Q2Special[2][24] = 16; 
+  
 }
 
 /**************************************************************/

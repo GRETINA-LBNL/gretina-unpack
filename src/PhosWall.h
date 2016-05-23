@@ -157,6 +157,7 @@ class phosWallCalc: public TObject {
   Float_t biggestC(TString var);
   Float_t biggestT(TString var);
   Int_t biggestPixel(TString var);
+  TVector3 biggestPixelPosition(TString var);
   Int_t biggestHit(TString var);
   Float_t secondBiggestA(TString var);
   Float_t secondBiggestB(TString var);
