@@ -615,6 +615,7 @@ void counterVariables::Initialize() {
   
   eoBuffer = 0; eofInBuffer = 0; eofPosInBuffer = 0;
   mode3i = 0; old3Bytes = 0;
+  b29i = 0;
   
   badEvent = 0; badSegment = 0; badCC1 = 0; badCC2 = 0;
   for (Int_t i=0; i<(MAXCHANNELS); i++) {
@@ -660,7 +661,8 @@ void counterVariables::ResetRunCounters() {
   
   eoBuffer = 0; eofInBuffer = 0; eofPosInBuffer = 0;
   mode3i = 0; old3Bytes = 0;
-  
+  b29i = 0;
+
   badEvent = 0; badSegment = 0; badCC1 = 0; badCC2 = 0;
   for (Int_t i=0; i<(MAXCHANNELS); i++) {
     goodTraceE_PU[i] = 0; goodTraceE[i] = 0;

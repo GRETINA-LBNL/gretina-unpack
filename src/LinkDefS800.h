@@ -27,6 +27,8 @@
 #pragma link C++ class S800Object+;
 #pragma link C++ class S800Ppac+;
 #pragma link C++ class S800Target+;
+#pragma link C++ struct s800Phys+;
+#pragma link C++ class S800Physics+;
 #pragma link C++ class S800Full+;
 #pragma link C++ class S800Scaler+;
 

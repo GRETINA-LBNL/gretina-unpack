@@ -1024,7 +1024,12 @@ Float_t g1GammaEvent::gTheta() {
 /**************************************************************/
 
 Float_t g1GammaEvent::gPhi() {
-  return xyzLab1.Phi();
+  if (xyzLab1.Phi() < 0) {
+    return (xyzLab1.Phi() + TMath::TwoPi());
+  } else {
+    return xyzLab1.Phi();
+  }
+  return 0.0;
 }
 
 /**************************************************************/
@@ -1419,6 +1424,7 @@ void GRETINA::Reset() {
   g2out.Reset();  g2out.Clear();
   g1out.Reset();  g1out.Clear();
   gSimOut.Reset();  gSimOut.Clear();
+  b29.chn.clear();
   b29.timestamp = 0;  b29.wfCFD = 0;
   b29.Clear();
 };
@@ -2724,6 +2730,194 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
 
   free(dp);
 
+  return (0);
+  
+}
+
+Int_t GRETINA::getBank29(FILE *inf, Int_t evtLength, counterVariables *cnt) {
+
+  Int_t siz = 0, remaining = 0;
+  mode3DataPacket *dp;
+  
+  siz = fread(gBuf, evtLength, 1, inf);
+  if (siz != 1) {
+    cout << ALERTTEXT;
+    printf("getBank29(): Error in read attempt (A).  Aborting now...\n");
+    cout << RESET_COLOR;  fflush(stdout);
+    return 5;
+  }
+  cnt->Increment(evtLength);
+  
+  /* Byte swapping, due to little/big endian problem */
+  for (Int_t j=0; j<evtLength; j=j+2) {
+    swap(*(gBuf + j), *(gBuf + j + 1));
+  }
+  cnt->b29i = 0;
+  
+  remaining = 1;
+  
+  while (remaining) {
+    unsigned char *tmp = (gBuf);
+    tmp = (gBuf + cnt->b29i*2);
+    
+    /* Allocate memory... */
+    if ( !(dp = (mode3DataPacket*)malloc(sizeof(dp->aahdr) +
+					 sizeof(dp->hdr) + 
+					 sizeof(dp->waveform))) ) {
+      cout << ALERTTEXT;
+      printf("getMode3(): Failed in memory allocation.\n");
+      cout << RESET_COLOR;  fflush(stdout);
+      exit(-1);
+    }
+    memset(dp->waveform, 1, MAX_TRACE_LENGTH * sizeof(UShort_t));
+    
+    /* Copy 'AAAA' header */
+    memmove(&dp->aahdr[0], tmp, sizeof(dp->hdr) + sizeof(dp->aahdr));
+    if ((dp->aahdr[0] != 0xAAAA) || (dp->aahdr[1] != 0xAAAA)) {
+      cout << ALERTTEXT;
+      printf("getBank29(): Didn't get 'AAAA' header as expected!\n");
+      printf("getBank29(): Found this instead: %x %x\n", dp->aahdr[0], dp->aahdr[1]);
+      cout << RESET_COLOR;  fflush(stdout);
+      exit(-1);
+    }
+    
+    /* We've got the data packet, pull out information */
+    g3ch.Clear();
+    
+    /* Interpret the header information */
+    g3ch.hdr0 = dp->hdr[0];  g3ch.hdr1 = dp->hdr[1];
+    g3ch.hdr7 = dp->hdr[7];
+
+    Int_t module = g3ch.module();
+    Int_t channel = g3ch.chanID();
+    Int_t sign = g3ch.sign();
+    Int_t TL = g3ch.tracelength();
+
+    cnt->b29i += (sizeof(dp->aahdr) + sizeof(dp->hdr)) / 2;
+    tmp = (gBuf + cnt->b29i*2);
+    
+    /* Copy the waveform! */
+    memmove(&dp->waveform[0], tmp, TL*sizeof(UShort_t));
+    
+    cnt->b29i += (TL * sizeof(UShort_t)) / 2;
+    tmp = (gBuf + cnt->b29i*2);
+  
+    g3ch.ID = channel;
+
+    Int_t hiEnergy = 0;
+    hiEnergy = (dp->hdr[7] & 0x00ff);
+    UInt_t tmpEnergy = 0;  Int_t tmpIntEnergy = 0;
+    tmpEnergy = ((UInt_t)(hiEnergy) << 16);
+    tmpEnergy += dp->hdr[4];
+    tmpIntEnergy = (Int_t)tmpEnergy;
+    if (sign) {
+      tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+      }
+    } else {
+      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+      }
+    }
+    if (tmpIntEnergy == 65536) { /* Guard against weird FPGA energy anomoly */
+      g3ch.eRaw = 0.; 
+    } else { g3ch.eRaw = (Float_t)(tmpIntEnergy/32.); }
+    
+    hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
+    hiEnergy = (dp->hdr[11] & 0x00ff);
+    sign = (dp->hdr[11] & 0x0100);
+    tmpEnergy = ((UInt_t)(hiEnergy) << 16);
+    tmpEnergy += dp->hdr[8];
+    tmpIntEnergy = (Int_t)(tmpEnergy);
+    if (sign) {
+      tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+      }
+    } else {
+      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+      }
+    }
+    g3ch.eCalPO = (Float_t)(tmpIntEnergy/32.);
+
+    hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
+    hiEnergy = (dp->hdr[13] & 0x0001);
+    sign = (dp->hdr[13] & 0x0002);
+    tmpEnergy = ((UInt_t)(hiEnergy) << 23);
+    tmpEnergy += ((UInt_t)(dp->hdr[10]) << 7);
+    tmpEnergy += ((UInt_t)(dp->hdr[11] & 0xfe00) >> 9);
+    tmpIntEnergy = (Int_t)(tmpEnergy);
+    if (sign) {
+      tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+      }
+    } else {
+      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+      }
+    }
+    g3ch.prevE1 = (Float_t)(tmpIntEnergy/32.);
+    
+    hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
+    hiEnergy = (dp->hdr[12] & 0x03ff);
+    sign = (dp->hdr[12] & 0x0400);
+    tmpEnergy = ((UInt_t)(hiEnergy) << 14);
+    tmpEnergy += ((UInt_t)(dp->hdr[13] & 0xfffc) >> 2);
+    tmpIntEnergy = (Int_t)(tmpEnergy);
+    if (sign) {
+      tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+      }
+    } else {
+      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+      }
+    }
+    g3ch.prevE2 = (Float_t)(tmpIntEnergy/32.);
+    g3ch.PZrollover = ((UInt_t)(dp->hdr[12] & 0xf800) >> 11);
+
+    /* Transform the waveform */
+    g3ch.wf.raw.clear();
+    for (Int_t j=0; j<TL+1; j=j+2) {
+      if (dp->waveform[j+1] & 0x8000) {
+	g3ch.wf.raw.push_back(dp->waveform[j+1] - std::numeric_limits<unsigned int>::max());
+      } else {
+	g3ch.wf.raw.push_back(dp->waveform[j+1]);
+      }
+      if (dp->waveform[j] & 0x8000) {
+	g3ch.wf.raw.push_back(dp->waveform[j] - std::numeric_limits<unsigned int>::max());
+      } else {
+	g3ch.wf.raw.push_back(dp->waveform[j]);
+      } 
+    }
+
+    /* For the CC always get a baseline value from the minimum trace, which is 6 samples. */
+    if (g3ch.wf.raw.size() >= 6) {  g3ch.baseline = g3ch.wf.BL(0, 6);  }
+    
+    g3ch.calcTime = g3ch.wf.CFD(0);
+
+    g3ch.timestamp = (ULong64_t)( ((ULong64_t)(dp->hdr[3])) + 
+				  ((ULong64_t)(dp->hdr[2]) << 16) +
+				  ((ULong64_t)(dp->hdr[5]) << 32) );
+    g3ch.CFDtimestamp = (ULong64_t)( ((ULong64_t)(dp->hdr[6])) + 
+				     ((ULong64_t)(dp->hdr[9]) << 16) +
+				     ((ULong64_t)(dp->hdr[8]) << 32) );
+    g3ch.deltaT1 = (UShort_t)(dp->hdr[6]);
+    g3ch.deltaT2 = (UShort_t)(dp->hdr[9]);
+   
+    b29.timestamp = g3ch.timestamp; 
+    b29.chn.push_back(g3ch);
+
+    free(dp);
+
+    if ( (Int_t)(cnt->b29i*2) == evtLength ) { remaining = 0; }
+    else if ( (Int_t)(cnt->b29i*2) < evtLength ) { remaining = 1; }
+  }
+  
   return (0);
   
 }

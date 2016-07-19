@@ -3724,3 +3724,39 @@ Bool_t S800Scaler::getAndProcessS800Aux(FILE *inf, Int_t length, long long int t
 
   return scaler;
 }
+
+void S800Physics::Reset() {
+  s800Ph.type = 0;
+  s800Ph.crdc1_x = 0.0;
+  s800Ph.crdc1_y = 0.0;
+  s800Ph.crdc2_x = 0.0;
+  s800Ph.crdc2_y = 0.0;
+  s800Ph.ic_sum = 0.0;
+  s800Ph.tof_xfp = 0.0;
+  s800Ph.tof_obj = 0.0;
+  s800Ph.rf = 0.0;
+  s800Ph.trigger = 0;
+  s800Ph.ic_de = 0.0;
+  s800Ph.tof_xfpe1 = 0.0;
+  s800Ph.tof_obje1 = 0.0;
+  s800Ph.tof_rfe1 = 0.0;
+  s800Ph.ata = 0.0;
+  s800Ph.bta = 0.0;
+  s800Ph.dta = 0.0;
+  s800Ph.yta = 0.0;
+}
+
+void S800Full::getPhysics(FILE *inf) {
+  fread(&phys.s800Ph, 1, sizeof(s800Phys), inf);
+  //printf("GOT IT: %x\n", phys.s800Ph.type);
+
+  fp.crdc1.x = phys.s800Ph.crdc1_x;
+  fp.crdc1.y = phys.s800Ph.crdc1_y;
+  fp.crdc2.x = phys.s800Ph.crdc2_x;
+  fp.crdc2.y = phys.s800Ph.crdc2_y;
+  fp.ic.sum = phys.s800Ph.ic_sum;
+  tof.xfp = phys.s800Ph.tof_xfp;
+  tof.obj = phys.s800Ph.tof_obj;
+  fp.track.ata = phys.s800Ph.ata;
+  fp.track.bta = phys.s800Ph.bta;
+}

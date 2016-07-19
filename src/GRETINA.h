@@ -275,6 +275,7 @@ class g3HistoryEvent : public TObject {
 class Bank29 : public TObject {
  
  public:
+  vector<g3ChannelEvent> chn;
   long long int timestamp;
   long long int wfCFD;
 
@@ -282,7 +283,7 @@ class Bank29 : public TObject {
   Bank29() { ; }
   ~Bank29() { ; }
  
-  ClassDef(Bank29, 1);
+  ClassDef(Bank29, 2);
 };
 
 /*--------------------------------------------------------*/
@@ -786,6 +787,7 @@ class GRETINA : public TObject {
 		 counterVariables *cnt);
   Int_t getSimulated(FILE *inf);
   void getScaler(FILE *inf, Int_t evtLength);
+  Int_t getBank29(FILE *inf, Int_t evtLength, counterVariables *cnt);
 
   Int_t analyzeMode2(g2CrystalEvent *g2, GRETINAVariables *gVar);
   void calibrateMode2CC(Int_t crystal, mode2ABCD5678 *g2, 

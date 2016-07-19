@@ -102,7 +102,6 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
 	     GRETINAVariables* gVar, INLCorrection *inlCor, 
 	     UShort_t junk[]);
 
-void GetBank29(FILE* inf, UShort_t buf[]);
 void ReadMario(FILE* inf);
 void SkipData(FILE* inf, UShort_t junk[]);
 
@@ -620,8 +619,10 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     break;
   case S800PHYSICS:
     {
-      SkipData(inf, junk);
+      //SkipData(inf, junk);
       //printf("%0.3f\n", s800->fp.crdc1.x);
+      s800->phys.Reset();
+      s800->getPhysics(inf);
       cnt->Increment(gHeader.length);
     }
     break; 
@@ -640,7 +641,7 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     break;
 #endif
   case BANK29:
-    { GetBank29(inf, junk);  cnt->Increment(gHeader.length); }
+    { gret->getBank29(inf, gHeader.length, cnt);  cnt->Increment(gHeader.length); }
     break;
   case GRETSCALER:
     { gret->getScaler(inf, gHeader.length);  cnt->Increment(gHeader.length); }
@@ -709,19 +710,6 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
   if (gHeader.type == RAWHISTORY) {
     cnt->setEventBit(RAW);
     cnt->headerType[RAW]++;
-  }
-}
-
-/****************************************************/
-
-void GetBank29(FILE* inf, UShort_t buf[]) {
-  gret->b29.timestamp = gHeader.timestamp;
-
-  /* Skip the actual data for now. Maybe we'll do 
-     something like CFD down the road. */
-  Int_t siz = fread(buf, 1, gHeader.length, inf);
-  if (siz != gHeader.length) {
-    cerr << "GetBank29 failed in bytes read." << endl;
   }
 }
 

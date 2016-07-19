@@ -1195,6 +1195,40 @@ class S800Target : public TObject {
 /*  The whole S800                                            */
 /**************************************************************/
 
+struct s800Phys {
+  int32_t type;
+  float crdc1_x;
+  float crdc1_y;
+  float crdc2_x;
+  float crdc2_y;
+  float ic_sum;
+  float tof_xfp;
+  float tof_obj;
+  float rf;
+  int32_t trigger;
+  float ic_de;
+  float tof_xfpe1;
+  float tof_obje1;
+  float tof_rfe1;
+  float ata;
+  float bta;
+  float dta;
+  float yta;
+};
+
+class S800Physics : public TObject {
+ public:
+  s800Phys s800Ph;
+  
+ public:
+  S800Physics() { ; }
+  ~S800Physics() { ; }
+  void Reset();
+  
+ private:
+  ClassDef(S800Physics, 1);
+};
+
 class S800Full : public TObject {
 
  public:
@@ -1223,6 +1257,8 @@ class S800Full : public TObject {
 #endif
   S800TimeOfFlight tof;
 
+  S800Physics phys;
+
  public:
   S800Full();
   
@@ -1235,6 +1271,7 @@ class S800Full : public TObject {
   void InitializeS800Variables(TString inputFilename);
   void UpdateS800RunVariables(TString filename);
   Float_t getDoppler(TVector3 xyz, Float_t beta, GRETINAVariables *gVar);
+  void getPhysics(FILE *inf);
 
  private:
 

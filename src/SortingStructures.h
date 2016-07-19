@@ -154,6 +154,7 @@ class counterVariables : public TObject {
   Int_t eofInBuffer;
   UInt_t eofPosInBuffer;
   UInt_t mode3i;
+  UInt_t b29i;
 
   long long int old3Bytes;
 
