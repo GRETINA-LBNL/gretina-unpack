@@ -73,7 +73,7 @@ env.Append(CCFLAGS = ['-O2', '-D_FILE_OFFSET_64', '-pg', '-g'], LINKFLAGS=['-pg'
 
 ## Link auxiliary detector system analysis #############################
 #env.Append(CPPDEFINES=['-DWITH_PWALL'])
-#env.Append(CPPDEFINES=['-DWITH_S800'])
+env.Append(CPPDEFINES=['-DWITH_S800'])
 env.Append(CPPDEFINES=['-DWITH_LENDA'])
 
 ## Finding dependencies (ROOT)
@@ -195,9 +195,9 @@ env.Program(target = gebTarget, source = gebSources)
 #envDecompView.Program(target = viewerTarget, source = viewerSources)
 
 ## Building MergeArbFiles executable #####################################
-mergeTarget = 'MergeArbFiles'
-mergeSources = ['MergeSrc/MergeModes.cpp']
-env.Program(target = mergeTarget, source = mergeSources)
+#mergeTarget = 'MergeArbFiles'
+#mergeSources = ['MergeSrc/MergeModes.cpp']
+#env.Program(target = mergeTarget, source = mergeSources)
 
 ## Building StripClover executable #######################################
 #cloverTarget = 'StripClover'
