@@ -414,6 +414,13 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt,
       phosWall->Reset();
       phosWall->aux.Reset();
 #endif
+#ifdef WITH_LENDA
+      for (UInt_t ui=0; ui<ddasEv->getData().size(); ui++) {
+	delete ddasEv->getData()[ui];
+      }
+      ddasEv->getData().clear();
+      lendaEv->Clear();
+#endif
     }
   } 
   

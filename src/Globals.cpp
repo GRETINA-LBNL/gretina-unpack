@@ -38,6 +38,15 @@ S800Full *s800;
 S800Scaler *s800Scaler;
 #endif
 
+/*------ LENDA DATA STRUCTURES ------*/
+
+#ifdef WITH_LENDA
+ddasEvent *ddasEv;
+lendaEvent *lendaEv;
+lendaPacker *lendaPack;
+lendaSettings *lendaSet;
+#endif
+
 /*------ ROOT TREES ------*/
 TTree *teb; 
 TTree *wave; 

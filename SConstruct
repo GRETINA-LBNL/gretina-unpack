@@ -73,7 +73,8 @@ env.Append(CCFLAGS = ['-O2', '-D_FILE_OFFSET_64', '-pg', '-g'], LINKFLAGS=['-pg'
 
 ## Link auxiliary detector system analysis #############################
 #env.Append(CPPDEFINES=['-DWITH_PWALL'])
-env.Append(CPPDEFINES=['-DWITH_S800'])
+#env.Append(CPPDEFINES=['-DWITH_S800'])
+env.Append(CPPDEFINES=['-DWITH_LENDA'])
 
 ## Finding dependencies (ROOT)
 try:
@@ -127,6 +128,16 @@ s800LibSources = ['src/S800Dict.cpp', 'src/S800Parameters.cpp']
 env.SharedLibrary(target = s800LibTarget, source = s800LibSources, 
                   SHLIBPREFIX='lib')
 
+## Building LendaDict and libLenda ######################################
+lendaDictTarget = 'src/LendaDict.cpp'
+lendaDictHeaders = ['src/LENDA-DDAS.h', 'src/LENDA-Controls.h', 'src/ddasChannel.h', 'src/LinkDefLenda.h'] 
+env.RootCint(lendaDictTarget, lendaDictHeaders)
+
+lendaLibTarget = 'Lenda'
+lendaLibSources = ['src/LendaDict.cpp', 'src/LENDA-DDAS.cpp', 'src/LENDA-Controls.cpp', 'src/ddasChannel.cpp']
+env.SharedLibrary(target = lendaLibTarget, source = lendaLibSources, 
+                  SHLIBPREFIX='lib')
+
 ## Building CHICODict and libCHICO ######################################
 chicoDictTarget = 'src/chicoDict.cpp'
 chicoDictHeaders = ['src/CHICO.h', 'src/LinkDefCHICO.h'] 
@@ -162,7 +173,7 @@ unpackTarget = 'Unpack'
 unpackSources = ['src/Unpack.cpp', 
 	         'src/Globals.cpp', 'src/UnpackUtilities.cpp', 
 		 'src/S800Functions.cpp']
-envUnpack.Append(LIBS=['GRETINA', 'S800', 'chico', 'phosWall'])
+envUnpack.Append(LIBS=['GRETINA', 'S800', 'chico', 'phosWall', 'Lenda'])
 envUnpack.Program(target = unpackTarget, source = unpackSources)
 
 ## Building AddGlobalHeaders executable ##################################

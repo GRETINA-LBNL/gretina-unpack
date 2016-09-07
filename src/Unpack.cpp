@@ -79,6 +79,12 @@
 #include "S800Functions.h"
 #endif
 
+#ifdef WITH_LENDA
+#include "ddasChannel.h"
+#include "LENDA-DDAS.h"
+#include "LENDA-Controls.h"
+#endif
+
 /* BGS header files */
 #ifdef WITH_BGS
 #include "BGSParamList.h"
@@ -239,6 +245,16 @@ int main(int argc, char *argv[]) {
   s800Scaler->InitializeS800ScalerParameters("s800Calibrations/S800Scaler.definition");
   cout << endl;
 #endif /* WITH_S800 */
+
+#ifdef WITH_LENDA
+  ddasEv = new ddasEvent();
+  lendaEv = new lendaEvent();
+  lendaSet = new lendaSettings();
+  lendaPack = new lendaPacker(lendaSet);
+  lendaPack->SetGates(25, 11, 25, 11);
+  lendaPack->SetTraceDelay(120);
+  // lendaPack->FindAndSetMapAndCorrectionsFileNames(runNumber);
+#endif /* WITH_LENDA */
 
   FILE *inf;
   
@@ -647,7 +663,8 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     { gret->getScaler(inf, gHeader.length);  cnt->Increment(gHeader.length); }
     break;
   case G4SIM:
-    { gret->getSimulated(inf);  cnt->Increment(gHeader.length); }
+    { SkipData(inf, junk);  cnt->Increment(gHeader.length); } 
+    //gret->getSimulated(inf);  cnt->Increment(gHeader.length); }
     break;
 #ifdef WITH_CHICO
   case CHICO: { chico->getAndUnpackCHICO(inf, gHeader.length);  cnt->Increment(gHeader.length); }
@@ -679,6 +696,20 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     break;
   case PWALLAUX:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
+    break;
+#endif
+#ifdef WITH_LENDA
+  case LENDA:
+    {
+      ddasEv->getEvent(inf, gHeader.length);
+      lendaPack->MakeLendaEvent(lendaEv, ddasEv, 0);
+      lendaEv->Finalize();
+      cnt->Increment(gHeader.length);
+    }
+    break;
+#else
+  case LENDA:
+    { SkipData(inf, junk); cnt->Increment(gHeader.length); }
     break;
 #endif
   case 0:

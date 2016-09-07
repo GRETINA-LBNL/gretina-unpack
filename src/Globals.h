@@ -24,6 +24,11 @@
 #include "S800Definitions.h"
 #endif
 
+#ifdef WITH_LENDA
+#include "LENDA-DDAS.h"
+#include "LENDA-Controls.h"
+#endif
+
 /*************************************************/
 /****            Global variables             ****/
 /*************************************************/
@@ -59,6 +64,14 @@ extern phosWallFull *phosWall;
 #ifdef WITH_S800
 extern S800Full *s800;
 extern S800Scaler *s800Scaler;
+#endif
+
+/*------ LENDA DATA STRUCTURES ------*/
+#ifdef WITH_LENDA
+extern ddasEvent *ddasEv;
+extern lendaEvent *lendaEv;
+extern lendaPacker *lendaPack;
+extern lendaSettings *lendaSet;
 #endif
 
 /*------ ROOT TREES ------*/

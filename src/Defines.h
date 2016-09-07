@@ -40,6 +40,7 @@
 #define DFMA 16
 #define PWALL 17
 #define PWALLAUX 18
+#define LENDA 21
 
 /********** Superpulse information **********/
 

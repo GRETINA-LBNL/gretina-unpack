@@ -262,6 +262,10 @@ void InitializeTree(controlVariables* ctrl) {
   teb->Branch("pwall.aux", "phosWallAux", &(phosWall->aux));  
 #endif
 
+#ifdef WITH_LENDA
+  teb->Branch("lenda", "lendaEvent", &lendaEv);
+#endif
+
   /* GRETINA */
   teb->Branch("g1", "g1OUT", &(gret->g1out));
   teb->Branch("g2", "g2OUT", &(gret->g2out));
