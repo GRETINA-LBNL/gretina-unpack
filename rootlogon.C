@@ -9,8 +9,11 @@
     cout << "Loaded: libGRETINA.so, ";
     gSystem->Load("libphosWall.so");
     cout << " libphosWall.so, ";
+    gSystem->Load("libLenda.so");
+    cout << " libLenda.so, ";
     gSystem->Load("libS800.so");
     cout << "and libS800.so" << endl;
+
   } else {
     gretinaLib = "libGRETINA.dll";
     foundlib = gSystem->Which(searchP, gretinaLib, EAccessMode::kFileExists);

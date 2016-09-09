@@ -16,6 +16,8 @@
 
 #include "TFile.h"
 
+#include "colors.h"
+
 #include "LENDA-DDAS.h"
 
 #define CHANPERMOD 16  /* Number of DDAS chans per DDAS module */

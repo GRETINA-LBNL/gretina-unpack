@@ -1,15 +1,12 @@
 ###########################################
 # S800 Variables                          #
 ###########################################
-
-debugMode 0
+S800
+debug 0
 evtreset 0
-
 #***** S800 FP variables *****#
-
-fp.gap 1073.000
-
-S800 FP IC => channel slope offset active?
+fp_gap 1073.000
+# S800 FP IC => channel slope offset active?
 0 1.000 0.000 1
 1 0.532 -12.71 1
 2 0.560 -4.864 1
@@ -26,64 +23,60 @@ S800 FP IC => channel slope offset active?
 13 0.514 -8.937 1
 14 0.596 -17.94 1
 15 0.498 -7.928 1
+de_x0tilt 100.000
+de_xtilt 0.00015
+de_ytilt 0.000
+de_slope 1.000
+de_offset 0.000
+#***** S800 FP CRDCs *****#
+# crdc1_xOffset crdc2_xOffset
+-278.685 -324.404
+# crdc1_xSlope crdc2_xSlope
+2.54 2.54
+# crdc1_yOffset crdc2_yOffset
+117.5 -123.514
+# crdc1_ySlope crdc2_ySlope
+-0.0625 0.0616646
+# crdc1_xyOffset crdc2_xyOffset
+0.0000 0.0000
+# crdc1_xySlope crdc2_xySlope
+0.0000 0.0000
+# crdc1_gravityWidth crdc2_gravityWidth
+20.000 20.000
+# crdc1_fitWidth crdc2_fitWidth
+20.000 20.000
+# crdc1_method crdc2_method
+1.000 1.000
+# crdc1_saturation crdc2_saturation
+1024.000 1024.000
+# crdc1_#badPads crdc2_#badPads
+0.000 0.000
 
-fp.ic.de_x0tilt 100.000
-fp.ic.de_xtilt 0.00015
-fp.ic.de_ytilt 0.000
-fp.ic.de_slope 1.000
-fp.ic.de_offset 0.000
+# crdc1 bad pads (up to 99)
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 
 
-# S800 FP CRDCs 
+# crdc2 bad pads (up to 99)
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 
 
-fp.crdc1.xOffset -278.685
-fp.crdc1.xSlope 2.54
-fp.crdc1.yOffset 117.5
-fp.crdc1.ySlope -0.0625
-fp.crdc1.xyOffset 0.000
-fp.crdc1.xySlope 0.000
-fp.crdc1.gravityWidth 20.000
-fp.crdc1.fitWidth 20.000
-fp.crdc1.method 1.000
-fp.crdc1.saturation 1024.00
-fp.crdc1.badPads 0.000
-
-CRDC1 Bad Pads (up to 99)
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0
-
-fp.crdc2.xOffset -324.404
-fp.crdc2.xSlope 2.54
-fp.crdc2.yOffset -123.514
-fp.crdc2.ySlope 0.0617
-fp.crdc2.xyOffset 0.000
-fp.crdc2.xySlope 0.000
-fp.crdc2.gravityWidth 20.000
-fp.crdc2.fitWidth 20.000
-fp.crdc2.method 1.000
-fp.crdc2.saturation 1024.00
-fp.crdc2.badPads 0.000
-
-CRDC2 Bad Pads (up to 99)
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 
-
-CRDC1 Calibration => channel ped slope offset minSamples m_thresh
+# crdc1 => channel ped slope offset minSamples m_thresh
 0 119.000000 1.000000 0.000000 1.000000 0.000000
 1 120.000000 1.536409 0.000000 1.000000 0.000000
 2 114.000000 1.362700 0.000000 1.000000 0.000000
@@ -308,8 +301,7 @@ CRDC1 Calibration => channel ped slope offset minSamples m_thresh
 221 117.000000 0.631876 0.000000 1.000000 0.000000
 222 117.000000 0.986464 0.000000 1.000000 0.000000
 223 107.000000 1.000000 0.000000 1.000000 0.000000
-
-CRDC2 Calibration => channel ped slope offset minSamples m_thresh
+# crdc2 => channel ped slope offset minSamples m_thresh
 0 85.000000 1.000000 0.000000 1.000000 0.000000
 1 83.000000 1.492482 0.000000 1.000000 0.000000
 2 99.000000 1.027134 0.000000 1.000000 0.000000
@@ -534,29 +526,25 @@ CRDC2 Calibration => channel ped slope offset minSamples m_thresh
 221 148.000000 0.694183 0.000000 1.000000 0.000000
 222 146.000000 1.091222 0.000000 1.000000 0.000000
 223 144.000000 1.000000 0.000000 1.000000 0.000000
-
-# S800 FP Track
-
-FP MapName
+#***** S800 FP Track *****#
+# fp map filename
 InverseMaps/Ca47FromCa48.inv
-
-fp.track.anglea -0.0017349
-fp.track.angleb 0.0056773
-fp.track.brho 2.5900
-fp.track.mass 48.000
-fp.track.charge 20.000
-fp.track.order 2.000
-fp.track.zfp 0.000
-fp.track.gecorr 0.000
-fp.track.anglea_cor 0.000
-fp.track.angleb_cor 0.000
-fp.track.ata_dtacor 0.000
-fp.track.bta_ytacor 0.000
-fp.track.map.maxcoefficients 200.000
-fp.track.map.maxparameters 6.000
-fp.track.map.maxorder 5.000
-
-Hodoscope => channel slope offset
+anglea -0.0017349
+angleb 0.0056773
+brho 2.5900
+mass 48.000
+charge 20.000
+order 2.000
+zfp 0.000
+gecorr 0.000
+anglea_cor 0.000
+angleb_cor 0.000
+ata_dtacor 0.000
+bta_ytacor 0.000
+maxcoefficients 200.000
+maxparameters 6.000
+maxorder 5.000
+# S800 FP Hodoscope => channel slope offset
 0 1.000 1.000
 1 1.000 1.000
 2 1.000 1.000
@@ -589,125 +577,34 @@ Hodoscope => channel slope offset
 29 1.000 1.000
 30 1.000 1.000
 31 1.000 1.000
-
-# S800 FP Target (S800_LINK_TARGET_PIN &/ PPAC)
-
-#target.pin1.e_offset
-#target.pin1.e_slope
-#target.pin1.pin_cor
-#target.pin2.e_offset
-#target.pin2.e_slope
-#target.pin2.pin_cor
-#target.ppac2.z
-#target.ppac2.uoffset
-#target.ppac2.uslope
-#target.ppac2.doffset
-#target.ppac2.dslope
-#target.ppac2.loffset
-#target.ppac2.lslope
-#target.ppac2.roffset
-#target.ppac2.rslope
-#target.ppac2.xoffset
-#target.ppac2.xslope
-#target.ppac2.yoffset
-#target.ppac2.yslope
-
-# S800 Image
-
-im.z 120.6
-im.gap 482.6
-im.dpphi 0.000
-
-#***** S800 Object *****#
-#Image track PPAC (S800_LINK_IMAGE_TRACK)
-#im.track.order
-#IM MapName
-#<Mapfilename>
-#im.track.map.maxcoefficients
-#im.track.map.maxparameters
-#im.track.map.maxorder
-
-#im.track.tppac1.badxstrips
-#TPPAC1 Bad X
-# <1-10>
-# <11-20>
-#im.track.tppac1.badystrips
-#TPPAC1 Bad Y
-# <1-10>
-# <11-20>
-#im.track.tppac2.badxstrips
-#TPPAC2 Bad X
-# <1-10>
-# <11-20>
-#im.track.tppac2.badystrips
-#TPPAC2 Bad Y
-# <1-10>
-# <11-20>
-#im.track.tppac1.width
-#im.track.tppac2.width
-#im.track.tppac1.xcenter
-#im.track.tppac2.xcenter
-#im.track.tppac1.ycenter
-#im.track.tppac2.ycenter
-
-# Image PPAC (S800_LINK_IMAGE_PPAC)
-#im.ppac1.z
-#im.ppac1.uoffset
-#im.ppac1.uslope
-#im.ppac1.doffset
-#im.ppac1.dslope
-#im.ppac1.loffset
-#im.ppac1.lslope
-#im.ppac1.roffset
-#im.ppac1.rslope
-#im.ppac1.xoffset
-#im.ppac1.xslope
-#im.ppac1.yoffset
-#im.ppac1.yslope
-#im.ppac2.z
-#im.ppac2.uoffset
-#im.ppac2.uslope
-#im.ppac2.doffset
-#im.ppac2.dslope
-#im.ppac2.loffset
-#im.ppac2.lslope
-#im.ppac2.roffset
-#im.ppac2.rslope
-#im.ppac2.xoffset
-#im.ppac2.xslope
-#im.ppac2.yoffset
-#im.ppac2.yslope
-
-# Object pin (S800_LINK_OBJECT_PIN)
-
-#obj.pin.e_offset
-#obj.pin.e_slope
-#obj.pin.pin_cor
-
+#***** S800 FP Target, if defined *****#
+#***** S800 Image *****#
+z 120.6
+gap 482.6
+dpphi 0.000
 #***** S800 TOF *****#
-
-tof.obj_shift 0.000
-tof.rfCorrection 0.080
-tof.rfe1Correction 950.0
-tof.objCorrection 0.110
-tof.obje1Correction 1270.0
-tof.xfpCorrection 0.040
-tof.xfpe1Correction 1250.0
-tof.tacobjCorrection 0.060
-tof.tacobje1Correction 550.0
-tof.tacxfpCorrection 0.070
-tof.tacxfpe1Correction 620.0
-tof.diaCorrection 0.000
-tof.diax 0.000
-tof.dia2ndCor 0.000
-tof.dia2ndCorOffset 0.000
-tof.dia1offset 0.000
-tof.dia2offset 0.000
-tof.dia3offset 0.000
-tof.dia4offset 0.000
-tof.obje2Correction 0.000
-tof.xfpe2Correction 0.000
-tof.im2objCorrection 0.000
+obj_shift 0.000
+rfCor 0.080
+rfE1cor 950.0
+objCor 0.110
+objE1Cor 1270.0
+xfpCor 0.040
+xfpE1Cor 1250.0
+tacObjCor 0.060
+tacObjE1Cor 550.0
+tacXfpCor 0.070
+tacXfpE1Cor 620.0
+diaCor 0.000
+diaX 0.000
+dia2ndCor 0.000
+dia2ndCorOffset 0.000
+dia1Offset 0.000
+dia2Offset 0.000
+dia3Offset 0.000
+dia4Offset 0.000
+objE2Cor 0.000
+xfpE2Cor 0.000
+im2ObjCor 0.000
 
 GRETINA
 bbeta 0.38

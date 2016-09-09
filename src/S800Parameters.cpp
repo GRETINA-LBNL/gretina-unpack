@@ -967,6 +967,8 @@ void S800FpCrdc::CalculatePosition() {
 UShort_t* S800FpCrdc::Unpack(UShort_t *p) {
   evtlength = *p;
   
+  calc.method = 1;
+
   p += 3;
   if (calc.method == 1) { /* Classic treatment */
     p = pad.UnpackRawDataClassic(p);
@@ -2702,6 +2704,10 @@ void S800Full::Initialize() {
   evtlength = -65000.; /* words */
   evtcount = -65000.; /* # */
   
+  evtNumber = 0;
+  lastEvtNumber = 0;
+  reportEvtIncrease = 1;
+  
   fp.Initialize(this);
   target.Initialize(this);
   im.Initialize(this);
@@ -2721,6 +2727,10 @@ void S800Full::Reset() {
   invalid = -65000; /* Pattern */
   evtlength = -65000.; /* words */
   evtcount = -65000.; /* # */
+
+  evtNumber = 0;
+  lastEvtNumber = 0;
+  reportEvtIncrease = 1;
   
   fp.Reset();
   target.Reset();
@@ -2809,12 +2819,15 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
       PktWords -= 3; /* PktTag, PktLen and S800 version */
       evtlength = PktLen;
 
+      if (DEBUGS800) { printf("PktLen: %d\n", PktLen); }
+
       while (PktWords) {
 	
 	UShort_t SubPktLen = *p;
 	UShort_t SubPktTag = *(p+1);
 
-	if (DEBUGS800) { cout << "SubPktTag = " << SubPktTag << endl;}
+	if (DEBUGS800) { printf("SubPktTag = 0x%x\n", SubPktTag); }
+	if (DEBUGS800) { printf("SubPktLen = %d\n", SubPktLen); cin.get(); }
 
 	switch(SubPktTag) {
 	case S800_TRIGGER_PACKET :
@@ -2822,10 +2835,10 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
 	  p = trigger.Unpack(p);
 	  break;
 	  
-	case S800_EVENT_NUMBER_PACKET :
-	  if (DEBUGS800) { cout << "S800 Event Number packet " << endl; }
-	  p = evtnum.Unpack(p);
-	  break;
+	  //case S800_EVENT_NUMBER_PACKET :
+	  //if (DEBUGS800) { cout << "S800 Event Number packet " << endl; }
+	  //p = evtnum.Unpack(p);
+	  //break;
 
 	case S800_TOF_PACKET :
 	  if (DEBUGS800) { cout << "S800 TOF packet " << endl; }
@@ -2848,17 +2861,17 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
 	  
 	case S800_FP_CRDC_PACKET :
 	  if (DEBUGS800) { cout << "S800 FP CRDC packet " << endl; }
-	  p = fp.crdc1.Unpack(p);
-	  /* Correction for weird shift in e12012: Bentley et al. */
-	  // if (fp.crdc1.calc.x_gravity < 96) { 
-	  //   fp.crdc1.y = (fp.crdc1.tac*-0.0633) + 124.367;
-	  // }
-  	  PktWords -= SubPktLen;
-	  SubPktLen = *p;
-	  SubPktTag = *(p+1);	
-	  p = fp.crdc2.Unpack(p);
+	  if (*(p+2) == 0) {
+	    p = fp.crdc1.Unpack(p);
+	  } else {
+	    p = fp.crdc2.Unpack(p);
+	  }
 	  break;
 	  
+	case S800_MESYTEC_TDC_PACKET :
+	  p += SubPktLen;
+	  break;
+
 	case S800_FP_HODO_PACKET : 
 	  if (DEBUGS800) { cout << "S800 FP Hodoscope packet " << endl; }
 #ifdef S800_PARSE_HODO
@@ -2924,6 +2937,29 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
 #else
 	  p += SubPktLen;
 #endif
+	  break;
+
+	case S800_EVENTNUMBER_PACKET :
+	  {
+	    uint64_t uint64_evt;
+	    p += 2;
+	    
+	    uint64_evt = (uint64_t) *p;
+	    ++p;
+	    uint64_evt += (uint64_t) (*p) << 16;
+	    ++p;
+	    uint64_evt += (uint64_t) (*p) << 32;
+	    ++p;
+	    evtNumber = (Double_t)uint64_evt;
+
+	    if (lastEvtNumber && reportEvtIncrease!= 0) {
+	      if ((lastEvtNumber+1) != uint64_evt) {
+		printf("S800 event number increase error!\n");
+		printf("  Last: %lld, current: %lld\n", lastEvtNumber, uint64_evt);
+	      }
+	      lastEvtNumber = uint64_evt;
+	    }
+	  }
 	  break;
 
 	case S800_GALOTTE_PACKET : /* This is a MCP ? */

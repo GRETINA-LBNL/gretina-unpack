@@ -1245,6 +1245,11 @@ class S800Full : public TObject {
   double evtlength;
   double evtcount;
   
+  Double_t evtNumber;
+  Double_t lastEvtNumber;
+  Double_t evtReset;
+  Int_t reportEvtIncrease;
+  
   S800LaBr labr;
   S800FocalPlane fp;
   S800Target target;
@@ -1275,7 +1280,7 @@ class S800Full : public TObject {
 
  private:
 
-  ClassDef(S800Full, 2);
+  ClassDef(S800Full, 3);
 };
 
 /**************************************************************/

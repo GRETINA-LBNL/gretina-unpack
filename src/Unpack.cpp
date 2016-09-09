@@ -253,7 +253,7 @@ int main(int argc, char *argv[]) {
   lendaPack = new lendaPacker(lendaSet);
   lendaPack->SetGates(25, 11, 25, 11);
   lendaPack->SetTraceDelay(120);
-  // lendaPack->FindAndSetMapAndCorrectionsFileNames(runNumber);
+  lendaPack->SetSettingsandCorrections("lendaCalibrations/MapFile.txt", "lendaCalibrations/Corrections.txt");
 #endif /* WITH_LENDA */
 
   FILE *inf;

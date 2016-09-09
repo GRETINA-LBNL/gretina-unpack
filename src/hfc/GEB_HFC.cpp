@@ -459,7 +459,15 @@ int main(int argc, char** argv) {
       }
       break;
 
-
+    case 21: // LENDA
+      if(!hfc_list.add(aGeb, cBuf) && success) {
+	success = false;
+	if (!pipeflag) {
+	  cerr << "HFC: adding event in HFC failed"
+	       << endl;
+	}
+      }
+      break;
       
     default:
       {

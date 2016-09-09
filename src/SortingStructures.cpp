@@ -729,6 +729,8 @@ void counterVariables::PrintRunStatistics(Int_t pgh, Int_t withWAVE, Int_t super
       printf("  S800Physics headers:   %d\n", headerType[S800PHYSICS]);
     if (headerType[S800AUX] > 0 || headerType[S800AUX_TS] > 0)
       printf("  S800 Aux. headers:     %d\n", (headerType[S800AUX]+headerType[S800AUX_TS]));
+    if (headerType[LENDA] > 0) 
+      printf("  LENDA headers:   %d\n", headerType[LENDA]);
   }
   printf("\n TS errors:   %d\n", TSerrors);
   printf("\n\n Run time (from TS): %0.3f seconds\n", (TSLast - TSFirst)*1e-8);

@@ -70,6 +70,9 @@ void ddasEvent::Reset() {
 
 void ddasEvent::getEvent(FILE *inf, Int_t length) {
   Reset();
+
+  Int_t deBugFn = 0;
+
   uint32_t sizeOfWholeThing = 0;
   uint32_t typeOfWholeThing = 0;   
 
@@ -90,39 +93,74 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
   // bytesReadTotal += sizeof(uint32_t);
   typeOfWholeThing = 30;
 
+  if(deBugFn) {
+    printf("sizeofwholething = %d\n", sizeOfWholeThing);
+    printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+  }
+
   switch(typeOfWholeThing) {
   case 30: /* Physics event */
     {  
-      totalSizeOfBody = sizeOfWholeThing;
+      totalSizeOfBody = sizeOfWholeThing - 4;
       while (1) {
 	fread(&timestamp, sizeof(uint64_t), 1, inf);
 	bytesReadTotal += sizeof(uint64_t);
 	bytesReadInBody += sizeof(uint64_t);
 
+	if(deBugFn) {
+	  printf("timestamp = %lld\n", timestamp);
+	  printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+	}
+
 	fread(&sourceID, sizeof(uint32_t), 1, inf);
 	bytesReadTotal += sizeof(uint32_t);
 	bytesReadInBody += sizeof(uint32_t);
+
+	if(deBugFn) {
+	  printf("sourceID = %lld\n", sourceID);
+	  printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+	}
 
 	fread(&fragPayloadSize, sizeof(uint32_t), 1, inf);
 	bytesReadTotal += sizeof(uint32_t);
 	bytesReadInBody += sizeof(uint32_t);
 
+	if(deBugFn) {
+	  printf("fragPayloadSize = %lld\n", fragPayloadSize);
+	  printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+	}
+
 	fread(&barrier, sizeof(uint32_t), 1, inf);
 	bytesReadTotal += sizeof(uint32_t);
 	bytesReadInBody += sizeof(uint32_t);
+
+	if(deBugFn) {
+	  printf("barrier = %lld\n", barrier);
+	  printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+	}
 
 	fread(&sizeOfRingItem, sizeof(uint32_t), 1, inf);
 	bytesReadTotal += sizeof(uint32_t);
 	bytesReadInBody += sizeof(uint32_t);
 
+	if(deBugFn) {
+	  printf("sizeOfRingItem = %lld\n", sizeOfRingItem);
+	  printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+	}
+
 	fread(&typeOfRingItem, sizeof(uint32_t), 1, inf);
 	bytesReadTotal += sizeof(uint32_t);
 	bytesReadInBody += sizeof(uint32_t);
 
+	if(deBugFn) {
+	  printf("typeOfRingItem = %lld\n", typeOfRingItem);
+	  printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+	}
+
 	Int_t NSCLDAQ11 = 1;
 
 	switch(sourceID) {
-	case 1: /* DDAS SourceID */
+	case 3: /* DDAS SourceID */
 	  {
 	    switch(typeOfRingItem) {
 	    case 30: /* Physics */
@@ -131,19 +169,40 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 		  fread(&sizeOfBH, sizeof(uint32_t), 1, inf);
 		  bytesReadTotal += sizeof(uint32_t);
 		  bytesReadInBody += sizeof(uint32_t);
-		  
+	
+		  if(deBugFn) {
+		    printf("sizeOfBH = %lld\n", sizeOfBH);
+		    
+		    printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+		  }
+
 		  fread(&timestampBH, sizeof(uint64_t), 1, inf);
 		  bytesReadTotal += sizeof(uint64_t);
 		  bytesReadInBody += sizeof(uint64_t);
-		  
+
+		  if(deBugFn) {
+		    printf("timestampBH = %lld\n", timestampBH); 
+		    printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+		  }
+
 		  fread(&sourceIDBH, sizeof(uint32_t), 1, inf);
 		  bytesReadTotal += sizeof(uint32_t);
 		  bytesReadInBody += sizeof(uint32_t);
 		  
+		  if(deBugFn) {
+		    printf("sourceIDBH = %lld\n", sourceIDBH);
+		    printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+		  }
+
 		  fread(&barrierBH, sizeof(uint32_t), 1, inf);
 		  bytesReadTotal += sizeof(uint32_t);
 		  bytesReadInBody += sizeof(uint32_t);
-		  
+
+		  if(deBugFn) {		  
+		    printf("barrierBH = %lld\n", barrierBH);
+		    printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+		  }
+
 		  count = sizeOfRingItem - 7*sizeof(uint32_t);
 		} else {
 		  count = sizeOfRingItem - 2*sizeof(uint32_t);
@@ -152,11 +211,15 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 		bytesReadTotal += countRead * sizeof(int8_t);
 		bytesReadInBody += countRead * sizeof(int8_t);
 		
+		if(deBugFn) {		
+		  printf("bytesReadTotal: %lld, bytesReadInBody: %lld\n", bytesReadTotal, bytesReadInBody);
+		}
+		
 		uint32_t *pt32 = buffer32;
 		tempdchan = new ddasChannel();
 		tempdchan->UnpackChannelData(pt32);
 		addChannelData(tempdchan);
-	      }
+  	      }
 	      break;
 	    default:
 	      {
@@ -462,32 +525,34 @@ lendaEvent::lendaEvent() {
 }
 
 void lendaEvent::Clear() {
-  for (Int_t i=0; i<Bars.size(); i++) {
-    Bars[i].Clear();
+  for (Int_t i=0; i<bars.size(); i++) {
+    bars[i].Clear();
   }
   
-  Bars.clear(); /* Will call deconstructor on sub objects. */
+  bars.clear(); /* Will call deconstructor on sub objects. */
   N = 0;
-  NumBars = 0;
+  numBars = 0;
   NumOfChannelsInEvent = 0;
-  TheObjectScintillators.clear();
+  refScint.clear();
 
   NumUnMappedChannels = 0;
-  NumObjectScintillators = 0;
+  numObjectScintillators = 0;
   etime = 0;
   internaltime = 0;
   UnMappedChannels.clear();
+
+  ScintIntLow = 0; ScintIntHigh = 0; ScintIntAll = 0;
 }
 
 void lendaEvent::Finalize() {
   Int_t tot=0;
-  for (Int_t i=0; i<Bars.size(); i++){
-    Bars[i].Finalize();
-    tot += Bars[i].BarMultiplicity;
+  for (Int_t i=0; i<bars.size(); i++){
+    bars[i].Finalize();
+    tot += bars[i].BarMultiplicity;
   }
-  NumObjectScintillators = TheObjectScintillators.size();
+  numObjectScintillators = refScint.size();
   
-  N = tot + NumUnMappedChannels + NumObjectScintillators;
+  N = tot + NumUnMappedChannels + numObjectScintillators;
   NumOfChannelsInEvent = N;
 }
 
@@ -496,24 +561,24 @@ Bool_t lendaEvent::operator==(const lendaEvent & RHS) {
   bool CalcValuesEqual = true;
   
   if (this->N == RHS.N &&
-      this->NumBars == RHS.NumBars &&
+      this->numBars == RHS.numBars &&
       this->NumOfChannelsInEvent == RHS.NumOfChannelsInEvent &&
       this->NumUnMappedChannels == RHS.NumUnMappedChannels &&
-      this->NumObjectScintillators == RHS.NumObjectScintillators){
+      this->numObjectScintillators == RHS.numObjectScintillators){
     CalcValuesEqual=true;
   } else {
     cout << "lendaEvent::operator== --> event failed." << endl;
     return false;
   }
   
-  for (UInt_t ui=0; ui<Bars.size(); ui++) {
-    if (!(this->Bars[ui] == RHS.Bars[ui])) {
+  for (UInt_t ui=0; ui<bars.size(); ui++) {
+    if (!(this->bars[ui] == RHS.bars[ui])) {
       return false;
     }
   }
   
-  for (UInt_t ui=0; ui<TheObjectScintillators.size(); ui++) {
-    if (!(this->TheObjectScintillators[ui] == RHS.TheObjectScintillators[ui])) {
+  for (UInt_t ui=0; ui<refScint.size(); ui++) {
+    if (!(this->refScint[ui] == RHS.refScint[ui])) {
       return false;
     }
   }
@@ -528,9 +593,9 @@ Bool_t lendaEvent::operator==(const lendaEvent & RHS) {
 }
 
 lendaBar * lendaEvent::FindBar(Int_t BarId) {
-  for (UInt_t ui=0; ui<Bars.size(); ui++) {
-    if (Bars[ui].BarId == BarId){
-      return &(Bars[ui]);
+  for (UInt_t ui=0; ui<bars.size(); ui++) {
+    if (bars[ui].BarId == BarId){
+      return &(bars[ui]);
     }
   }
   return NULL;
@@ -538,27 +603,27 @@ lendaBar * lendaEvent::FindBar(Int_t BarId) {
 
 
 lendaBar * lendaEvent::FindBar(string Name) {
-  for (UInt_t ui=0; ui<Bars.size(); ui++){
-    if (Bars[ui].Name == Name){
-      return &(Bars[ui]);
+  for (UInt_t ui=0; ui<bars.size(); ui++){
+    if (bars[ui].Name == Name){
+      return &(bars[ui]);
     }
   }
   return NULL;
 }
 
 lendaBar lendaEvent::FindBarSafe(string Name) {
-   for (UInt_t ui=0; ui<Bars.size(); ui++) {
-     if (Bars[ui].Name == Name) {
-       return (Bars[ui]);
+   for (UInt_t ui=0; ui<bars.size(); ui++) {
+     if (bars[ui].Name == Name) {
+       return (bars[ui]);
      }
    }
    return lendaBar();
 }
 
 lendaBar lendaEvent::FindBarSafe(Int_t BarId) {
-  for (UInt_t ui=0; ui<Bars.size(); ui++) {
-    if (Bars[ui].BarId == BarId){
-      return (Bars[ui]);
+  for (UInt_t ui=0; ui<bars.size(); ui++) {
+    if (bars[ui].BarId == BarId){
+      return (bars[ui]);
     }
   }
   return lendaBar();
@@ -569,31 +634,31 @@ lendaChannel* lendaEvent::FindChannel(string Name) {
      Does not search in the UnMapped channels because those don't 
      have a name */
 
-  for (UInt_t ui=0; ui<Bars.size(); ui++) {
-    for (UInt_t uj=0; uj<Bars[ui].Tops.size(); uj++) {
-      if (Name == Bars[ui].Tops[uj].GetName()) {
-	return &Bars[ui].Tops[uj];
+  for (UInt_t ui=0; ui<bars.size(); ui++) {
+    for (UInt_t uj=0; uj<bars[ui].Tops.size(); uj++) {
+      if (Name == bars[ui].Tops[uj].GetName()) {
+	return &bars[ui].Tops[uj];
       }
     }
-    for (UInt_t uj=0; uj<Bars[ui].Bottoms.size(); uj++) {
-      if (Name == Bars[ui].Bottoms[uj].GetName()) {
-	return &Bars[ui].Bottoms[uj];
+    for (UInt_t uj=0; uj<bars[ui].Bottoms.size(); uj++) {
+      if (Name == bars[ui].Bottoms[uj].GetName()) {
+	return &bars[ui].Bottoms[uj];
       }
     }
   }
   
-  for (UInt_t ui=0; ui<TheObjectScintillators.size(); ui++) {
-    if (Name == TheObjectScintillators[ui].GetName()) {
-      return &TheObjectScintillators[ui];
+  for (UInt_t ui=0; ui<refScint.size(); ui++) {
+    if (Name == refScint[ui].GetName()) {
+      return &refScint[ui];
     }
   }
   return NULL;  
 }
 
 lendaChannel* lendaEvent::FindReferenceChannel(string Name) {
-  for (UInt_t ui=0; ui<TheObjectScintillators.size(); ui++) {
-    if (Name == TheObjectScintillators[ui].GetName()) {
-      return &TheObjectScintillators[ui];
+  for (UInt_t ui=0; ui<refScint.size(); ui++) {
+    if (Name == refScint[ui].GetName()) {
+      return &refScint[ui];
     }
   }
   return NULL;

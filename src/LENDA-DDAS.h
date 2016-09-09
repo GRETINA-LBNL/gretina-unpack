@@ -370,15 +370,17 @@ class lendaBar : public TObject {
 
 class lendaEvent : public TObject {
  public:
-  vector <lendaBar> Bars; 
+  vector <lendaBar> bars; 
   vector <lendaChannel> UnMappedChannels;
-  vector <lendaChannel> TheObjectScintillators;
+  vector <lendaChannel> refScint;
   
   Int_t NumOfChannelsInEvent; 
   Int_t N;
-  Int_t NumBars;
+  Int_t numBars;
   Int_t NumUnMappedChannels;
-  Int_t NumObjectScintillators;
+  Int_t numObjectScintillators;
+
+  Double_t ScintIntLow, ScintIntHigh, ScintIntAll;
   
   uint64_t etime;
   Double_t internaltime;
@@ -393,7 +395,7 @@ class lendaEvent : public TObject {
      Calls the finalize methods the Bars and ObjectScinitillators. */
   void Finalize(); 
   
-  void PushABar(lendaBar aBar) { Bars.push_back(aBar); NumBars++; }
+  void PushABar(lendaBar aBar) { bars.push_back(aBar); numBars++; }
   void PushUnMappedChannel(lendaChannel c) {
     UnMappedChannels.push_back(c);
     NumUnMappedChannels++;

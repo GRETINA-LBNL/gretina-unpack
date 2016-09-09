@@ -13,7 +13,7 @@ lendaSettings::~lendaSettings() { ; }
 void lendaSettings::PrintAll() {
   std::map<string, Double_t>::iterator it;
   for (it = TheTimingOffsets.begin(); it != TheTimingOffsets.end(); it++) {
-    cout << endl;
+    printf("/n");
     PrintChannelCorrections(it->first);
     PrintChannelMapInfo(Name2GlobalID[it->first]);
     PrintFilterInfo(it->first);
@@ -144,12 +144,12 @@ void lendaPacker::Reset(){
 }
 
 void lendaPacker::CalcTimeFilters(vector<UShort_t>& theTrace, mapInfo info) {
-  cout << "NO CALL" << endl;
+  printf(DMAGENTA "<lendaPacker::CalcTimeFilters>: DO NOT CALL!!!\n" RESET_COLOR);
   throw -1;
 }
 
-void lendaPacker::CalcEnergyGates(vector<UShort_t>& theTrace, mapInfo info){
-  cout << "No call " << endl;
+void lendaPacker::CalcEnergyGates(vector<UShort_t>& theTrace, mapInfo info) {
+  printf(DMAGENTA "<lendaPacker::CalcEnergyGates>: DO NOT CALL!!!\n" RESET_COLOR);
   throw -1;
 }
 
@@ -173,32 +173,34 @@ void lendaPacker::CalcAll(vector<UShort_t>& theTrace, mapInfo info) {
     
     /* If this channel is NOT a reference channel run the basic algorithms. */ 
     if (! info.IsAReferenceChannel ) {
-      Int_t MaxSpotInTrace_temp = -1;
-      Int_t MaxSpotInFilter_temp = -1;
+      Int_t imaxInTrace = -1;
+      Int_t imaxInFilter = -1;
       /* Since this not a reference channel push the maximum point on 
 	 to the vector holding the pulseheights.  There will be just the 
 	 one entry in the vector. */
-      thisChannelsPulseHeights.push_back(theFilter.GetMaxPulseHeight(theTrace, MaxSpotInTrace_temp));
+      thisChannelsPulseHeights.push_back( theFilter.GetMaxPulseHeight(theTrace, imaxInTrace) );
       
       /* For the filter things are not implemented as a vector. */
-      thisEventsFilterHeight = theFilter.GetMaxPulseHeight(thisEventsFF, MaxSpotInFilter_temp);
-      thisChannelsEnergies.push_back(theFilter.GetEnergy(theTrace, MaxSpotInTrace_temp));
-      shortGate = theFilter.GetGate(theTrace,MaxSpotInTrace_temp-4, 10);
+      thisEventsFilterHeight = theFilter.GetMaxPulseHeight(thisEventsFF, imaxInFilter);
+      thisChannelsEnergies.push_back( theFilter.GetEnergy(theTrace, imaxInTrace) );
+      shortGate = theFilter.GetGate(theTrace, imaxInTrace-4, 10);
 
       /* Run the basic timing algorithms for this channel. */
-      thisChannelsSoftwareCFDs.push_back(theFilter.GetZeroCrossingImproved(thisEventsCFD,MaxSpotInTrace_temp,thisChannelsCFDResidual)); 
-      thisChannelsCubicCFDs.push_back(theFilter.GetZeroCubic(thisEventsCFD, MaxSpotInTrace_temp));
+      thisChannelsSoftwareCFDs.push_back( theFilter.GetZeroCrossingImproved(thisEventsCFD, imaxInTrace,
+									    thisChannelsCFDResidual) ); 
+      thisChannelsCubicCFDs.push_back( theFilter.GetZeroCubic(thisEventsCFD, imaxInTrace) );
       // cubicFitCFD=theFilter.GetZeroFitCubic(thisEventsCFD);
     
     } else { /* This channel is a reference channel.  Perform the 
 		highrate related algorithms. */
+
       Double_t trash;
       Int_t t;
       thisChannelsEnergies = theFilter.GetEnergyHighRate(theTrace, thisChannelsPeakSpots, thisChannelsUnderShoots, trash, t);
-      if (thisChannelsPeakSpots.size()!=0) {
+      if (thisChannelsPeakSpots.size() != 0) {
 	thisChannelsPulseHeights = theFilter.GetPulseHeightHighRate(theTrace, thisChannelsPeakSpots);
-	thisChannelsSoftwareCFDs = theFilter.GetZeroCrossingHighRate(thisEventsCFD,thisChannelsPeakSpots);
-	thisChannelsCubicCFDs = theFilter.GetZeroCrossingCubicHighRate(thisEventsCFD,thisChannelsPeakSpots);
+	thisChannelsSoftwareCFDs = theFilter.GetZeroCrossingHighRate(thisEventsCFD, thisChannelsPeakSpots);
+	thisChannelsCubicCFDs = theFilter.GetZeroCrossingCubicHighRate(thisEventsCFD, thisChannelsPeakSpots);
 	shortGate = theFilter.GetGate(theTrace,thisChannelsPeakSpots[0]-4, 10);
 	longGate = theFilter.GetGate(theTrace,thisChannelsPeakSpots[0]-4, 30);
       }
@@ -221,12 +223,12 @@ void lendaPacker::CalcAll(vector<UShort_t>& theTrace, mapInfo info) {
   }
 }
 
-void lendaPacker::CalcAll(ddasChannel* c, mapInfo info){
-  cout << "<lendaPacker::CalcAll(ddasChannel*)> Not implemented yet" << endl;
+void lendaPacker::CalcAll(ddasChannel* c, mapInfo info) {
+  printf(DMAGENTA "<lendaPacker::CalcAll(ddasChannel*)> not yet implemented\n" RESET_COLOR);
 }
 
-void lendaPacker::CalcAll(lendaChannel* c, mapInfo info){
-  cout << "<lendaPacker::CalcAll(lendaChannel*)> Not implemented yet" << endl;
+void lendaPacker::CalcAll(lendaChannel* c, mapInfo info) {
+  printf(DMAGENTA "<lendaPacker::CalcAll(lendaChannel*)> not yet implemented\n" RESET_COLOR);
 }
 
 void lendaPacker::ForceAllBarFilters(Int_t FL, Int_t FG, Int_t d, Int_t w){
@@ -266,19 +268,16 @@ void lendaPacker::ForceAllFilters(Int_t FL, Int_t FG, Int_t d, Int_t w) {
   UpdateSettings();
 }
 
-void lendaPacker::SetGates(Double_t ilg,Double_t isg,
+void lendaPacker::SetGates(Double_t ilg, Double_t isg,
 			   Double_t ilg2, Double_t isg2){
-   lg = ilg;
-   sg = isg;
-   lg2 = ilg2;
-   sg2 = isg2;
+   lg = ilg;  sg = isg;  lg2 = ilg2;  sg2 = isg2;
 } 
 
 void lendaPacker::MakeLendaEvent(lendaEvent *Event, ddasEvent *theDDASEvent,
 				  Long64_t jentry) {
 
   vector<ddasChannel*> theDDASChannels = theDDASEvent->getData();
-  multimap<Int_t, refTimeContainer> GlobalIDToReferenceTimes; 
+  multimap<Int_t, refTimeContainer> gIDToRefTimes; 
 
   /* Container to hold the Bars that have fired in the event. 
      Is copied into the lendaEvent. */
@@ -305,7 +304,7 @@ void lendaPacker::MakeLendaEvent(lendaEvent *Event, ddasEvent *theDDASEvent,
       if (fullName.find(referenceChannelPattern) != string::npos) { 
 	/* If the channel is one of the Object Scintillators */
 	lendaChannel Temp = DDASChannel2LendaChannel(theDDASChannels[i],it->second);
-	GlobalIDToReferenceTimes.insert(make_pair(id, refTimeContainer(&Temp)));
+	gIDToRefTimes.insert(make_pair(id, refTimeContainer(&Temp)));
 	ThisEventsObjectScintillators.insert(make_pair(fullName,Temp));	 
       
       } else if (fullName == "IGNORE") {
@@ -331,7 +330,7 @@ void lendaPacker::MakeLendaEvent(lendaEvent *Event, ddasEvent *theDDASEvent,
 	}
       }
     } else { /* This is when the channel was not in the map */
-      // Event->PushUnMappedChannel(DDASChannel2LendaChannel(theDDASChannels[i],MapInfo()));
+      //Event->PushUnMappedChannel(DDASChannel2LendaChannel(theDDASChannels[i],MapInfo()));
     }
   } /* End loop over DDASChannels */
   
@@ -344,15 +343,15 @@ void lendaPacker::MakeLendaEvent(lendaEvent *Event, ddasEvent *theDDASEvent,
   
   std::multimap<string,lendaChannel>::iterator it; 
   for (it=ThisEventsObjectScintillators.begin(); it!=ThisEventsObjectScintillators.end(); it++) {
-    Event->TheObjectScintillators.push_back((*it).second);
+    Event->refScint.push_back((*it).second);
   }
   
   /* Now put the bars into the lenda Event by iterating over the 
      temporary bar map and set the reference times for each lendaChannel */
-  FillReferenceTimesInEvent(Event,ThisEventsBars,GlobalIDToReferenceTimes);
+  FillReferenceTimesInEvent(Event,ThisEventsBars,gIDToRefTimes);
 
   ThisEventsBars.clear();
-  GlobalIDToReferenceTimes.clear();
+  gIDToRefTimes.clear();
   ThisEventsObjectScintillators.clear();
 }
 
@@ -360,29 +359,29 @@ void lendaPacker::ReMakeLendaEvent(lendaEvent* inEvent, lendaEvent* outEvent) {
 
   map<string,lendaBar> ThisEventsBars;
   
-  for (int i=0;i<inEvent->NumBars;i++) {
-    int numTops = inEvent->Bars[i].NumTops;
-    int numBottoms= inEvent->Bars[i].NumBottoms;
+  for (int i=0;i<inEvent->numBars;i++) {
+    int numTops = inEvent->bars[i].NumTops;
+    int numBottoms= inEvent->bars[i].NumBottoms;
   
     for (int t=0;t<numTops;t++) {
-      RePackChannel(&inEvent->Bars[i].Tops[t]);
+      RePackChannel(&inEvent->bars[i].Tops[t]);
     }
     for (int b=0;b<numBottoms;b++) {
-      RePackChannel(&inEvent->Bars[i].Bottoms[b]);
+      RePackChannel(&inEvent->bars[i].Bottoms[b]);
     }
-    ThisEventsBars[inEvent->Bars[i].Name] = inEvent->Bars[i];
+    ThisEventsBars[inEvent->bars[i].Name] = inEvent->bars[i];
   }
 
-  multimap <int, refTimeContainer >  GlobalIDToReferenceTimes;
+  multimap <int, refTimeContainer >  gIDToRefTimes;
   
-  for (int i=0; i<inEvent->NumObjectScintillators; i++) {
-    outEvent->TheObjectScintillators.push_back(inEvent->TheObjectScintillators[i]);
-    lendaChannel* thisObjectScintillator = &(outEvent->TheObjectScintillators[i]);
+  for (int i=0; i<inEvent->numObjectScintillators; i++) {
+    outEvent->refScint.push_back(inEvent->refScint[i]);
+    lendaChannel* thisObjectScintillator = &(outEvent->refScint[i]);
     RePackChannel(thisObjectScintillator, true);
-    GlobalIDToReferenceTimes.insert(make_pair(thisObjectScintillator->GetGlobalID(),refTimeContainer(thisObjectScintillator)));
+    gIDToRefTimes.insert(make_pair(thisObjectScintillator->GetGlobalID(),refTimeContainer(thisObjectScintillator)));
   }
   
-  FillReferenceTimesInEvent(outEvent,ThisEventsBars,GlobalIDToReferenceTimes);
+  FillReferenceTimesInEvent(outEvent,ThisEventsBars,gIDToRefTimes);
   ThisEventsBars.clear();
 }
 
@@ -450,11 +449,11 @@ lendaChannel lendaPacker::DDASChannel2LendaChannel(ddasChannel* c, mapInfo info)
 }
 
 void lendaPacker::RePackSoftwareTimes(lendaEvent *Event){
-  cout << "<lendaPacker::RePackSoftareTimes> This should not be called" << endl;
+  printf(DMAGENTA "<lendaPacker::RePackSoftwareTimes>: This should not be called.\n" RESET_COLOR);
 }
 
 void lendaPacker::PackEvent(lendaEvent * Event){
-  cout << "lendaPacker::PackEvent is OBSOLETE!!!!" << endl;
+  printf(DMAGENTA "<lendaPacker::PackEvent> is OBSOLETE!!\n" RESET_COLOR);
 }
 
 void lendaPacker::RePackEvent(lendaEvent * Event){
@@ -510,19 +509,18 @@ void lendaPacker::SetSettingsandCorrections(string MapFileName,
 					    string CorrectionsFileName){
   already_called = 100;
   stringstream filePath, mapfilename, correctionfilename;
-  filePath << string(getenv("LendaSettings"));
-  filePath << "/";
+  filePath << "./";
   mapfilename << filePath.str() << MapFileName;
   correctionfilename << filePath.str() << CorrectionsFileName;  
   ifstream testFile;
   testFile.open(mapfilename.str().c_str());
   if (!testFile.good()) {
-    std::cout << "ERROR: Could not find:" << mapfilename.str() << endl;
+    printf(DMAGENTA "ERROR: Could not find %s\n" RESET_COLOR, mapfilename.str());
   }
   testFile.close();
   testFile.open(correctionfilename.str().c_str());
   if(!testFile.good()) {
-    std::cout << "ERROR: Could not find:" << correctionfilename << endl;
+    printf(DMAGENTA "ERROR: Could not find %s\n" RESET_COLOR, correctionfilename.str());
   }
   mapFileName = mapfilename.str();
   correctionsFileName = correctionfilename.str();
@@ -646,8 +644,8 @@ void lendaPacker::BuildMaps() {
       it->second.GlobalID=GlobalID;
       it->second.ReferenceGlobalID=RefGlobalID;
     } else {
-      cout << "Found a reference name in the map file that does not map to a channel" << endl;
-      cout << "The name was " << it->second.ReferenceName << " it is from map info of " << it->second.FullName << endl;
+      printf(DMAGENTA "Found a reference name in the map file that does not map to a channel.\n");
+      printf("The name was %s -- it is from map info of %s\n" RESET_COLOR, it->second.ReferenceName, it->second.FullName);
       throw -12;
     }
 
@@ -678,7 +676,6 @@ void lendaPacker::PutDDASChannelInBar(mapInfo info, lendaBar &theBar,
 
   /* All we need to do is determine whether this fullName coresponds to
      the TOP or bottom PMT of the bar */
-  
   if (lastLetter == "T" ) { /* Top PMT */
     lendaChannel temp = DDASChannel2LendaChannel(theChannel,info);
     theBar.Tops.push_back(temp);
@@ -686,11 +683,11 @@ void lendaPacker::PutDDASChannelInBar(mapInfo info, lendaBar &theBar,
     lendaChannel temp =DDASChannel2LendaChannel(theChannel,info);
     theBar.Bottoms.push_back(temp);
   } else {
-    cout << "*********************************************************" << endl;
-    cout << "*********************************************************" << endl;
-    cout << "Found a ddaschannel name without a T or B as last letter" << endl;
-    cout << "**** Cable map file must have names that end in T or B***" << endl;
-    cout << "Name was " << fullName;
+    printf(DMAGENTA "*************************************************************\n");
+    printf("Found a ddasChannel name without a T or B as the last letter!\n");
+    printf("***** Cable map file must have names that end in T or B *****\n");
+    printf("***** Name was: %s\n", fullName);
+    printf("*************************************************************\n" RESET_COLOR);
     throw -99;
   } 
 }
@@ -746,15 +743,22 @@ void lendaPacker::FillReferenceTimesInEvent(lendaEvent* Event,
 					    map<string,lendaBar>& ThisEventsBars,
 					    multimap <int,refTimeContainer>& GlobalIDToReferenceTimes) {
 
+
+  std::pair<std::multimap<int, refTimeContainer>::iterator, std::multimap<int, refTimeContainer>::iterator> MultiMapRange;
+  multimap<int, refTimeContainer>::iterator MultiMapIt;
+
   /* Loop over the ThisEventsBars container and set all the reference times */
+  
   for (map<string,lendaBar>::iterator ii=ThisEventsBars.begin();
        ii!=ThisEventsBars.end();ii++) {
+    
+    /* If this event had TWO copies of OBJ1T for example both should 
+       be in the multimap and we can loop over all timestamps in BOTH 
+       and push those into the Bar's list of reference times */
+    /* Top signals */
     for (int t=0; t<ii->second.Tops.size(); t++) {
-      /* If this event had TWO copies of OBJ1T for example both should 
-	 be in the multimap and we can loop over all timestamps in BOTH 
-	 and push those into the Bar's list of reference times */
-      std::pair<std::multimap<int, refTimeContainer>::iterator, std::multimap<int, refTimeContainer>::iterator> MultiMapRange = GlobalIDToReferenceTimes.equal_range(ii->second.Tops[t].GetReferenceGlobalID());
-      for (multimap<int, refTimeContainer>::iterator MultiMapIt = MultiMapRange.first; MultiMapIt!=MultiMapRange.second;  ++MultiMapIt) {
+      MultiMapRange = GlobalIDToReferenceTimes.equal_range(ii->second.Tops[t].GetReferenceGlobalID());  
+      for (MultiMapIt = MultiMapRange.first; MultiMapIt!=MultiMapRange.second;  ++MultiMapIt) {
 	refTimeContainer * temp = &MultiMapIt->second;
 	ii->second.Tops[t].SetReferenceTime(temp->RefTime);
 	ii->second.Tops[t].SetSoftwareReferenceTimes(temp->RefSoftTime);
@@ -762,9 +766,10 @@ void lendaPacker::FillReferenceTimesInEvent(lendaEvent* Event,
       }
     }
 
-    for (int b=0;b<ii->second.Bottoms.size();b++) {
-      std::pair<std::multimap<int, refTimeContainer>::iterator, std::multimap<int, refTimeContainer>::iterator> MultiMapRange = GlobalIDToReferenceTimes.equal_range(ii->second.Bottoms[b].GetReferenceGlobalID());
-      for (multimap<int, refTimeContainer>::iterator MultiMapIt = MultiMapRange.first; MultiMapIt!=MultiMapRange.second;  ++MultiMapIt) {
+    /* Bottom signals */
+    for (int b=0; b<ii->second.Bottoms.size(); b++) {
+      MultiMapRange = GlobalIDToReferenceTimes.equal_range(ii->second.Bottoms[b].GetReferenceGlobalID());
+      for (MultiMapIt = MultiMapRange.first; MultiMapIt!=MultiMapRange.second;  ++MultiMapIt) {
 	refTimeContainer * temp = &MultiMapIt->second;
 	ii->second.Bottoms[b].SetReferenceTime(temp->RefTime);
 	ii->second.Bottoms[b].SetSoftwareReferenceTimes(temp->RefSoftTime);

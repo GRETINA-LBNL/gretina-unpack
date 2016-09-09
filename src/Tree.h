@@ -9,13 +9,15 @@ void InitializeTree(controlVariables* ctrl) {
 
 #ifdef WITH_S800
   /* S800 FP Scintillators */
-  if (ctrl->E1_RAW) {
+  //if (ctrl->E1_RAW) {
+  if (1) {
     teb->Branch("fp.e1.de_up", &(s800->fp.e1.de_up), "fp.e1.de_up/D");
     teb->Branch("fp.e1.de_down", &(s800->fp.e1.de_down), "fp.e1.de_down/D");
     teb->Branch("fp.e1.time_up", &(s800->fp.e1.time_up), "fp.e1.time_up/D");
     teb->Branch("fp.e1.time_down", &(s800->fp.e1.time_down), "fp.e1.time_down/D");
   }
-  if (ctrl->E1_CAL) {
+  if (1) {
+    //  if (ctrl->E1_CAL) {
     teb->Branch("fp.e1.de", &(s800->fp.e1.de), "fp.e1.de/D");
     teb->Branch("fp.e1.time", &(s800->fp.e1.time), "fp.e1.time/D");
     teb->Branch("fp.e1.pos", &(s800->fp.e1.pos), "fp.e1.pos/D");
@@ -58,7 +60,8 @@ void InitializeTree(controlVariables* ctrl) {
   }
 
   /* FP IC calculated */
-  if (ctrl->IC_CAL) {
+  if (1) {
+    //  if (ctrl->IC_CAL) {
     teb->Branch("fp.ic.de", &(s800->fp.ic.de), "fp.ic.de/D");
     teb->Branch("fp.ic.sum", &(s800->fp.ic.sum), "fp.ic.sum/D");
   }
@@ -100,7 +103,8 @@ void InitializeTree(controlVariables* ctrl) {
   }
   
   /* FP CRDC1 calculated */
-  if (ctrl->CRDC1_CALC) {
+if (1) {
+  //  if (ctrl->CRDC1_CALC) {
     teb->Branch("fp.crdc1.x", &(s800->fp.crdc1.x), "fp.crdc1.x/D");
     teb->Branch("fp.crdc1.y", &(s800->fp.crdc1.y), "fp.crdc1.y/D");
   }
@@ -143,20 +147,21 @@ void InitializeTree(controlVariables* ctrl) {
   }
   
  /* FP CRDC2 calculated */
-  if (ctrl->CRDC2_CALC) {
+  if (1) {
+    //  if (ctrl->CRDC2_CALC) {
     teb->Branch("fp.crdc2.x", &(s800->fp.crdc2.x), "fp.crdc2.x/D");
     teb->Branch("fp.crdc2.y", &(s800->fp.crdc2.y), "fp.crdc2.y/D");
   }
 
   /* S800 Timestamp */
-  //if (1) {
-  if (ctrl->S800_TIMESTAMP) {
+  if (1) {
+    //if (ctrl->S800_TIMESTAMP) {
     teb->Branch("ts.timestamp" , &(s800->ts.timestamp), "ts.timestamp/L");
     teb->Branch("s800.evtnum", &(s800->evtnum.eventNum), "s800.evtnum/L");
   }
 
   /* S800 Trigger */
-  if (ctrl->TRIGGER) {
+  if (1) {//if (ctrl->TRIGGER) {
     teb->Branch("trigger.s800", &(s800->trigger.s800), "trigger.s800/D");
     teb->Branch("trigger.reg", &(s800->trigger.reg), "trigger.reg/D");
   }
