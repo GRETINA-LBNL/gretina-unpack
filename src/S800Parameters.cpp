@@ -2983,8 +2983,9 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
 		tof.dia4 = (*p) & 0x0fff;
 		break;
 	      default:
-		cout << "Suspicious channel in GALOTTE detector: "
-		     << ((*p) >> 12) << endl;
+		break;
+		//cout << "Suspicious channel in GALOTTE detector: "
+		//    << ((*p) >> 12) << endl;
 	      }
 	      p++;
 	      len--;

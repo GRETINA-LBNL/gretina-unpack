@@ -74,7 +74,7 @@ env.Append(CCFLAGS = ['-O2', '-D_FILE_OFFSET_64', '-pg', '-g'], LINKFLAGS=['-pg'
 ## Link auxiliary detector system analysis #############################
 #env.Append(CPPDEFINES=['-DWITH_PWALL'])
 env.Append(CPPDEFINES=['-DWITH_S800'])
-env.Append(CPPDEFINES=['-DWITH_LENDA'])
+#env.Append(CPPDEFINES=['-DWITH_LENDA'])
 
 ## Finding dependencies (ROOT)
 try:
