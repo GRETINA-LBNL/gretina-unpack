@@ -590,6 +590,12 @@ objCor 0.110
 objE1Cor 1270.0
 xfpCor 0.040
 xfpE1Cor 1250.0
+mrfCor 0.080
+mrfE1cor 950.0
+mobjCor 0.110
+mobjE1Cor 1270.0
+mxfpCor 0.040
+mxfpE1Cor 1250.0
 tacObjCor 0.060
 tacObjE1Cor 550.0
 tacXfpCor 0.070

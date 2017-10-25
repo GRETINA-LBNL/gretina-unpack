@@ -205,7 +205,7 @@ if (1) {
 
   /* TOF */
   /* S800 Time of Flight */
-  if (ctrl->TOF) {
+  if (1) {
     teb->Branch("tof.rf", &(s800->tof.rf), "tof.rf/D");
     teb->Branch("tof.obj", &(s800->tof.obj), "tof.obj/D");
     teb->Branch("tof.xfp", &(s800->tof.xfp), "tof.xfp/D");
@@ -213,6 +213,12 @@ if (1) {
     teb->Branch("tof.rfe1", &(s800->tof.rfe1), "tof.rfe1/D");
     teb->Branch("tof.obje1", &(s800->tof.obje1), "tof.obje1/D");
     teb->Branch("tof.xfpe1", &(s800->tof.xfpe1), "tof.xfpe1/D");
+    teb->Branch("tof.mesyrf", &(s800->tof.mesyrf), "tof.mesyrf/D");
+    teb->Branch("tof.mesyobj", &(s800->tof.mesyobj), "tof.mesyobj/D");
+    teb->Branch("tof.mesyxfp", &(s800->tof.mesyxfp), "tof.mesyxfp/D");
+    teb->Branch("tof.mesyrfe1", &(s800->tof.mesyrfe1), "tof.mesyrfe1/D");
+    teb->Branch("tof.mesyobje1", &(s800->tof.mesyobje1), "tof.mesyobje1/D");
+    teb->Branch("tof.mesyxfpe1", &(s800->tof.mesyxfpe1), "tof.mesyxfpe1/D");
 #ifdef S800_LINK_E2
     teb->Branch("tof.obje2", &(s800->tof.obje2), "tof.obje2/D");
     teb->Branch("tof.xfpe2", &(s800->tof.xfpe2), "tof.xfpe2/D");

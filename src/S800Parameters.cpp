@@ -21,58 +21,6 @@ using namespace std;
 
 #define DEBUGS800 0
 
-/*
-ClassImp(S800ImMap);
-ClassImp(S800Map);
-
-ClassImp(S800FpCrdcCalc);
-ClassImp(S800FpCrdcPads);
-ClassImp(S800FpCrdc);
-ClassImp(S800FpCrdcCalc);
-
-ClassImp(S800Tppac);
-
-ClassImp(S800Track);
-
-ClassImp(S800FpIonChamber);
-ClassImp(S800FpScintillator);
-ClassImp(S800FpTrack);
-ClassImp(S800FpHodo);
-
-ClassImp(S800FocalPlane);
-
-ClassImp(S800ClassicPpac);
-
-ClassImp(S800Image);
-ClassImp(S800TimeStamp);
-
-ClassImp(S800Trigger);
-
-ClassImp(S800TimeOfFlight);
-
-ClassImp(S800Pin);
-
-ClassImp(S800LaBr);
-
-ClassImp(S800Object);
-ClassImp(S800Ppac);
-ClassImp(S800Target);
-ClassImp(S800Full);
-
-ClassImp(S800Scaler);
-
-ClassImp(Caesar_HitDet);
-ClassImp(CaesarTarget);
-ClassImp(CaesarCalData);
-ClassImp(CaesarAddBack);
-ClassImp(Fera_eDet);
-ClassImp(Fera);
-ClassImp(Caesar);
-
-ClassImp(GRETINA);
-
-ClassImp(HPGE);
-ClassImp(WU_PSD); */
 
 /************************************************************/
 /* S800ImMap Class - Functions                              */
@@ -2163,6 +2111,29 @@ void S800TimeOfFlight::Initialize(S800Full *s800) {
   tac_xfpe1 = -65000.;
 #endif
 
+  mesypat = 0;
+  mesye1up = -65000.;  mesye1down = -65000.;
+  mesyobj = -65000.;  mesyxfp = -65000.;
+  mesyrf = -65000.;
+  mesycrdc1 = -65000.;  mesycrdc2 = -65000.;
+  mesyref = -65000.;
+  mesyobje1 = -65000.;  mesyxfpe1 = -65000.;
+  mesyrfe1 = -65000.;
+  mesyhitsum = -65000.;
+
+  mesyrefchn = S800MESY_E1REF;
+  mselobj = -2000.;
+  mselxfp = 2500.;
+  mselrf = 0.;
+  mselref = 0.;
+
+  for (Int_t i=0; i<S800MESY_MAXCHN; i++) { mesyhit[i] = -65000; mesymindiff[i] = -65000.; }
+  me1up.clear(); me1down.clear();
+  mobj.clear(); mxfp.clear(); mrf.clear();
+  mcrdc1.clear(); mcrdc2.clear(); mhoth.clear();
+  mref.clear();
+  mobje1.clear(); mxfpe1.clear(); mrfe1.clear();
+
 #ifdef S800_LINK_DIAMOND
   diaor = -65000.;
   dia1 = -65000.;
@@ -2228,7 +2199,30 @@ void S800TimeOfFlight::Reset() {
   tac_xfp = -65000.;
   tac_xfpe1 = -65000.;
 #endif
+  
+  mesypat = 0;
+  mesye1up = -65000.;  mesye1down = -65000.;
+  mesyobj = -65000.;  mesyxfp = -65000.;
+  mesyrf = -65000.;
+  mesycrdc1 = -65000.;  mesycrdc2 = -65000.;
+  mesyref = -65000.;
+  mesyobje1 = -65000.;  mesyxfpe1 = -65000.;
+  mesyrfe1 = -65000.;
+  mesyhitsum = -65000.;
 
+  mesyrefchn = S800MESY_E1REF;
+  mselobj = -2000.;
+  mselxfp = 2500.;
+  mselrf = 0.;
+  mselref = 0.;
+
+  for (Int_t i=0; i<S800MESY_MAXCHN; i++) { mesyhit[i] = -65000; mesymindiff[i] = -65000.; }
+  me1up.clear(); me1down.clear();
+  mobj.clear(); mxfp.clear(); mrf.clear();
+  mcrdc1.clear(); mcrdc2.clear(); mhoth.clear();
+  mref.clear();
+  mobje1.clear(); mxfpe1.clear(); mrfe1.clear();
+  
 #ifdef S800_LINK_DIAMOND
   diaor = -65000.;
   dia1 = -65000.;
@@ -2361,6 +2355,117 @@ UShort_t* S800TimeOfFlight::Unpack(UShort_t *p) {
   return p;  
 }
 
+UShort_t* S800TimeOfFlight::UnpackMesy(UShort_t *p) {
+  
+  int PktLen = *p; p += 2; /* PktTag = S800_MESYTEC_TDC_PACKET */
+  PktLen -= 2;
+
+  int32_t traw[S800MESY_MAXCHN][S800MESY_MAXHIT];
+  int32_t Tref = 0x8000;
+  bool bad = false;
+
+  mesypat = 0;
+  mesyhitsum = 0;
+
+  while (PktLen) {
+    uint16_t chn, hit;
+    chn = *p & 0xff; /* Channel */
+    hit = (*p >> 8); /* Hit number 0 - 15 */
+    ++p; PktLen--;
+
+    mesypat = (int32_t) mesypat | (int32_t)(1<<chn);
+    mesyhitsum++;
+
+    if ( chn >= S800MESY_MAXCHN || hit >= S800MESY_MAXHIT ) {
+      p++; PktLen--;
+      printf("S800TimeOfFlight::UnpackMesy");
+      printf(" channel %d OR hit %d out of range", chn, hit);
+      printf(" (MAXCHN: %d, MAXHIT: %d)\n", S800MESY_MAXCHN, S800MESY_MAXHIT);
+      continue;
+    }
+
+    if (mesyhit[chn] != -65000) { mesyhit[chn]++; }
+    else { mesyhit[chn] = 1; }
+
+    if (mesyhit[chn] != hit+1) {
+      printf("S800TimeOfFlight::UnpackMesy -- channel %d", chn);
+      printf(" hit %d but mesyhit[chn] is %d\n", hit, mesyhit[chn]);
+      bad = true;
+    }
+
+    traw[chn][hit] = (int32_t)*p;
+    ++p; PktLen--;
+  
+    if (chn == mesyrefchn) {
+      if (hit==0) { Tref = traw[chn][hit]; }
+      else if (TMath::Abs(traw[chn][hit]-mselref) < TMath::Abs(Tref-mselref)) { Tref = traw[chn][hit]; }
+    }
+  }
+
+  if (mesyhit[S800MESY_E1REF] > 0) { mesyref = Tref; }
+
+  if (!bad) {
+    for (int chn=0; chn<S800MESY_MAXCHN; chn++) {
+      if (mesyhit[chn] > 0) {
+	for (int hit = 0; hit<mesyhit[chn]; hit++) {
+	  /* Find minimum time difference between multiple hits */
+	  if (hit == 1) {
+	    mesymindiff[chn] = TMath::Abs(traw[chn][1] - traw[chn][0]);
+	  }
+	  if (hit > 1 && TMath::Abs(traw[chn][hit]-traw[chn][hit-1])<mesymindiff[chn]) {
+	    mesymindiff[chn] = TMath::Abs(traw[chn][hit]-traw[chn][hit-1]);
+	  }
+	
+	  switch(chn) {
+	  case S800MESY_E1UP:
+	    me1up.push_back(traw[chn][hit]-Tref);
+	    mesye1up = me1up[0];
+	    break;
+	  case S800MESY_E1DOWN:
+	    me1down.push_back(traw[chn][hit]-Tref);
+	    mesye1down = me1down[0];
+	    break;
+	  case S800MESY_XFP:
+	    mxfp.push_back(traw[chn][hit]-Tref);
+	    if (hit==0) { mesyxfp = mxfp[0]; }
+	    else if (TMath::Abs(mxfp[hit]-mselxfp) < TMath::Abs(mesyxfp-mselxfp)) { mesyxfp = mxfp[hit]; }
+	    break;
+	  case S800MESY_OBJ:
+	    mobj.push_back(traw[chn][hit]-Tref);
+	    if (hit==0) { mesyobj = mobj[0]; }
+	    else if (TMath::Abs(mobj[hit]-mselobj) < TMath::Abs(mesyobj-mselobj)) { mesyobj = mobj[hit]; }
+	    break;
+	  case S800MESY_RF:
+	    mrf.push_back(traw[chn][hit]-Tref);
+	    if (hit==0) { mesyrf = mrf[0]; }
+	    else if (TMath::Abs(mrf[hit]-mselrf) < TMath::Abs(mesyrf-mselrf)) { mesyrf = mrf[hit]; }
+	    break;
+	  case S800MESY_CRDC1:
+	    mcrdc1.push_back(traw[chn][hit]-Tref);
+	    mesycrdc1 = mcrdc1[0];
+	    break;
+	  case S800MESY_CRDC2:
+	    mcrdc2.push_back(traw[chn][hit]-Tref);
+	    mesycrdc2 = mcrdc2[0];
+	    break;
+	  case S800MESY_HODO:
+	    mhoth.push_back(traw[chn][hit]-Tref);
+	    break;
+	  case S800MESY_E1REF:
+	    mref.push_back(traw[chn][hit]);
+	    break;
+	  default:
+	    break;
+	  }
+	}
+      }
+    }
+  } /* if (!bad) */
+  
+  return p;
+}
+
+
 void S800TimeOfFlight::CalculateTOF() {
   /* Parameters which need correction with CRDC data */
   if (m_top->fp.track.afp != -65000.) { /* crdc1 and crdc2 are valid too */
@@ -2465,6 +2570,40 @@ void S800TimeOfFlight::CalculateTOF() {
   } /* End of if (s800.fp.track.afp != -65000.) */
 
 }
+
+void S800TimeOfFlight::CalculateMesyTOF() {
+  /* Parameters which need correction with CRDC data */
+  if (m_top->fp.track.afp != -65000.) { /* crdc1 and crdc2 are valid too */
+
+    if (mesyobj != -65000.) {
+      mesyobje1 = ( (mesyobj) + (mobje1Correction*m_top->fp.track.afp) + 
+		    (mobjCorrection*m_top->fp.crdc1.x) ); 
+    }
+    if (mesyxfp != -65000.) {
+      mesyxfpe1 = ( (mesyxfp) + (mxfpe1Correction*m_top->fp.track.afp) + 
+		    (mxfpCorrection*m_top->fp.crdc1.x) ); 
+    }
+    if (mesyrf != -65000.) {
+      mesyrfe1 = ( (mesyrf) + (mrfe1Correction*m_top->fp.track.afp) + 
+		    (mrfCorrection*m_top->fp.crdc1.x) ); 
+    }
+    for (int i=0; i<mobj.size(); i++) {
+      mobje1.push_back( (mobj[i]) + (mobje1Correction*m_top->fp.track.afp) +
+			(mobjCorrection*m_top->fp.crdc1.x) );
+    }
+    for (int i=0; i<mxfp.size(); i++) {
+      mxfpe1.push_back( (mxfp[i]) + (mxfpe1Correction*m_top->fp.track.afp) +
+			(mxfpCorrection*m_top->fp.crdc1.x) );
+    }
+    for (int i=0; i<mrf.size(); i++) {
+      mrfe1.push_back( (mrf[i]) + (mrfe1Correction*m_top->fp.track.afp) +
+			(mrfCorrection*m_top->fp.crdc1.x) );
+    }
+  }
+}
+	
+   
+ 
 
 /************************************************************/
 /* S800Pin - Functions                                      */
@@ -2869,7 +3008,8 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
 	  break;
 	  
 	case S800_MESYTEC_TDC_PACKET :
-	  p += SubPktLen;
+	  if (DEBUGS800) { cout << "S800 FP MESYTOF packet " << endl; }
+	  p = tof.UnpackMesy(p);
 	  break;
 
 	case S800_FP_HODO_PACKET : 
@@ -3038,6 +3178,7 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
       fp.track.CalculateTracking(); /* Using a map... */
       im.Calculate();
       tof.CalculateTOF();
+      tof.CalculateMesyTOF();
       fp.ic.CalibrateIcSum();
       fp.hodo.CorrectX();
       DoInvalidBitReg();
@@ -3441,7 +3582,13 @@ void S800Full::InitializeS800Variables(TString inputFilename) {
       tof.objCorrection = GetNextValue(in);
       tof.obje1Correction = GetNextValue(in);
       tof.xfpCorrection = GetNextValue(in);
-      tof.xfpe1Correction = GetNextValue(in);     
+      tof.xfpe1Correction = GetNextValue(in); 
+      tof.mrfCorrection = GetNextValue(in);
+      tof.mrfe1Correction = GetNextValue(in);
+      tof.mobjCorrection = GetNextValue(in);
+      tof.mobje1Correction = GetNextValue(in);
+      tof.mxfpCorrection = GetNextValue(in);
+      tof.mxfpe1Correction = GetNextValue(in); 
       tof.tacobjCorrection = GetNextValue(in);
       tof.tacobje1Correction = GetNextValue(in);
       tof.tacxfpCorrection = GetNextValue(in);

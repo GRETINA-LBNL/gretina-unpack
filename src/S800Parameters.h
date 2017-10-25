@@ -986,6 +986,34 @@ class S800TimeOfFlight : public TObject {
   double tac_xfpe1;
 #endif
   
+  /* MESYTEC TDC -- Added properly to ROOT analysis package October 2017 */
+  double mesypat;
+  double mesye1up;
+  double mesye1down;
+  double mesyobj;
+  double mesyxfp;
+  double mesyrf;
+  double mesycrdc1;
+  double mesycrdc2;
+  double mesyref;
+  double mesyobje1;
+  double mesyxfpe1;
+  double mesyrfe1;
+  double mesyhitsum;
+
+  int mesyrefchn;
+  double mselobj; double mselxfp; double mselrf;
+  double mselref;
+
+  int mesyhit[S800MESY_MAXCHN];
+  double mesymindiff[S800MESY_MAXCHN];
+  vector<double> me1up, me1down;
+  vector<double> mobj, mxfp,  mrf;
+  vector<double> mcrdc1,  mcrdc2; 
+  vector<double> mhoth; 
+  vector<double> mref; 
+  vector<double> mobje1, mxfpe1, mrfe1;
+
 #ifdef S800_LINK_DIAMOND
   double diaor;
   double dia1;
@@ -1008,7 +1036,10 @@ class S800TimeOfFlight : public TObject {
   double obj_shift;
   double rfCorrection;
   double rfe1Correction;
+  double mrfCorrection;
+  double mrfe1Correction;
   double objCorrection;
+  double mobjCorrection;
   double diaCorrection;
   double diax;
   double dia2ndCor;
@@ -1018,8 +1049,11 @@ class S800TimeOfFlight : public TObject {
   double dia3offset;
   double dia4offset;
   double xfpCorrection;
+  double mxfpCorrection;
   double obje1Correction;
+  double mobje1Correction;
   double xfpe1Correction;
+  double mxfpe1Correction;
   double obje2Correction;
   double xfpe2Correction;
   double im2objCorrection;
@@ -1033,7 +1067,9 @@ class S800TimeOfFlight : public TObject {
   void Initialize(S800Full *s800);
   void Reset();
   UShort_t* Unpack(UShort_t *p);
+  UShort_t* UnpackMesy(UShort_t *p);
   void CalculateTOF();
+  void CalculateMesyTOF();
 
   ClassDef(S800TimeOfFlight, 1);
 };
