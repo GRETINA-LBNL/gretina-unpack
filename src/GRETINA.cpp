@@ -716,6 +716,8 @@ void g2CrystalEvent::Reset() {
   bl = -9999; /* 2015-09-20 CMC: added for wf baseline and PZ checks */
   error = -1;
   cc = 0.0; segSum = 0.0;
+  ccCurrent = 0.0; ccPrior1 = 0.0; ccPrior2 = 0.0;
+  deltaT1 = 0.0; deltaT2 = 0.0;
   doppler = 0.0; dopplerSeg = 0.0; dopplerCrystal = 0.0;
 }
 
@@ -1494,21 +1496,37 @@ Int_t GRETINA::getMode1(FILE* inf, GRETINAVariables *gVar,
 Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar, 
 			counterVariables *cnt) {
  
-  Int_t siz = 0; Int_t old = 0;
-  mode2ABCD5678 g2; mode2ABCD1234 g2old; 
+  Int_t siz = 0; Int_t t34 = 0, t78 = 0, t89 = 0;
+  mode2ABCD6789 g2_89; mode2ABCD5678 g2_78; mode2ABCD1234 g2_34; 
 
   Int_t remaining = 1;
 
   while (remaining) {
-    siz = fread(&g2, sizeof(Int_t), 1, inf);
-    if (g2.type == (Int_t)0xabcd1234) {
-      old = 1;
-      g2old.type = g2.type;
-    }
+    siz = fread(&g2_78, sizeof(Int_t), 1, inf);
+    if (g2_78.type == (Int_t)0xabcd1234) {
+      t34 = 1;
+      g2_34.type = g2_78.type;
+    } else if (g2_78.type == (Int_t)0xabcd6789) {
+      t89 = 1;
+      g2_89.type = g2_78.type;
+    } else { t78 = 1; }
     
-    if (!old) {
-      siz = fread(&g2.crystal_id, (sizeof(struct mode2ABCD5678) - 
-				   sizeof(Int_t)), 1, inf);
+
+    if (t89) {
+      siz = fread(&g2_89.crystal_id, (sizeof(struct mode2ABCD6789) - 
+				      sizeof(Int_t)), 1, inf);
+      if (siz != 1) {
+	cout << ALERTTEXT;
+	printf("GetMode2(): Failed in bytes read.\n");
+	raise(SIGINT);
+	cout << RESET_COLOR;
+      } else {
+	cnt->Increment(sizeof(struct mode2ABCD6789));
+	evtLength -= sizeof(struct mode2ABCD6789);
+      }
+    } else if (t78) {
+      siz = fread(&g2_78.crystal_id, (sizeof(struct mode2ABCD5678) - 
+				      sizeof(Int_t)), 1, inf);
       if (siz != 1) {
 	cout << ALERTTEXT;
 	printf("GetMode2(): Failed in bytes read.\n");
@@ -1518,8 +1536,8 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
 	cnt->Increment(sizeof(struct mode2ABCD5678));
 	evtLength -= sizeof(struct mode2ABCD5678);
       }
-    } else if (old) {
-      siz = fread(&g2old.crystal_id, (sizeof(struct mode2ABCD1234) - 
+    } else if (t34) {
+      siz = fread(&g2_34.crystal_id, (sizeof(struct mode2ABCD1234) - 
 				      sizeof(Int_t)), 1, inf);
       if (siz != 1) {
 	cout << ALERTTEXT;
@@ -1532,17 +1550,22 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
       }
     }
     
-    if (!old) {
+    if (t89) {
       g2X.Reset();
-      g2X.crystalID = g2.crystal_id;
+      g2X.crystalID = g2_89.crystal_id;
       /* Simple data transfers here... */
-      g2X.timestamp = g2.timestamp;
-      g2X.t0 = g2.t0;
-      g2X.chiSq = g2.chisq;
-      g2X.normChiSq = g2.norm_chisq;
-      g2X.bl = g2.prestep; /* 2015-09-20 CMC: added for wf baseline and PZ checks */
-      g2X.error = g2.pad;
-      g2X.cc = g2.tot_e;
+      g2X.timestamp = g2_89.timestamp;
+      g2X.t0 = g2_89.t0;
+      g2X.chiSq = g2_89.chisq;
+      g2X.normChiSq = g2_89.norm_chisq;
+      g2X.bl = g2_89.prestep; /* 2015-09-20 CMC: added for wf baseline and PZ checks */
+      g2X.error = g2_89.pad;
+      g2X.cc = g2_89.tot_e;
+      g2X.ccCurrent = g2_89.totE_fixedPickOff_current;
+      g2X.ccPrior1 = g2_89.totE_fixedPickOff_prior1;
+      g2X.ccPrior2 = g2_89.totE_fixedPickOff_prior2;
+      g2X.deltaT1 = g2_89.deltaT_prior1;
+      g2X.deltaT2 = g2_89.deltaT_prior2;
       
       /* Figure out the basics...what detector is this in terms of quads? 
 	 We need to know this for the calibration...*/
@@ -1554,23 +1577,23 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
 	}
       }
       
-      if (crystal != -1) { calibrateMode2CC(crystal, &g2, &g2X, gVar); }
+      if (crystal != -1) { calibrateMode2CC(crystal, &g2_89, &g2X, gVar); }
       
       pt.Clear();
       for (Int_t m=0; m<MAX_INTPTS; m++) {
-	if (g2.intpts[m].e != 0) {
+	if (g2_89.intpts[m].e != 0) {
 	  pt.Clear();
-	  pt.segNum = g2.intpts[m].seg;
-	  pt.xyz.SetXYZ(g2.intpts[m].x,
-			g2.intpts[m].y,
-			g2.intpts[m].z);
-	  pt.xyzLab = rot.crys2Lab(g2.crystal_id, pt.xyz);
-	  pt.xyzLabSeg = rot.crys2Lab(g2.crystal_id, TVector3(xA[pt.segNum], 
+	  pt.segNum = g2_89.intpts[m].seg;
+	  pt.xyz.SetXYZ(g2_89.intpts[m].x,
+			g2_89.intpts[m].y,
+			g2_89.intpts[m].z);
+	  pt.xyzLab = rot.crys2Lab(g2_89.crystal_id, pt.xyz);
+	  pt.xyzLabSeg = rot.crys2Lab(g2_89.crystal_id, TVector3(xA[pt.segNum], 
 							     yA[pt.segNum], 
 							     zA[pt.segNum]));
-	  pt.xyzLabCrys = rot.crys2Lab(g2.crystal_id, TVector3(0., 0., 0.));
-	  pt.e = g2.intpts[m].e;
-	  pt.segE = g2.intpts[m].seg_energy;
+	  pt.xyzLabCrys = rot.crys2Lab(g2_89.crystal_id, TVector3(0., 0., 0.));
+	  pt.e = g2_89.intpts[m].e;
+	  pt.segE = g2_89.intpts[m].seg_energy;
 	  g2X.intpts.push_back(pt);
 	}
       }
@@ -1578,29 +1601,75 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
       analyzeMode2(&g2X, gVar);
       g2out.xtals.push_back(g2X);
 
-    } else if (old) {
+    } else if (t78) {
       g2X.Reset();
-      g2X.crystalID = g2old.crystal_id;
+      g2X.crystalID = g2_78.crystal_id;
       /* Simple data transfers here... */
-      g2X.timestamp = g2old.timestamp;
-      g2X.t0 = g2old.t0;
-      g2X.chiSq = g2old.chisq;
-      g2X.normChiSq = g2old.norm_chisq;
-      g2X.error = g2old.pad; 
-
-      g2X.cc = g2old.tot_e;
+      g2X.timestamp = g2_78.timestamp;
+      g2X.t0 = g2_78.t0;
+      g2X.chiSq = g2_78.chisq;
+      g2X.normChiSq = g2_78.norm_chisq;
+      g2X.bl = g2_78.prestep; /* 2015-09-20 CMC: added for wf baseline and PZ checks */
+      g2X.error = g2_78.pad;
+      g2X.cc = g2_78.tot_e;
+      
+      /* Figure out the basics...what detector is this in terms of quads? 
+	 We need to know this for the calibration...*/
+      Int_t crystal = -1;
+      for (Int_t index=0; index<MAXQUADS; index++) {
+	if ((Int_t)(g2X.crystalID/4) == gVar->hole[index]) {
+	  crystal = ((gVar->electronicsOrder[index]*4) + 
+		     (Int_t)(g2X.crystalID%4));
+	}
+      }
+      
+      if (crystal != -1) { calibrateMode2CC(crystal, &g2_78, &g2X, gVar); }
       
       pt.Clear();
       for (Int_t m=0; m<MAX_INTPTS; m++) {
-	if (g2old.intpts[m].e != 0) {
+	if (g2_78.intpts[m].e != 0) {
 	  pt.Clear();
-	  pt.segNum = g2old.intpts[m].seg;
-	  pt.xyz.SetXYZ(g2old.intpts[m].x,
-			g2old.intpts[m].y,
-			g2old.intpts[m].z);
-	  pt.xyzLab = rot.crys2Lab(g2old.crystal_id, pt.xyz);
-	  pt.e = g2old.intpts[m].e;
-	  pt.segE = g2old.intpts[m].seg_energy;
+	  pt.segNum = g2_78.intpts[m].seg;
+	  pt.xyz.SetXYZ(g2_78.intpts[m].x,
+			g2_78.intpts[m].y,
+			g2_78.intpts[m].z);
+	  pt.xyzLab = rot.crys2Lab(g2_78.crystal_id, pt.xyz);
+	  pt.xyzLabSeg = rot.crys2Lab(g2_78.crystal_id, TVector3(xA[pt.segNum], 
+							     yA[pt.segNum], 
+							     zA[pt.segNum]));
+	  pt.xyzLabCrys = rot.crys2Lab(g2_78.crystal_id, TVector3(0., 0., 0.));
+	  pt.e = g2_78.intpts[m].e;
+	  pt.segE = g2_78.intpts[m].seg_energy;
+	  g2X.intpts.push_back(pt);
+	}
+      }
+      
+      analyzeMode2(&g2X, gVar);
+      g2out.xtals.push_back(g2X);
+
+    } else if (t34) {
+      g2X.Reset();
+      g2X.crystalID = g2_34.crystal_id;
+      /* Simple data transfers here... */
+      g2X.timestamp = g2_34.timestamp;
+      g2X.t0 = g2_34.t0;
+      g2X.chiSq = g2_34.chisq;
+      g2X.normChiSq = g2_34.norm_chisq;
+      g2X.error = g2_34.pad; 
+
+      g2X.cc = g2_34.tot_e;
+      
+      pt.Clear();
+      for (Int_t m=0; m<MAX_INTPTS; m++) {
+	if (g2_34.intpts[m].e != 0) {
+	  pt.Clear();
+	  pt.segNum = g2_34.intpts[m].seg;
+	  pt.xyz.SetXYZ(g2_34.intpts[m].x,
+			g2_34.intpts[m].y,
+			g2_34.intpts[m].z);
+	  pt.xyzLab = rot.crys2Lab(g2_34.crystal_id, pt.xyz);
+	  pt.e = g2_34.intpts[m].e;
+	  pt.segE = g2_34.intpts[m].seg_energy;
 	  g2X.intpts.push_back(pt);
 	}
       }
@@ -1758,6 +1827,30 @@ Float_t GRETINA::getDopplerSimple(TVector3 xyz, Float_t beta) {
   Float_t cosDop = xyz.CosTheta();
   Float_t gamma = 1/TMath::Sqrt(1. - beta*beta);
   return (gamma*(1. - beta*cosDop));
+}
+
+/**************************************************************/
+
+void GRETINA::calibrateMode2CC(Int_t crystal, mode2ABCD6789 *g2, g2CrystalEvent *g2crystal, GRETINAVariables *gVar) {
+  TRandom *random = new TRandom1();
+  for (Int_t i=0; i<4; i++) {
+    Float_t tmpE = (Float_t)g2->core_e[i] + random->Rndm() - 0.5;
+    Int_t idNum;
+    if (i == 0) { 
+      idNum = (crystal)*40 + 9; 
+      g2crystal->cc1 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+    }  else if (i == 1) { 
+      idNum = (crystal)*40 + 19; 
+      g2crystal->cc2 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+    } else if (i == 2) { 
+      idNum = (crystal)*40 + 29; 
+      g2crystal->cc3 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+    } else if (i == 3) { 
+      idNum = (crystal)*40 + 39;  
+      g2crystal->cc4 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+    }
+  }
+  random->Delete();
 }
 
 /**************************************************************/

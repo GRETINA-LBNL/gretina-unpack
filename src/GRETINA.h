@@ -347,6 +347,31 @@ struct mode2ABCD5678 {
   ip intpts[MAX_INTPTS];
 };
 
+struct mode2ABCD6789 {
+  Int_t type;
+  Int_t crystal_id;
+  Int_t num;
+  Float_t tot_e;
+  Int_t core_e[4];
+  long long int timestamp;
+  /* Used for history-based energy correction at rate */
+  Float_t totE_fixedPickOff_prior1;
+  Float_t totE_fixedPickOff_prior2;
+  Float_t t0;
+  /* Used for history-based energy correction at rate */
+  UShort_t deltaT_prior1;
+  UShort_t deltaT_prior2;
+  Float_t chisq;
+  Float_t norm_chisq;
+  /* Used for history-based energy correction at rate */
+  Float_t totE_fixedPickOff_current;
+  Float_t prestep;
+  Float_t poststep;
+  Int_t pad;
+  ip intpts[MAX_INTPTS];
+
+};
+
 /* \class g2IntPt
    \brief Class containing the information relevant to a single gamma-ray interaction point resulting from
    signal decomposition (mode2 data).
@@ -395,6 +420,8 @@ class g2CrystalEvent : public TObject {
   Float_t bl;
   Int_t error;
   Float_t cc;
+  Float_t ccCurrent, ccPrior1, ccPrior2;
+  UShort_t deltaT1, deltaT2;
   Float_t cc1, cc2, cc3, cc4;
   Float_t segSum;
   Float_t doppler;
@@ -791,6 +818,8 @@ class GRETINA : public TObject {
 
   Int_t analyzeMode2(g2CrystalEvent *g2, GRETINAVariables *gVar);
   void calibrateMode2CC(Int_t crystal, mode2ABCD5678 *g2, 
+			g2CrystalEvent *g2crystal, GRETINAVariables *gVar);
+  void calibrateMode2CC(Int_t crystal, mode2ABCD6789 *g2, 
 			g2CrystalEvent *g2crystal, GRETINAVariables *gVar);
   void analyzeMode3(GRETINAVariables *gVar, controlVariables *ctrl);
   void calibrateMode3(g3ChannelEvent *g3, GRETINAVariables* gVar);

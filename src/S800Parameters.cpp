@@ -4,8 +4,6 @@
        Author: Heather Crawford
        Date: October 2010                                */
 
-using namespace std;
-
 #include "S800Parameters.h"
 
 #include <string>
@@ -313,10 +311,10 @@ UShort_t* S800FpCrdcPads::UnpackRawDataFastClassic(UShort_t *p) {
   /* For S800_FP_CRDC_RAW_PACKET only!  (not checked)
      Input data structure -> see class description in Parameter.h
      REMARK: all if-conditions seem to be needed, input data is 'messed' */
-  register UShort_t SubLen;
-  register UShort_t maxsample;
-  register UShort_t data, sample, begin, previous, chn, padChn, value;
-  register int thresh;
+   UShort_t SubLen;
+   UShort_t maxsample;
+   UShort_t data, sample, begin, previous, chn, padChn, value;
+   int thresh;
 
   m_minChn = S800_FP_CRDC_CHANNELS;
   m_maxChn = 0;
@@ -389,10 +387,10 @@ UShort_t* S800FpCrdcPads::UnpackRawDataFast(UShort_t *p) {
   /* For S800_FP_CRDC_RAW_PACKET only (not checked ! )
      Input data structure-> see class description Parameters.h
      REMARK: All if conditions needed, if input is somehow 'messed' */
-  register UShort_t SubLen;
-  register UShort_t maxsample;
-  register UShort_t data, sample, begin, previous, chn, padChn, value;
-  register int thresh;
+  UShort_t SubLen;
+  UShort_t maxsample;
+  UShort_t data, sample, begin, previous, chn, padChn, value;
+  int thresh;
 
   m_minChn = S800_FP_CRDC_CHANNELS;
   m_maxChn = 0;
@@ -3095,7 +3093,7 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
 	    if (lastEvtNumber && reportEvtIncrease!= 0) {
 	      if ((lastEvtNumber+1) != uint64_evt) {
 		printf("S800 event number increase error!\n");
-		printf("  Last: %lld, current: %lld\n", lastEvtNumber, uint64_evt);
+		printf("  Last: %f, current: %lld\n", lastEvtNumber, uint64_evt);
 	      }
 	      lastEvtNumber = uint64_evt;
 	    }
@@ -3150,7 +3148,7 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
 	  break;
 
 	default:
-	  cout << "Unexpected SubPktTag!! 0x" << hex << SubPktTag << dec << endl;
+	  cout << "Unexpected SubPktTag!! 0x" << std::hex << SubPktTag << std::dec << endl;
 	  p += SubPktLen;
 	  break;
 	  

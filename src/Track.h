@@ -5,7 +5,7 @@
 #include "Rtypes.h"
 #include <stdint.h>
 #include <stdlib.h>
-#include <values.h>
+#include <limits.h>
 
 #include "TObject.h"
 #include "TString.h"

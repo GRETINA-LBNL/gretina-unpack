@@ -27,6 +27,7 @@
 #pragma link C++ struct mode2Old+;
 #pragma link C++ struct mode2ABCD1234+;
 #pragma link C++ struct mode2ABCD5678+;
+#pragma link C++ struct mode2ABCD6789+;
 #pragma link C++ class vector<ip>+;
 #pragma link C++ class g2IntPt+;
 #pragma link C++ class g2CrystalEvent+;

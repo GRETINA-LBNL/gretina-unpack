@@ -515,12 +515,12 @@ void lendaPacker::SetSettingsandCorrections(string MapFileName,
   ifstream testFile;
   testFile.open(mapfilename.str().c_str());
   if (!testFile.good()) {
-    printf(DMAGENTA "ERROR: Could not find %s\n" RESET_COLOR, mapfilename.str());
+    printf(DMAGENTA "ERROR: Could not find %s\n" RESET_COLOR, mapfilename.str().c_str());
   }
   testFile.close();
   testFile.open(correctionfilename.str().c_str());
   if(!testFile.good()) {
-    printf(DMAGENTA "ERROR: Could not find %s\n" RESET_COLOR, correctionfilename.str());
+    printf(DMAGENTA "ERROR: Could not find %s\n" RESET_COLOR, correctionfilename.str().c_str());
   }
   mapFileName = mapfilename.str();
   correctionsFileName = correctionfilename.str();
@@ -645,7 +645,7 @@ void lendaPacker::BuildMaps() {
       it->second.ReferenceGlobalID=RefGlobalID;
     } else {
       printf(DMAGENTA "Found a reference name in the map file that does not map to a channel.\n");
-      printf("The name was %s -- it is from map info of %s\n" RESET_COLOR, it->second.ReferenceName, it->second.FullName);
+      printf("The name was %s -- it is from map info of %s\n" RESET_COLOR, it->second.ReferenceName.c_str(), it->second.FullName.c_str());
       throw -12;
     }
 
@@ -686,7 +686,7 @@ void lendaPacker::PutDDASChannelInBar(mapInfo info, lendaBar &theBar,
     printf(DMAGENTA "*************************************************************\n");
     printf("Found a ddasChannel name without a T or B as the last letter!\n");
     printf("***** Cable map file must have names that end in T or B *****\n");
-    printf("***** Name was: %s\n", fullName);
+    printf("***** Name was: %s\n", fullName.c_str());
     printf("*************************************************************\n" RESET_COLOR);
     throw -99;
   } 

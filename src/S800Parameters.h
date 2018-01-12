@@ -13,8 +13,6 @@
 #ifndef __PARAMETERS_H
 #define __PARAMETERS_H
 
-using namespace std;
-
 #include "S800Definitions.h"
 #include "GRETINA.h"
 

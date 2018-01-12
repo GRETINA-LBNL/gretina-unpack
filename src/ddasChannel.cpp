@@ -218,7 +218,7 @@ void ddasChannel::UnpackChannelData(const uint32_t *data) {
   int show_me=1;
   /* First four words of data identifiers, times, and energies. */
   /* data[0] is the number of half words in the event, skip it... */
-  *data++;
+  data++;
 
   /* A module-identifying 32-bit word is included in current ddas version (March 2016) */
   uint32_t module_identifier = *data;
