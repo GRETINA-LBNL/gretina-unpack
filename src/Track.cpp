@@ -1318,7 +1318,7 @@ Int_t Track::doTrack(Int_t mode, Int_t iClust) {
 
   /* Loop over ALL permutations, i.e. full search, not tree search */
 
-  minFOM = MAXFLOAT;
+  minFOM = FLT_MAX;
   for (curPerm = 0; curPerm < perm.nPerm[clust[iClust].nDet]; curPerm++) {
 
     if (DEBUG) {
@@ -2081,7 +2081,7 @@ Int_t Track::combineCluster(Int_t focusC) {
 
   Int_t i, j, i1;
   Float_t p1, p2, p3, q1, q2, q3;
-  Float_t dist, bestFOMsoFar = MAXFLOAT, val, eSum;
+  Float_t dist, bestFOMsoFar = FLT_MAX, val, eSum;
   Int_t nCandidates = 0, nBase, best, try1, bestCombSoFar = -1;
 
   /* Setup the base of the trial cluster */
