@@ -5,7 +5,7 @@
 
 #define EB_DIFF_TIME 1000
 
-#define MAXQUADS 30
+#define MAXQUADS 40
 #define MAXCRYSTALS MAXQUADS*4
 #define MAXCHANNELS MAXCRYSTALS*40
 
@@ -45,7 +45,7 @@
 /********** Superpulse information **********/
 
 /*! Defines the tracelength to be used -- 108 samples, or 1.08us. */
-#define AVG_TR_LENGTH 108
+#define AVG_TR_LENGTH 100
 /*! Defines the assumed channels to have between waveform starts -- with 
     the definition of AVG_TR_LENGTH 108, this means two bins between
     channels in the .spn files. */

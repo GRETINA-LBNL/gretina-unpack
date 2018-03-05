@@ -256,6 +256,7 @@ struct mode3HistoryPacket {
 struct historyEvent{
   Float_t energy;
   long long int TS;
+  Int_t BLpreSum;
 };
 
 class g3HistoryEvent : public TObject {

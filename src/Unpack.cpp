@@ -72,6 +72,11 @@
 #include "CHICO.h"
 #endif
 
+/* FMA header files */
+#ifdef WITH_DFMA
+#include "DFMA.h"
+#endif
+
 /* S800 header files */
 #ifdef WITH_S800
 #include "S800Parameters.h"
@@ -207,6 +212,12 @@ int main(int argc, char *argv[]) {
 				  "chicoCalibrations/ppacPhi.cal", 
                                   "chicoCalibrations/beta.dat");
   chico->offsetTarget = 15.8; 
+#endif
+
+  /* DFMA */
+#ifdef WITH_DFMA
+  fma = new DFMAFull();
+  fma->Initialize();
 #endif
   
   /* Phoswich Wall */
@@ -501,8 +512,6 @@ int main(int argc, char *argv[]) {
       if (ctrl->superPulse) {
 	gret->checkSPIntegrity();
 	gret->sp.MakeSuperPulses();
-	gret->sp.FinishSuperPulses();
-	gret->sp.WriteSuperPulses();
       }
       
       if (ctrl->outputON) {
@@ -524,11 +533,6 @@ int main(int argc, char *argv[]) {
       } else {
 	if (ctrl->withTREE) { teb->Fill(); }
       }
-      
-      /* Do David's baseline fitting routine, if that's what we're looking at. */    
-      //if (ctrl->RADFORD_BASELINE) {
-      //	gWf->RadfordBaselineFit("Baselines.out");
-      //}
       
       timer.Stop();
       
@@ -567,6 +571,13 @@ int main(int argc, char *argv[]) {
       
     } /* End of if !gotsignal */
   } /* End of iterating over different run # */
+
+  if (ctrl->superPulse) {
+    gret->checkSPIntegrity();
+    gret->sp.MakeSuperPulses();
+    gret->sp.FinishSuperPulses();
+    gret->sp.WriteSuperPulses();
+  }
 
   if (ctrl->outputON) {
     cout << endl;
@@ -709,6 +720,18 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     break;
 #else
   case LENDA:
+    { SkipData(inf, junk); cnt->Increment(gHeader.length); }
+    break;
+#endif
+#ifdef WITH_DFMA
+  case DFMA:
+    {
+      dfma->timestamp = gHeader.timestamp;
+      cnt->Increment(gHeader.length);
+    }
+    break;
+#else
+  case DFMA:
     { SkipData(inf, junk); cnt->Increment(gHeader.length); }
     break;
 #endif

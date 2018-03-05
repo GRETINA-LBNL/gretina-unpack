@@ -98,7 +98,7 @@ Int_t SuperPulse::ReadDetMaps(char *fn, GRETINAVariables* gVar) {
 	  } else {
 	    printf("Opened \"%s\".\n", filename);
 	    /* Determine the array ID value, based on electronics ordering */
-	    Int_t gIDstart = gVar->electronicsOrder[Qnum-1]*160;// + (posN-1)*40; 
+	    Int_t gIDstart = gVar->electronicsOrder[Qnum-1]*160 + (posN-1)*40; 
 	    
 	    /* Read values */
 	    if (fileFlag == 0) {
@@ -269,10 +269,13 @@ void SuperPulse::MakeSuperPulses() {
 	    for (Int_t j=0; j<AVG_TR_LENGTH; j++) {
 	      /* We fill one giant array with all 37 traces,
 		 with small gaps between waveforms. */
-	      averageTrace[i][netSeg[i]][m*(AVG_TR_STRIDE) + j] += waves[i][m][j];	      
+	      averageTrace[i][netSeg[i]][m*(AVG_TR_STRIDE) + j] += waves[i][m][j];
 	    } /* Loop over waveform samples */
 	  } /* Loop over segments */
 	} /* if CFD alignment is OK */
+	for (Int_t m=0; m<36; m++) {
+	  // printf("%d - %d\n", m, data4net[i][m]);
+	}
       } /* in energy window */
     } /* if mult = 1 and 40 segments */
   } /* loop over MAXCRYSTALS crystals */
@@ -286,7 +289,7 @@ Int_t SuperPulse::AlignCFD(Int_t crystalNum) {
 
   /* Find the time to align to. */
   for (j=0; j<40; j++) {
-    if (netSeg[crystalNum] == j || j >= 36) { /* Net segment or CC */
+    if (netSeg[crystalNum] == j || (j >= 36 && j<=37)) { /* Net segment or CC */
       t = cfdTime(crystalNum, j);
       if (t < 0.0) { return -1; }
       t -= delay1[crystalNum][j]; /* DCR - there may be a question about - sign */
@@ -364,6 +367,7 @@ void SuperPulse::FinishSuperPulses() {
   /* Scale the superpulses, and get the trace gains. */
 
   for (Int_t i=0; i<MAXCRYSTALS; i++) {
+
     for (Int_t j=0; j<36; j++) {
       gain[i][j] = (((Float_t)averageTrace[i][j][j*AVG_TR_STRIDE + AVG_TR_LENGTH - 1]) /
 		    ((Float_t)averageTrace[i][j][36*AVG_TR_STRIDE + AVG_TR_LENGTH - 1]));
@@ -387,15 +391,21 @@ void SuperPulse::FinishSuperPulses() {
 
 void SuperPulse::WriteSuperPulses() {
   for (Int_t i=0; i<MAXCRYSTALS; i++) {
-    char filenameOut[1024];
-    sprintf(filenameOut, "SPCrystal%d_%d.spn", i, (Int_t)((lowE + highE)/2));
-    cout << "Writing superpulses to " << filenameOut << endl;
-    
-    FILE *spOut = fopen(filenameOut, "wb");
-    for (Int_t j=0; j<36; j++) {
-      fwrite(averageTraceINT[i][j], sizeof(Int_t), 4096, spOut);
+    if (data4net[i][0] > 0 || data4net[i][1] > 0) {
+      char filenameOut[1024];
+      sprintf(filenameOut, "SPCrystal%d_%d.spn", i, (Int_t)((lowE + highE)/2));
+      cout << "Writing superpulses to " << filenameOut << endl;
+      
+      FILE *spOut = fopen(filenameOut, "wb");
+      for (Int_t j=0; j<36; j++) {
+	fwrite(averageTraceINT[i][j], sizeof(Int_t), 4096, spOut);
+      }
+      fclose(spOut);
+      printf("Superpulse statistics:\n");
+      for (Int_t k=0; k<36; k++) {
+	printf("%d -- %d\n", k, data4net[i][k]);
+      }
     }
-    fclose(spOut);
   }
 }
 

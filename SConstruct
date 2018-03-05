@@ -73,8 +73,9 @@ env.Append(CCFLAGS = ['-O2', '-D_FILE_OFFSET_64', '-pg', '-g'], LINKFLAGS=['-pg'
 
 ## Link auxiliary detector system analysis #############################
 #env.Append(CPPDEFINES=['-DWITH_PWALL'])
-env.Append(CPPDEFINES=['-DWITH_S800'])
+#env.Append(CPPDEFINES=['-DWITH_S800'])
 #env.Append(CPPDEFINES=['-DWITH_LENDA'])
+env.Append(CPPDEFINES=['-DWITH_DFMA'])
 
 ## Finding dependencies (ROOT)
 try:
@@ -146,6 +147,16 @@ env.RootCint(chicoDictTarget, chicoDictHeaders)
 chicoLibTarget = 'chico'
 chicoLibSources = ['src/chicoDict.cpp', 'src/CHICO.cpp']
 env.SharedLibrary(target = chicoLibTarget, source = chicoLibSources, 
+                  SHLIBPREFIX='lib')
+
+## Building DFMADict and libDFMA ######################################
+fmaDictTarget = 'src/fmaDict.cpp'
+fmaDictHeaders = ['src/DFMA.h', 'src/LinkDefDFMA.h'] 
+env.RootCint(fmaDictTarget, fmaDictHeaders)
+
+fmaLibTarget = 'fma'
+fmaLibSources = ['src/fmaDict.cpp', 'src/DFMA.cpp']
+env.SharedLibrary(target = fmaLibTarget, source = fmaLibSources, 
                   SHLIBPREFIX='lib')
 
 ## Building PhosWallDict and libPhosWall ######################################

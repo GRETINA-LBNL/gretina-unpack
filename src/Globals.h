@@ -15,6 +15,10 @@
 #include "CHICODefinitions.h"
 #endif
 
+#ifdef WITH_DFMA
+#include "DFMA.h"
+#endif
+
 #ifdef WITH_PWALL
 #include "PhosWall.h"
 #endif
@@ -53,6 +57,11 @@ extern Track *track;
 /*------ CHICO DATA STRUCTURES ------*/
 #ifdef WITH_CHICO
 extern CHICOFull *chico;
+#endif
+
+/*------ DFMA DATA STRUCTURES -------*/
+#ifdef WITH_DFMA
+extern DFMAFull *fma;
 #endif
 
 /*------ PWALL DATA STRUCTURES ------*/

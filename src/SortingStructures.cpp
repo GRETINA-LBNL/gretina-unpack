@@ -304,7 +304,7 @@ Int_t controlVariables::InterpretCommandLine(int argc, char *argv[]) {
       i++;
     }
     else if (strcmp(argv[i], "-calibrationRun") == 0) {
-      calibration = 1; noEB = 1;
+      calibration = 1; noEB = 1; withHISTOS = 1; withTREE = 0;
       cout << "Calibration run. Disabled event building too. " << endl;
       i++;
     }

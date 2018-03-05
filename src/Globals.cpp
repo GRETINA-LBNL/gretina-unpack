@@ -26,6 +26,11 @@ Track *track;
 CHICOFull *chico;
 #endif
 
+/*------ DFMA DATA STRUCTURES -------*/
+#ifdef WITH_DFMA
+DFMAFull *fma;
+#endif
+
 /*------ PWALL DATA STRUCTURES ------*/
 #ifdef WITH_PWALL
 phosWallFull *phosWall;

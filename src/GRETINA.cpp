@@ -2097,12 +2097,14 @@ void GRETINA::checkSPIntegrity() {
   for (UInt_t i=0; i<vecSize; i++) {
     Int_t xtalNum = (Int_t)(g3Temp[i].ID/40);
     Int_t segNum = sp.map[xtalNum][(Int_t)(g3Temp[i].ID%40)];
-  
+    
     sp.segEventIndex[xtalNum][segNum] = i;
 
     /* The trace was pulled and put into the waves array when
        the GRETINA data was first unpacked. */
     
+    sp.trLength = 100;
+
     /* Adjust the trace baseline offset */
     Int_t s = 0;
     for (Int_t b=0; b<25; b++) {
@@ -2120,7 +2122,7 @@ void GRETINA::checkSPIntegrity() {
       avg += TMath::Abs(sp.waves[xtalNum][segNum][b]);
     }
     avg /= 10;
-    
+
     if (avg > 20 && g3Temp[i].eCal > 30 && segNum < 36) { /* Net */
       if (g3Temp[i].eCal > sp.segE[xtalNum]) {
 	sp.segE[xtalNum] = g3Temp[i].eCal;
@@ -2138,8 +2140,9 @@ void GRETINA::checkSPIntegrity() {
       }
     }
     
+    
     /* Pull out the CC energy -- use CC on last digitizer, totally arbitrary */
-    if (g3Temp[i].ID%40 == 39) {
+    if (g3Temp[i].ID%40 == 19) {
       sp.ccE[xtalNum] = g3Temp[i].eCal;
     }
 
@@ -2247,6 +2250,25 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
       g3ch.eRaw = 0.; 
     } else { g3ch.eRaw = (Float_t)(tmpIntEnergy/32.); }
     
+  
+    //printf("ID %d, g3ch.eRaw = %f\n", g3ch.ID, g3ch.eRaw);
+
+
+
+    /* For AGATA translated data due to error in translation code... */
+    if ((Int_t)(channel%10) == 9) {
+      g3ch.eRaw = -(g3ch.eRaw);
+    }
+    g3ch.eRaw += 524288.;
+    g3ch.eRaw *= 4.0;
+
+    if (g3ch.eRaw > 100000) { g3ch.eRaw = 0.; }
+
+    //printf("-----> ID %d, g3ch.eRaw = %f\n", g3ch.ID, g3ch.eRaw);
+
+
+
+
     hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
     hiEnergy = (dp->hdr[11] & 0x00ff);
     sign = (dp->hdr[11] & 0x0100);
@@ -2422,6 +2444,7 @@ void GRETINA::calibrateMode3SP(g3ChannelEvent *g3) {
   
   Float_t tmpE = (g3->eRaw)*0.25;
   g3->eCal = (tmpE * sp.ehiGeGain[g3->ID] + sp.ehiGeOffset[g3->ID]);
+  // printf("tmpE %f / ID %d, GeGain %f GeOffset %f\n", tmpE, g3->ID, sp.ehiGeGain[g3->ID], sp.ehiGeOffset[g3->ID]);
 
 }
 
@@ -2788,11 +2811,11 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
     Int_t overflow = (dp->hdr[5] & 0x8000);
     gH.energy = dp->hdr[4] + ((dp->hdr[7] & 0xff)<< 16);
     gH.energy /= 32.;
-    
+       
     eventsize -= (sizeof(dp->hdr)/4);
 
     g3H.past.push_back(gH);
-    gH.energy = 0; gH.TS = 0;
+    gH.energy = 0; gH.TS = 0; gH.BLpreSum = 0;
         
     int i=0;
     while (eventsize) {
@@ -2801,8 +2824,10 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
       /* Pairs of 32-bit words:                         */
       /* 0:   31 -- 25   24 -- 0                        */
       /*       TS(6-0)   E(24-0)                        */
-      /* 1:    31          30 -- 0                      */
-      /*    Overflow       TS(37-7)                     */
+      /* 1:    31        30 -- 0                        */
+      /*    Overflow     TS(37-7)                       */
+      /* 2:   31 -- 18   17 -- 0                        */
+      /*         ??     BLpre-sum                       */
       /**************************************************/
 
       long long int TSintermediate = ((dp->data[i+3]) + ((dp->data[i+2] & 0x7fff) << 16));
@@ -2813,11 +2838,12 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
       gH.energy = dp->data[i+1] + ((dp->data[i] & 0x1ff) << 16);
       gH.energy /= 32;
       overflow = (dp->data[i+2] & 0x8000);
+      gH.BLpreSum = dp->data[i+5]
 
-      i+=4;
-      eventsize -= (sizeof(unsigned short));
+      i+=6;
+      eventsize -= (sizeof(unsigned short)*3/2);
       g3H.past.insert(g3H.past.end(), gH);
-      gH.energy = 0; gH.TS = 0;
+      gH.energy = 0; gH.TS = 0; gH.BLpreSum = 0;
     }
   }
 
