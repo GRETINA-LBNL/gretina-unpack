@@ -216,8 +216,8 @@ int main(int argc, char *argv[]) {
 
   /* DFMA */
 #ifdef WITH_DFMA
-  fma = new DFMAFull();
-  fma->Initialize();
+  dfma = new DFMAFull();
+  dfma->Initialize();
 #endif
   
   /* Phoswich Wall */
@@ -726,7 +726,7 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
 #ifdef WITH_DFMA
   case DFMA:
     {
-      dfma->timestamp = gHeader.timestamp;
+      dfma->ts = gHeader.timestamp;
       cnt->Increment(gHeader.length);
     }
     break;

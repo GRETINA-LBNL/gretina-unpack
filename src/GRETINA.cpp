@@ -2838,7 +2838,7 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
       gH.energy = dp->data[i+1] + ((dp->data[i] & 0x1ff) << 16);
       gH.energy /= 32;
       overflow = (dp->data[i+2] & 0x8000);
-      gH.BLpreSum = dp->data[i+5]
+      gH.BLpreSum = dp->data[i+5];
 
       i+=6;
       eventsize -= (sizeof(unsigned short)*3/2);

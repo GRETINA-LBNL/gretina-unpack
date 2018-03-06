@@ -28,7 +28,7 @@ CHICOFull *chico;
 
 /*------ DFMA DATA STRUCTURES -------*/
 #ifdef WITH_DFMA
-DFMAFull *fma;
+DFMAFull *dfma;
 #endif
 
 /*------ PWALL DATA STRUCTURES ------*/

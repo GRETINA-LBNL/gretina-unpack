@@ -439,6 +439,16 @@ int main(int argc, char** argv) {
       }
       break;
 
+    case 17: // DFMA
+      if(!hfc_list.add(aGeb, cBuf) && success) {
+	success = false;
+	if (!pipeflag) {
+	  cerr << "HFC: adding event in HFC failed"
+	       << endl;
+	}
+      }
+      break;
+
     case 17: // PHOSWALL
       if(!hfc_list.add(aGeb, cBuf) && success) {
 	success = false;

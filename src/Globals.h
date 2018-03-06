@@ -61,7 +61,7 @@ extern CHICOFull *chico;
 
 /*------ DFMA DATA STRUCTURES -------*/
 #ifdef WITH_DFMA
-extern DFMAFull *fma;
+extern DFMAFull *dfma;
 #endif
 
 /*------ PWALL DATA STRUCTURES ------*/
