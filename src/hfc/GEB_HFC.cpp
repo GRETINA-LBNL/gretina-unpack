@@ -439,7 +439,7 @@ int main(int argc, char** argv) {
       }
       break;
 
-    case 17: // DFMA
+    case 16: // DFMA
       if(!hfc_list.add(aGeb, cBuf) && success) {
 	success = false;
 	if (!pipeflag) {
