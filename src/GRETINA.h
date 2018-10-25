@@ -65,6 +65,16 @@ class GRETINAVariables : public TObject {
   Float_t ehiGeOffset[MAXCHANNELS];
   Float_t ehiGeGain[MAXCHANNELS];
 
+  /* History correction */
+  Float_t historyPar1[MAXCRYSTALS];
+  Float_t historyPar2[MAXCRYSTALS];
+  Float_t historyPar3[MAXCRYSTALS];
+  Float_t historyPar4[MAXCRYSTALS];
+  Float_t historyPar5[MAXCRYSTALS];
+  Float_t historyPar6[MAXCRYSTALS];
+  Float_t historyPar7[MAXCRYSTALS];
+  Float_t historyPar8[MAXCRYSTALS];
+
   /* Non-linearity look-up table correction */
   Float_t dnlLU[MAXCHANNELS][5000];
 
@@ -249,14 +259,25 @@ class g3OUT : public TObject {
 
 struct mode3HistoryPacket {
   unsigned short aahdr[2];
-  unsigned short hdr[8];
+  /*  unsigned short hdr[8];*/
+  /* 2018-04-19 CMC changed for new FW build 2.00_00A6, adds BLpresum 32bit header word */
+  unsigned short hdr[10];
   unsigned short data[MAX_TRACE_LENGTH];
 };
 
 struct historyEvent{
   Float_t energy;
   long long int TS;
-  Int_t BLpreSum;
+  long long int rawenergy;
+  // 2016-07-23 CMC added module to gH to differentiate between digitizers
+  Int_t module;
+  /*  Int_t BLpreSum;*/
+  /*  Float_t BLpreSum;*/
+  /* 2018-05-14 CMC changed because name was hard to remember*/
+  Float_t baseline;
+  Bool_t lostEvents; 
+  /* 2018-05-14 CMC added for use in CHICO experiment 1713*/
+  Int_t xtal;
 };
 
 class g3HistoryEvent : public TObject {
@@ -423,9 +444,11 @@ class g2CrystalEvent : public TObject {
   Float_t cc;
   Float_t ccCurrent, ccPrior1, ccPrior2;
   UShort_t deltaT1, deltaT2;
+  Float_t ccCorrection; /*20180326 CMC added*/
   Float_t cc1, cc2, cc3, cc4;
   Float_t segSum;
   Float_t doppler;
+  Float_t dopplerT; /*20180517 CMC added for CHICO target-like gammas*/
   Float_t dopplerSeg;
   Float_t dopplerCrystal;
   vector<g2IntPt> intpts;
@@ -822,6 +845,7 @@ class GRETINA : public TObject {
 			g2CrystalEvent *g2crystal, GRETINAVariables *gVar);
   void calibrateMode2CC(Int_t crystal, mode2ABCD6789 *g2, 
 			g2CrystalEvent *g2crystal, GRETINAVariables *gVar);
+  void historyCorrectMode2CC(Int_t crystal, mode2ABCD6789 *g2, GRETINAVariables *gVar);
   void analyzeMode3(GRETINAVariables *gVar, controlVariables *ctrl);
   void calibrateMode3(g3ChannelEvent *g3, GRETINAVariables* gVar);
   void calibrateMode3SP(g3ChannelEvent *g3);

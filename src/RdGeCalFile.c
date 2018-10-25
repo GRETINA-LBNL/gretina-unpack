@@ -60,6 +60,63 @@ int RdGeCalFile(const char *fn, GRETINAVariables* gVar) {
 
 /*************************************************************************/
 
+int RdHistoryCalFile(const char *fn, GRETINAVariables* gVar) {
+ 
+  /* Declarations */
+  FILE *fp;
+  int i1, nn;
+  float f1, f2, f3, f4, f5, f6, f7, f8;
+  char *st, str[400];
+
+  /* Open file */
+  fp = fopen(fn, "r");
+  if (fp == NULL) {
+    printf("Could not open \"%s\".\n", fn);
+    exit(1);
+  }
+  printf("\"%s\" open....", fn);
+
+  /* Read values */
+  nn = 0;
+  st = fgets(str, 400, fp);
+  while (st != NULL) {
+    if (str[0] == 35) {
+      /* '#' comment line, do nothing */
+    } else if (str[0] == 59) {
+      /* ';' comment line, do nothing */
+    } else if (str[0] == 10) {
+      /* Empty line, do nothing */
+    } else {
+      sscanf(str, "%i %f %f", &i1, &f1, &f2);
+      if (i1>=0 && i1<MAXCHANNELS) {
+        gVar->historyPar1[i1]=f1;
+        gVar->historyPar2[i1]=f2;
+        gVar->historyPar3[i1]=f3;
+        gVar->historyPar4[i1]=f4;
+        gVar->historyPar5[i1]=f5;
+        gVar->historyPar6[i1]=f6;
+        gVar->historyPar7[i1]=f7;
+        gVar->historyPar8[i1]=f8;
+
+	// printf("det %3.3i: offset=%9.3f, gain=%9.6f\n", 
+	//         i1, offset[i1], gain[i1]);
+        fflush(stdout);
+      }
+      nn++;
+    }
+    
+    /* Attempt to read next line */
+    st = fgets(str, 400, fp);
+  }
+  printf("Read %i gain calibration coefficients.\n", nn);
+
+  /* Done! */
+  fclose(fp);
+  return (0);
+}
+
+/*************************************************************************/
+
 int RdDNLGeCalFile(const char *fn, float *dnl0, float *dnl1, float *dnl2,
 		   float *dnl3, float *dnl4, float *dnl5, float *dnl6,
 		   float *dnl7) {

@@ -22,6 +22,9 @@
 #include <iostream>
 #include <RConfigure.h>
 
+#include "TFile.h"
+#include "TCutG.h"
+
 class CHICOFull;
 
 class CHICORaw : public TObject {
@@ -54,21 +57,31 @@ class CHICOParticle : public TObject {
   CHICOFull* m_top;
 
  public:
+  unsigned long long int LEDts; /*2018-05-10 CMC added*/
+
   Int_t id;
-  Double_t t;
-  Float_t tof; /* left - right */
-  Float_t mass;
+  ULong64_t t;
+  Double_t tof; /* left - right */
+  Double_t mass;
 
   Int_t thetaL;  Int_t phiL;
   Int_t thetaR;  Int_t phiR;
+  /*
   Float_t fThetaL;  Float_t fPhiL;
   Float_t fThetaR;  Float_t fPhiR;
+  */
+  Double_t fThetaL; Double_t  fPhiL;
+  Double_t fThetaR; Double_t  fPhiR;
 
   Int_t eL;  Int_t eR;
 
   Double_t rf;
 
-  Float_t pgCosL, pgCosR;
+  /*  Float_t pgCosL, pgCosR;*/
+  Double_t pgCosT, pgCosP;
+
+  Double_t dL, dR;
+  Double_t massT, massP, betaT, betaP, Qvalue;
 
  public:
   void Initialize();
@@ -84,6 +97,7 @@ class CHICOFull : public TObject {
   CHICOParticle particle;
 
   UInt_t gotParticle;
+  UInt_t idParticle;
   UInt_t multiAnodeTDCNum;
   UInt_t multiCathodeTDCNum;
 
@@ -94,12 +108,21 @@ class CHICOFull : public TObject {
   Float_t betaT[160]; Float_t betaP[160];
   // Float_t at[ANGNUM], bt[ANGNUM], ct[ANGNUM];
   // Float_t am[ANGNUM], bm[ANGNUM], cm[ANGNUM];
+  Float_t betaP0,betaP1,betaP2,betaP3,betaP4,betaP5;
+  Float_t betaT0,betaT1,betaT2,betaT3,betaT4,betaT5;
+  Float_t betaB[180];
 
   /* CHICO data */
   UInt_t rawCHICO[8192];
 
   /* GRETINA target offset with CHICO */
   Float_t offsetTarget;
+
+  /* CHICO cuts */
+  TCutG *massLCut,*massRCut;
+  TCutG *etCut,*etCutTK;
+  TCutG *GT_TKCut;
+  TCutG *ThetaLRCut;
 
  public:
   CHICOFull();
@@ -116,6 +139,12 @@ class CHICOFull : public TObject {
   void GetParticle();
   Float_t calcCos(Float_t pTheta, Float_t pPhi, Float_t gTheta, Float_t gPhi);
   
+  void setupCut();
+  Int_t IDparticles();
+  Float_t GetMass(int LR, int PT);
+  Float_t GetBeta(int LR, int PT, float MASS);
+  Float_t GetQval(int LR);
+
  private:
   
   ClassDef(CHICOFull, 1);

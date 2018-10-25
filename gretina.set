@@ -5,37 +5,38 @@ ATAcor 0.204
 BTAcor -0.168
 targetX 0.
 targetY 0.
-targetZ 0.2
+targetZ 0.
 # radial corrections => crystal# factor
-28
-1 1.05
-2 1.02
-3 1.05
-4 1.05
-5 1.05
-6 1.08
-7 1.1
-8 1.05
-9 1.0
-10 1.0
-11 1.0
-12 1.0
-13 1.04
-14 1.12
-15 1.02
-16 1.0
-17 1.14
-18 1.15
-19 1.05
-20 1.1
-21 1.12
-22 1.09
-23 1.1
-24 1.11
-25 1.06
-26 1.06
-27 1.06
-28 1.09
+0
+#28
+#1 1.05
+#2 1.02
+#3 1.05
+#4 1.05
+#5 1.05
+#6 1.08
+#7 1.1
+#8 1.05
+#9 1.0
+#10 1.0
+#11 1.0
+#12 1.0
+#13 1.04
+#14 1.12
+#15 1.02
+#16 1.0
+#17 1.14
+#18 1.15
+#19 1.05
+#20 1.1
+#21 1.12
+#22 1.09
+#23 1.1
+#24 1.11
+#25 1.06
+#26 1.06
+#27 1.06
+#28 1.09
 
 # MSU 7 Close-packed Configuration
 #Geometry
@@ -61,16 +62,16 @@ targetZ 0.2
 #7 -1
 
 # MSU Standard In-Beam Configuration - First campaign
-Geometry
+#Geometry
 # QNumber HoleNumber
-7
-1 15
-2 6
-3 16
-4 8
-5 9
-6 7
-7 17
+#7
+#1 15
+#2 6
+#3 16
+#4 8
+#5 9
+#6 7
+#7 17
 
 # MSU 90 degree configuration
 #Geometry
@@ -119,9 +120,25 @@ Geometry
 #6 14
 #7 11
 
+# ANL CHICO second campaign
+Geometry
+# QNumber HoleNumber
+11
+1 6
+2 7
+3 14
+4 17
+5 19
+6 21
+7 22
+8 24
+9 25
+10 26
+11 29
+
 Electronics Order
 # QNumber OrderNumber (from 0)
-7
+11
 1 0
 2 1
 3 2
@@ -129,6 +146,7 @@ Electronics Order
 5 4
 6 5
 7 6
-
-
-
+8 7
+9 8
+10 9
+11 10

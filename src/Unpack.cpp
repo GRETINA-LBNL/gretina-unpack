@@ -100,6 +100,14 @@
 #include "BGSAnalyze.h"
 #endif
 
+/* CHICO header files, 2018-05-17 CMC test */
+/*
+#ifdef WITH_CHICO
+#include "CHICO.h"
+#include "CHICODefinitions.h"
+#endif
+*/
+
 #include "Tree.h"
 
 #define DEBUG2AND3 0
@@ -188,6 +196,8 @@ int main(int argc, char *argv[]) {
     RdGeCalFile("gCalibration.dat", gVar);
   }
 
+  RdHistoryCalFile("gHistoryCal.dat", gVar);
+
   /* Read in baseline values for all segments. These are only
      used with the option "RADFORD_ENERGY". */
   //if (ctrl->withWAVE) {
@@ -210,7 +220,7 @@ int main(int argc, char *argv[]) {
   chico->Initialize();
   chico->InitializeCHICOVariables("chicoCalibrations/ppacTheta.cal", 
 				  "chicoCalibrations/ppacPhi.cal", 
-                                  "chicoCalibrations/beta.dat");
+                                  "chicoCalibrations/betaE.dat");
   chico->offsetTarget = 15.8; 
 #endif
 
@@ -465,6 +475,7 @@ int main(int argc, char *argv[]) {
 		}
 #endif
 	      } else {
+		/* printf ("About to call ProcessEvent, chico->particle.fThetaL %f \n", chico->particle.fThetaL); */
 		Int_t evtOK = ProcessEvent(currTS, ctrl, cnt, gVar);
 		if (evtOK < 0) { raise(SIGINT); }
 	      }
@@ -678,7 +689,7 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     //gret->getSimulated(inf);  cnt->Increment(gHeader.length); }
     break;
 #ifdef WITH_CHICO
-  case CHICO: { chico->getAndUnpackCHICO(inf, gHeader.length);  cnt->Increment(gHeader.length); }
+  case CHICO: { chico->getAndUnpackCHICO(inf, gHeader.length); /*printf("After getAndUnpackCHICO, chico->particle.t %llu \n",chico->particle.t );*/  cnt->Increment(gHeader.length); }
     break;
 #else
   case CHICO:

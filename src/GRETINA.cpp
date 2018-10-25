@@ -60,10 +60,8 @@ Int_t rotationMatrix::ReadMatrix(TString file) {
       for (Int_t i=0; i<4; i++) {
 	st = fgets(str, 256, fp);
 	sscanf(str, "%f %f %f %f", &f1, &f2, &f3, &f4);
-	crmat[pos-1][xtal][i][0] = f1;
-	crmat[pos-1][xtal][i][1] = f2;
-	crmat[pos-1][xtal][i][2] = f3;
-	crmat[pos-1][xtal][i][3] = f4;
+	crmat[pos-1][xtal][i][0] = f1;	crmat[pos-1][xtal][i][1] = f2;
+	crmat[pos-1][xtal][i][2] = f3;  crmat[pos-1][xtal][i][3] = f4;
       }
       nn++;
     }
@@ -717,8 +715,10 @@ void g2CrystalEvent::Reset() {
   error = -1;
   cc = 0.0; segSum = 0.0;
   ccCurrent = 0.0; ccPrior1 = 0.0; ccPrior2 = 0.0;
+  ccCorrection = 0.0; /*20180326 CMC added*/
   deltaT1 = 0.0; deltaT2 = 0.0;
   doppler = 0.0; dopplerSeg = 0.0; dopplerCrystal = 0.0;
+  dopplerT = 0.0; /*20180517 CMC added for CHICO target-like gammas*/
 }
 
 /**************************************************************/
@@ -1147,6 +1147,10 @@ GRETINAVariables::GRETINAVariables() {
 	dinoFactor[i][j][k] = 0.0;
       }
     }
+    historyPar1[i] = 0.0;  historyPar2[i] = 0.0;
+    historyPar3[i] = 0.0;  historyPar4[i] = 0.0;
+    historyPar5[i] = 0.0;  historyPar6[i] = 0.0;
+    historyPar7[i] = 0.0;  historyPar8[i] = 0.0;
   }
   
   for (Int_t i=0; i<36; i++) {
@@ -1577,7 +1581,11 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
 	}
       }
       
-      if (crystal != -1) { calibrateMode2CC(crystal, &g2_89, &g2X, gVar); }
+      if (crystal != -1) { 
+	calibrateMode2CC(crystal, &g2_89, &g2X, gVar);
+	historyCorrectMode2CC(crystal, &g2_89, gVar);
+      }
+      
       
       pt.Clear();
       for (Int_t m=0; m<MAX_INTPTS; m++) {
@@ -1736,6 +1744,131 @@ Int_t GRETINA::analyzeMode2(g2CrystalEvent *g2, GRETINAVariables* gVar) {
     }
   }
 
+  /* Calibrated the fixed pick-off energies for the history stuff... */
+  TRandom *random = new TRandom1();  
+  Float_t tmpE = (Float_t)g2->ccCurrent/128. + random->Rndm() - 0.5;
+  g2->ccCurrent = tmpE*gVar->ehiGeGain[g2->crystalNum+100] + gVar->ehiGeOffset[g2->crystalNum+100];
+
+  tmpE = (Float_t)g2->ccPrior1/128. + random->Rndm() - 0.5;
+  g2->ccPrior1 = tmpE*gVar->ehiGeGain[g2->crystalNum+100] + gVar->ehiGeOffset[g2->crystalNum+100];
+
+  tmpE = (Float_t)g2->ccPrior2/128. + random->Rndm() - 0.5;
+  g2->ccPrior2 = tmpE*gVar->ehiGeGain[g2->crystalNum+100] + gVar->ehiGeOffset[g2->crystalNum+100];
+
+  /* Tweak the calibration... */
+  g2->cc = g2->cc*gVar->ehiGeGain[g2->crystalNum] + gVar->ehiGeOffset[g2->crystalNum];
+  /* 2018-05-16 remove calibration tweak from fixed pickoff energy, handle in single calibration used above*/
+  /*
+  g2->ccCurrent = g2->ccCurrent*gVar->ehiGeGain[g2->crystalNum] + gVar->ehiGeOffset[g2->crystalNum];
+  g2->ccPrior1 = g2->ccPrior1*gVar->ehiGeGain[g2->crystalNum] + gVar->ehiGeOffset[g2->crystalNum];
+  g2->ccPrior2 = g2->ccPrior2*gVar->ehiGeGain[g2->crystalNum] + gVar->ehiGeOffset[g2->crystalNum];
+  */
+
+  /*
+  if (g2->crystalNum ==9) {
+    printf("xtal %d gain[109] %f gain[9] %f \n",g2->crystalNum,gVar->ehiGeGain[g2->crystalNum+100],gVar->ehiGeGain[g2->crystalNum] );
+  }
+  */
+
+  /*20180326 CMC added correction here to use calibrated values, hardcoded for the moment*/
+  g2->ccCorrection = 0;
+
+  Float_t tmpDT = (g2->deltaT1 / 100.0) + 660 * (g2->deltaT1 == 0);
+
+  if ( tmpDT < 240.0 ) {
+    /*then make one of two corrections, by time range*/
+    if ( tmpDT < 170.0 ) {
+      g2->ccCorrection =       1328.51 ;
+      g2->ccCorrection +=     0.191056 * tmpDT ;
+      g2->ccCorrection +=  -0.00262898 * tmpDT * tmpDT ;
+      g2->ccCorrection +=  1.47572e-05 * tmpDT * tmpDT * tmpDT ;
+      g2->ccCorrection += -2.96086e-08 * tmpDT * tmpDT * tmpDT * tmpDT ;
+    } else {
+      g2->ccCorrection =       1334.82 ;
+      g2->ccCorrection +=   -0.0269888 * tmpDT ;
+      g2->ccCorrection +=  0.000122369 * tmpDT * tmpDT ;
+      g2->ccCorrection += -2.34901e-07 * tmpDT * tmpDT * tmpDT ;
+      g2->ccCorrection +=   1.6117e-10 * tmpDT * tmpDT * tmpDT * tmpDT ;
+    }
+      /*
+      g2->ccCorrection =       1328.63 ;
+      g2->ccCorrection +=     0.232746 * tmpDT ;
+      g2->ccCorrection +=   -0.0043961 * tmpDT * tmpDT ;
+      g2->ccCorrection +=  3.32591e-05 * tmpDT * tmpDT * tmpDT ;
+      g2->ccCorrection += -8.82225e-08 * tmpDT * tmpDT * tmpDT * tmpDT ;
+    } else {
+      g2->ccCorrection =       1333.79  ;
+      g2->ccCorrection +=   -0.0276949 * tmpDT ;
+      g2->ccCorrection +=  0.000201733 * tmpDT * tmpDT ;
+      g2->ccCorrection += -6.62637e-07 * tmpDT * tmpDT * tmpDT ;
+      g2->ccCorrection +=  8.02196e-10 * tmpDT * tmpDT * tmpDT * tmpDT ;
+    }
+    g2->ccCorrection -= 1332.23 ;
+    g2->ccCorrection *= (g2->ccPrior1 / 665.2) ;
+      */
+    g2->ccCorrection -= 1332.62 ;
+    g2->ccCorrection *= (g2->ccPrior1 / 1233.89) ;
+    
+  } else {
+    /*else no correction*/
+    g2->ccCorrection = 0;
+  }
+
+  /*
+2nd TRY
+
+dT1=0.0 : centroid=1332.62
+
+Fit 10-195:
+
+USE to 170
+
+Minimizer is Linear
+Chi2                      =      115.219
+NDf                       =           32
+p0                        =      1328.51   +/-   0.192109    
+p1                        =     0.191056   +/-   0.0102798   
+p2                        =  -0.00262898   +/-   0.000176008 
+p3                        =  1.47572e-05   +/-   1.19287e-06 
+p4                        = -2.96086e-08   +/-   2.77838e-09 
+
+fit 130-595:
+
+USE 170to240
+
+Minimizer is Linear
+Chi2                      =      94.0608
+NDf                       =           89
+p0                        =      1334.82   +/-   0.435511    
+p1                        =   -0.0269888   +/-   0.00597453  
+p2                        =  0.000122369   +/-   2.84825e-05 
+p3                        = -2.34901e-07   +/-   5.65079e-08 
+p4                        =   1.6117e-10   +/-   3.97533e-11 
+  */
+
+  /*
+1st TRY
+
+average energy of ccPrior, also with error(pad)==0 gate : 665.2
+so normalize correction by this value,
+i.e. correction to apply = -1 * (function of dT1  - 1332.23) * ( ccPrior / 665.2 )
+    
+p0                        =      1328.63   +/-   0.147729    
+p1                        =     0.232746   +/-   0.00950861  
+p2                        =   -0.0043961   +/-   0.000202134 
+p3                        =  3.32591e-05   +/-   1.72879e-06 
+p4                        = -8.82225e-08   +/-   5.12651e-09 
+
+p0                        =      1333.79   +/-   0.28104     
+p1                        =   -0.0276949   +/-   0.00840151  
+p2                        =  0.000201733   +/-   8.71493e-05 
+p3                        = -6.62637e-07   +/-   3.7602e-07  
+p4                        =  8.02196e-10   +/-   5.75373e-10 
+  */
+
+
+  /*20180326 CMC added END*/
+
   /* If we didn't find that hole number in our settings, keep processing -- 
      but crystalNum gets set big (over edge of maximum of 120), and quadNum similarly 
      gets set to represent holeNumber + 30 */
@@ -1875,6 +2008,18 @@ void GRETINA::calibrateMode2CC(Int_t crystal, mode2ABCD5678 *g2, g2CrystalEvent 
     }
   }
   random->Delete();
+}
+
+/**************************************************************/
+
+void GRETINA::historyCorrectMode2CC(Int_t crystal, mode2ABCD6789 *g2, GRETINAVariables *gVar) {
+
+  /* Available parameters: gVar->historyPar1[crystal] through gVar->historyPar8[crystal] */
+  /* Variables you'll want: g2->totE_fixedPickOff_prior1, g2->deltaT_prior1
+                            g2->totE_fixedPickOff_prior2, g2->deltaT_prior2 */
+
+  g2->tot_e = g2->tot_e;
+
 }
 
 /**************************************************************/
@@ -2254,8 +2399,11 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
     //printf("ID %d, g3ch.eRaw = %f\n", g3ch.ID, g3ch.eRaw);
 
 
+    /* 2018-05-12 CMC commented out the following to look at GRETINA raw data*/
 
     /* For AGATA translated data due to error in translation code... */
+
+    /*
     if ((Int_t)(channel%10) == 9) {
       g3ch.eRaw = -(g3ch.eRaw);
     }
@@ -2263,6 +2411,7 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
     g3ch.eRaw *= 4.0;
 
     if (g3ch.eRaw > 100000) { g3ch.eRaw = 0.; }
+    */
 
     //printf("-----> ID %d, g3ch.eRaw = %f\n", g3ch.ID, g3ch.eRaw);
 
@@ -2749,6 +2898,10 @@ void GRETINA::fillHistos(Int_t ctrl) {
 Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, counterVariables *cnt,
 			       GRETINAVariables *gVar) {
 
+  /*
+  cout <<"Start getMode3History " << endl ; 
+  */
+
   Int_t siz = 0, remaining = 0;
   mode3HistoryPacket *dp;
 
@@ -2762,10 +2915,13 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
   cnt->Increment(evtLength);
   
   /* Byte swapping, due to little/big endian problem */
+  /**/
   for (Int_t j=0; j<evtLength; j=j+2) {
     swap(*(gBuf + j), *(gBuf + j + 1));
   }
-  
+  /**/
+  /* 2018-05-14 CMC test removing this, seems writing from Decomp may have made this redundant*/
+  /* 2018-05-14 CMC REMOVE for runs before 89, after the swap is again required to match sendRaw2 */
   unsigned char *tmp = (gBuf);
   
   /* Allocate memory... */
@@ -2794,13 +2950,79 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
   /* Now copy the rest of the event */  
   memmove(&dp->hdr[0], tmp, (evtLength - sizeof(dp->aahdr)));
 
+  /*
+  cout <<"      getMode3History pre-if" << endl ; 
+  printf("      getMode3History evtLength = %d\n",evtLength) ; 
+  printf("      getMode3History hdr[0] = %d\n",dp->hdr[0]) ; 
+  printf("      getMode3History hdr[1] = %d\n",dp->hdr[1]) ; 
+  printf("      getMode3History hdr[2] = %d\n",dp->hdr[2]) ; 
+  printf("      getMode3History hdr[3] = %d\n",dp->hdr[3]) ; 
+  printf("      getMode3History hdr[4] = %d\n",dp->hdr[4]) ; 
+  printf("      getMode3History hdr[5] = %d\n",dp->hdr[5]) ; 
+  printf("      getMode3History hdr[6] = %d\n",dp->hdr[6]) ; 
+  printf("      getMode3History hdr[7] = %d\n",dp->hdr[7]) ; 
+  */
+
   /* We've got the data, pull out the information now... */
   if ( (dp->hdr[1] & 0xf) == 0xB) {
     Int_t eventsize = (dp->hdr[0] & 0x3ff);
 
+    /*
+    cout <<"      getMode3History post-if" << endl ; 
+    */
+
+    gH.rawenergy = 0.;
     gH.energy = 0.;
     gH.TS = 0;
+    gH.module = 0;
     
+    // 2016-07-23 CMC added module to gH to differentiate between digitizers
+    // unlike energy and TS, module should not be reset within the while loop
+    // a mode3 channel event/packet comes from one digitzer, channel 9 by firmware
+    // Int_t module() { return (hdr1 >> 4); }
+    gH.module = (dp->hdr[1]) >> 4;
+
+    Int_t ChannelShift = 100 * (1+ (gH.module % 4)) ;
+
+    Int_t ID = -1;
+    Int_t xtal = 999;
+    Float_t gain, offset;
+
+    for (Int_t i=0; i<MAXQUADS; i++) {
+      /*      printf("i %d module/16 %d hole %d \n",i,gH.module/16,gVar->hole[i]);*/
+      if (gH.module/16 == gVar->hole[i]) {
+	ID = (gH.module - (gVar->hole[i] - gVar->electronicsOrder[i])*4*4)*10 + 9;
+      } 
+    }
+    if (ID < 0) {  
+      gH.xtal = 0;
+      /*
+      gain    = 1.0;
+      offset  = 0.0;
+      2018-08-22 CMC replaced to allow calibration of beam dump HPGe
+      */
+      /*
+      gain    = gVar->ehiGeGain[gH.xtal + 100];
+      offset  = gVar->ehiGeOffset[gH.xtal + 100];      
+      2018-08-23 CMC consolidated below
+      */
+    } else { 
+      gH.xtal = ID/40 + 1;
+      /*
+      gain    = gVar->ehiGeGain[gH.xtal + 100];
+      offset  = gVar->ehiGeOffset[gH.xtal + 100];      
+      2018-08-23 CMC consolidated below
+      */
+
+      /*  g2->ccCurrent = g2->ccCurrent*gVar->ehiGeGain[g2->crystalNum] + gVar->ehiGeOffset[g2->crystalNum]; */
+    }
+
+    /* 2018-08-23 CMC consolidated below */
+    gain    = gVar->ehiGeGain[gH.xtal + ChannelShift];
+    offset  = gVar->ehiGeOffset[gH.xtal + ChannelShift];      
+
+    /*    printf("module %d ID %d xtal %d gain %f offset %f \n",gH.module,ID,xtal,gain, offset);*/
+
     gH.TS = (ULong64_t)( ((ULong64_t)(dp->hdr[3])) +  
 			 ((ULong64_t)(dp->hdr[2]) << 16) +
 			 ((ULong64_t)(dp->hdr[5] & 0x7fff) << 32) +
@@ -2809,16 +3031,48 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
     long long int headerTS = gH.TS;
 
     Int_t overflow = (dp->hdr[5] & 0x8000);
-    gH.energy = dp->hdr[4] + ((dp->hdr[7] & 0xff)<< 16);
-    gH.energy /= 32.;
+    /*    gH.energy = dp->hdr[4] + ((dp->hdr[7] & 0xff)<< 16);*/
+    /*      CMC changed, energy is 25 bits, not 24 bits*/
+    gH.rawenergy = dp->hdr[4] + ((dp->hdr[7] & 0x1ff)<< 16);
+    gH.baseline = dp->hdr[9] + ((dp->hdr[8] & 0x3) << 16) ;
+    
+    overflow = (dp->hdr[5] & 0x8000);
+    gH.lostEvents = (overflow!=0);
        
     eventsize -= (sizeof(dp->hdr)/4);
+    
+    /*gH.baseline = dp->data[1] + ((dp->data[0] & 0x3) << 16) ;*/
+    //    eventsize -= (sizeof(unsigned short)/2);
+    /*eventsize -= 1;*/
+    /*gH.lostEvents=0;*/
+
+    if (gH.rawenergy > pow(2,24)) {gH.rawenergy -= pow(2,25);}
+    gH.energy = gH.rawenergy / 32.0 ;
+    if (gH.baseline > pow(2,17)) {gH.baseline -= pow(2,18);}
+    gH.baseline /= 16.0 ;
+
+    /* 2018-05-13 CMC calibration TBD !!! */
+    /* Calibrated the fixed pick-off energies for the history stuff... */
+    /*
+      TRandom *random = new TRandom1();  
+      Float_t tmpE = (Float_t)g2->ccCurrent/128. + random->Rndm() - 0.5;
+      g2->ccCurrent = tmpE*gVar->ehiGeGain[g2->crystalNum+100] + gVar->ehiGeOffset[g2->crystalNum+100];
+    */
+
+    gH.energy = gH.energy * 0.25 * gain + offset ;
 
     g3H.past.push_back(gH);
-    gH.energy = 0; gH.TS = 0; gH.BLpreSum = 0;
-        
-    int i=0;
-    while (eventsize) {
+    gH.energy = 0; gH.TS = 0; gH.baseline = 0; gH.lostEvents=0;
+    
+    /*    
+    cout <<"      getMode3History pre-while" << endl ; 
+    */
+
+    int i=0; 
+    /* 2018-04-18 CMC tetsting for new FW build 2.00_00A6 */
+    /*   int i=2;*/
+    /*    while (eventsize > 0) {*/
+    while (eventsize >= 3) {
      
       /**************************************************/
       /* Pairs of 32-bit words:                         */
@@ -2830,20 +3084,47 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
       /*         ??     BLpre-sum                       */
       /**************************************************/
 
+      /*
+      cout <<" event size " << eventsize << endl << endl ; 
+      */
+
       long long int TSintermediate = ((dp->data[i+3]) + ((dp->data[i+2] & 0x7fff) << 16));
 
       gH.TS = (ULong64_t)( ((ULong64_t)(dp->data[i] & 0xfe00) >> 9) + 
 			   ((ULong64_t)(TSintermediate) << 7) + 
 			   ((ULong64_t)(headerTS & 0xffc000000000)) );   
-      gH.energy = dp->data[i+1] + ((dp->data[i] & 0x1ff) << 16);
-      gH.energy /= 32;
+      gH.rawenergy = dp->data[i+1] + ((dp->data[i] & 0x1ff) << 16);
       overflow = (dp->data[i+2] & 0x8000);
-      gH.BLpreSum = dp->data[i+5];
+      gH.lostEvents = (overflow!=0);
+      /*
+      gH.baseline = dp->data[i+5];
+      CMC changed, BLpreSum is 18 bits, not 16 bits
+      */
+      gH.baseline = dp->data[i+5] + ((dp->data[i+4] & 0x3) << 16) ;
 
+      if (gH.rawenergy > pow(2,24)) {gH.rawenergy -= pow(2,25);}
+      gH.energy = gH.rawenergy / 32.0 ;
+      if (gH.baseline > pow(2,17)) {gH.baseline -= pow(2,18);}
+      gH.baseline /= 16.0 ;
+
+
+      if (headerTS == 1613704249 ) {
+	cout << "gH.energy  " << gH.energy << " gH.TS "<<  gH.TS << endl; 
+	if (gH.TS == 0) {
+	  cout << "data[i] " << dp->data[i] << " data[i+1] " << dp->data[i+1] << endl;
+	  cout << "data[i+2] " << dp->data[i+2] << " data[i+3] " << dp->data[i+3] << endl;
+	  cout << "data[i+4] " << dp->data[i+4] << " data[i+5] " << dp->data[i+5] << endl;
+	  cout << endl;
+	}
+      }
+
+
+      gH.energy = gH.energy * 0.25 * gain + offset ;
+      
       i+=6;
       eventsize -= (sizeof(unsigned short)*3/2);
       g3H.past.insert(g3H.past.end(), gH);
-      gH.energy = 0; gH.TS = 0; gH.BLpreSum = 0;
+      gH.rawenergy = -8 ; gH.energy = -9; gH.TS = 99; gH.baseline = -9; gH.lostEvents=0;
     }
   }
 
