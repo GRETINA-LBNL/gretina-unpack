@@ -26,6 +26,11 @@ Track *track;
 CHICOFull *chico;
 #endif
 
+/*------ GODDESS DATA STRUCTURES -------*/
+#ifdef WITH_GOD
+goddessFull *goddess;
+#endif
+
 /*------ DFMA DATA STRUCTURES -------*/
 #ifdef WITH_DFMA
 DFMAFull *dfma;

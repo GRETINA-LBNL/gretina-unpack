@@ -1,4 +1,0 @@
-#ifndef __ADDGLOBALHEADERS_H
-#define __ADDGLOBALHEADERS_H
-
-#endif // __ADDGLOBALHEADERS_H

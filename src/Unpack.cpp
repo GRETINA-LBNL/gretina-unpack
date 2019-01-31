@@ -67,6 +67,11 @@
 #include "PhosWall.h"
 #endif
 
+/* Goddess header files */
+#ifdef WITH_GOD
+#include "GODDESS.h"
+#endif
+
 /* CHICO header files */
 #ifdef WITH_CHICO
 #include "CHICO.h"
@@ -187,19 +192,6 @@ int main(int argc, char *argv[]) {
     cout << "Using default GRETINA energy calibration file. " << endl;
     RdGeCalFile("gCalibration.dat", gVar);
   }
-
-  /* Read in baseline values for all segments. These are only
-     used with the option "RADFORD_ENERGY". */
-  //if (ctrl->withWAVE) {
-  // if (ctrl->RADFORD_ENERGY) {
-  //  RdGeBaseLineFile("Baselines.out");
-  //  for (Int_t i=0; i<MAXCHANNELS; i++) {
-  //	if (i%40 == 9 || i%40 == 19) {
-  //	  gWf->tau[i] = gWf->tau[i+20];
-  //	}
-  //  }
-  //}
-  //}
   cout << endl;
 
   /* And now the auxiliary detector system data structures.  In alphabetical order :) */
@@ -212,6 +204,11 @@ int main(int argc, char *argv[]) {
 				  "chicoCalibrations/ppacPhi.cal", 
                                   "chicoCalibrations/beta.dat");
   chico->offsetTarget = 15.8; 
+#endif
+
+  /* GODDESS */
+#ifdef WITH_GOD
+  goddess = new goddessFull();
 #endif
 
   /* DFMA */
@@ -706,6 +703,19 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
   case PWALLAUX:
+    { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
+    break;
+#endif
+#ifdef WITH_GOD
+  case GODDESS:
+    { 
+      goddess->getAnalogGoddess(inf, gHeader.length); 
+      goddess->printAnalogRawEvent();
+      cnt->Increment(gHeader.length);
+    }
+    break;
+#else
+  case GODDESS:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
 #endif

@@ -1,0 +1,45 @@
+/***** CHICO Definitions *****/
+
+#define PPAC_NUM 20
+#define PPACMATCH 10
+#define ANGNUM 49
+#define CH2NS 0.025
+
+#define ANODE_E_VSN 1
+#define ANODE_T_VSN 2
+#define CATHODE_T_VSN 3
+
+#define DATA 0x00000000
+#define COUNTMASK 0x3f00
+#define COUNTSHIFT 8
+
+#define QDCTYPESHIFT 24
+#define QDCGEOSHIFT 27
+#define QDCHEADER 2
+#define QDCTYPEMASK 0x7000000
+#define QDCTRAILER 4
+#define QDCGEOMASK 0xf8000000
+#define QDCCHANMASK 0x3f0000
+#define QDCCHANSHIFT 16
+#define QDCDATAMASK 0x0fff
+
+#define TDCTYPEMASK 0xf8000000
+#define TDCGEOMASK 0x0000001f
+#define TDCCHANMASK 0x03f80000
+#define TDCCHANSHIFT 19
+#define TDCDATAMASK 0x0007ffff
+#define TDCHEADER 0x40000000
+#define TDCTRAILER 0x80000000
+
+#define ANODE_REFCH 24
+#define CATHODE_REFCH 80
+#define RFCH 25
+
+
+
+
+
+
+
+
+

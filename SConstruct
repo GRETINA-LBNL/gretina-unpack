@@ -1,6 +1,16 @@
 import sys
 import os
 
+# Define the sub-systems to be included in analysis.
+PhosWall=0
+S800=0
+LENDA=0
+CHICO=0
+DFMA=0
+GODDESS=1
+
+########################### You shouldn't need to change anything past this point..... ########
+
 colors = {}
 colors['cyan']   = '\033[36m'
 colors['purple'] = '\033[95m'
@@ -69,13 +79,20 @@ env.Append(BUILDERS = {'RootCint':bld})
 
 ## Optimization flags ##################################################
 env.Append(CCFLAGS = ['-O2', '-D_FILE_OFFSET_64', '-g'], LINKFLAGS=[])
-#env.Append(CCFLAGS = ['-O2', '-D_FILE_OFFSET_64'])
 
 ## Link auxiliary detector system analysis #############################
-#env.Append(CPPDEFINES=['-DWITH_PWALL'])
-#env.Append(CPPDEFINES=['-DWITH_S800'])
-#env.Append(CPPDEFINES=['-DWITH_LENDA'])
-#env.Append(CPPDEFINES=['-DWITH_DFMA'])
+if PhosWall==1:
+   env.Append(CPPDEFINES=['-DWITH_PWALL'])
+if S800==1:
+   env.Append(CPPDEFINES=['-DWITH_S800'])
+if LENDA==1:
+   env.Append(CPPDEFINES=['-DWITH_LENDA'])
+if CHICO==1:
+   env.Append(CPPDEFINES=['-DWITH_CHICO'])
+if DFMA==1:
+   env.Append(CPPDEFINES=['-DWITH_DFMA'])
+if GODDESS==1:
+   env.Append(CPPDEFINES=['-DWITH_GOD'])
 
 ## Finding dependencies (ROOT)
 try:
@@ -85,8 +102,8 @@ except OSError:
     print "scons: ROOT not found!"
     exit(1)
 
-env.Append(CPPPATH='#')
-env.Append(LIBPATH='.')
+env.Append(CPPPATH=['.', './include'])
+env.Append(LIBPATH='./lib')
 
 envUnpack = env.Clone()
 envDecompView = env.Clone()
@@ -95,10 +112,10 @@ envClover = env.Clone()
 
 ## Building GRETINADict and libGRETINA #################################
 gretinaDictTarget = 'lib/GRETINADict.cpp'
-gretinaDictHeaders = ['src/GRETINA.h', 'src/SortingStructures.h', 
-		      'src/GRETINAWavefunction.h',
-		      'src/INLCorrection.h', 'src/Histos.h', 
-		      'src/Track.h', 'src/LinkDefGRETINA.h']
+gretinaDictHeaders = ['include/GRETINA.h', 'include/SortingStructures.h', 
+		      'include/GRETINAWavefunction.h',
+		      'include/INLCorrection.h', 'include/Histos.h', 
+		      'include/Track.h', 'include/LinkDefGRETINA.h']
 env.RootCint(gretinaDictTarget, gretinaDictHeaders)
 
 gretinaLibTarget = 'lib/GRETINA'
@@ -109,69 +126,105 @@ gretinaLibSources = ['lib/GRETINADict.cpp', 'src/GRETINA.cpp',
 env.SharedLibrary(target = gretinaLibTarget, source = gretinaLibSources, 
                   SHLIBPREFIX='lib')
 
-## Building TrackDict and libTrack #####################################
-#trackDictTarget = 'lib/TrackDict.cpp'
-#trackDictHeaders = ['src/Track.h', 'src/LinkDefTrack.h']
-#env.RootCint(trackDictTarget, trackDictHeaders)
-
-#trackLibTarget = 'lib/Track'
-#trackLibSources = ['lib/TrackDict.cpp', 'src/Track.cpp']
-#env.SharedLibrary(target = trackLibTarget, source = trackLibSources,
-#	          SHLIBPREFIX='lib')
-
 ## Building S800Dict and libS800 #######################################
-s800DictTarget = 'lib/S800Dict.cpp'
-s800DictHeaders = ['src/S800Parameters.h', 'src/LinkDefS800.h'] 
-env.RootCint(s800DictTarget, s800DictHeaders)
+if S800==1:
+   s800DictTarget = 'lib/S800Dict.cpp'
+   s800DictHeaders = ['include/S800Parameters.h', 'include/LinkDefS800.h'] 
+   env.RootCint(s800DictTarget, s800DictHeaders)
 
-s800LibTarget = 'lib/S800'
-s800LibSources = ['lib/S800Dict.cpp', 'src/S800Parameters.cpp']
-env.SharedLibrary(target = s800LibTarget, source = s800LibSources, 
-                  SHLIBPREFIX='lib')
+   s800LibTarget = 'lib/S800'
+   s800LibSources = ['lib/S800Dict.cpp', 'src/S800Parameters.cpp']
+   env.SharedLibrary(target = s800LibTarget, source = s800LibSources, 
+                  	    SHLIBPREFIX='lib')
 
 ## Building LendaDict and libLenda ######################################
-lendaDictTarget = 'lib/LendaDict.cpp'
-lendaDictHeaders = ['src/LENDA-DDAS.h', 'src/LENDA-Controls.h', 'src/ddasChannel.h', 'src/LinkDefLenda.h'] 
-env.RootCint(lendaDictTarget, lendaDictHeaders)
+if LENDA==1:
+   lendaDictTarget = 'lib/LendaDict.cpp'
+   lendaDictHeaders = ['include/LENDA-DDAS.h', 'include/LENDA-Controls.h', 'include/ddasChannel.h', 'include/LinkDefLenda.h'] 
+   env.RootCint(lendaDictTarget, lendaDictHeaders)
 
-lendaLibTarget = 'lib/Lenda'
-lendaLibSources = ['lib/LendaDict.cpp', 'src/LENDA-DDAS.cpp', 'src/LENDA-Controls.cpp', 'src/ddasChannel.cpp']
-env.SharedLibrary(target = lendaLibTarget, source = lendaLibSources, 
-                  SHLIBPREFIX='lib')
+   lendaLibTarget = 'lib/Lenda'
+   lendaLibSources = ['lib/LendaDict.cpp', 'src/LENDA-DDAS.cpp', 'src/LENDA-Controls.cpp', 'src/ddasChannel.cpp']
+   env.SharedLibrary(target = lendaLibTarget, source = lendaLibSources, 
+                     SHLIBPREFIX='lib')
 
 ## Building CHICODict and libCHICO ######################################
-chicoDictTarget = 'lib/chicoDict.cpp'
-chicoDictHeaders = ['src/CHICO.h', 'src/LinkDefCHICO.h'] 
-env.RootCint(chicoDictTarget, chicoDictHeaders)
+if CHICO==1:
+   chicoDictTarget = 'lib/chicoDict.cpp'
+   chicoDictHeaders = ['include/CHICO.h', 'include/LinkDefCHICO.h'] 
+   env.RootCint(chicoDictTarget, chicoDictHeaders)
 
-chicoLibTarget = 'lib/chico'
-chicoLibSources = ['lib/chicoDict.cpp', 'src/CHICO.cpp']
-env.SharedLibrary(target = chicoLibTarget, source = chicoLibSources, 
-                  SHLIBPREFIX='lib')
+   chicoLibTarget = 'lib/chico'
+   chicoLibSources = ['lib/chicoDict.cpp', 'src/CHICO.cpp']
+   env.SharedLibrary(target = chicoLibTarget, source = chicoLibSources, 
+                     SHLIBPREFIX='lib')
 
 ## Building DFMADict and libDFMA ######################################
-fmaDictTarget = 'lib/fmaDict.cpp'
-fmaDictHeaders = ['src/DFMA.h', 'src/LinkDefDFMA.h'] 
-env.RootCint(fmaDictTarget, fmaDictHeaders)
+if DFMA==1:
+   fmaDictTarget = 'lib/fmaDict.cpp'
+   fmaDictHeaders = ['include/DFMA.h', 'include/LinkDefDFMA.h'] 
+   env.RootCint(fmaDictTarget, fmaDictHeaders)
 
-fmaLibTarget = 'lib/fma'
-fmaLibSources = ['lib/fmaDict.cpp', 'src/DFMA.cpp']
-env.SharedLibrary(target = fmaLibTarget, source = fmaLibSources, 
-                  SHLIBPREFIX='lib')
+   fmaLibTarget = 'lib/fma'
+   fmaLibSources = ['lib/fmaDict.cpp', 'src/DFMA.cpp']
+   env.SharedLibrary(target = fmaLibTarget, source = fmaLibSources, 
+                     SHLIBPREFIX='lib')
+
+## Building GoddessDict and libGODDESS ######################################
+if GODDESS==1:
+   godDictTarget = 'lib/GoddessDict.cpp'
+   godDictHeaders = ['include/GODDESS.h', 'include/LinkDefGODDESS.h'] 
+   env.RootCint(godDictTarget, godDictHeaders)
+
+   godLibTarget = 'lib/GODDESS'
+   godLibSources = ['lib/GoddessDict.cpp', 'src/GODDESS.cpp']
+   env.SharedLibrary(target = godLibTarget, source = godLibSources, 
+                     SHLIBPREFIX='lib')
 
 ## Building PhosWallDict and libPhosWall ######################################
-pwallDictTarget = 'lib/phosWallDict.cpp'
-pwallDictHeaders = ['src/PhosWall.h', 'src/LinkDefPhosWall.h'] 
-env.RootCint(pwallDictTarget, pwallDictHeaders)
+if PhosWall==1:
+   pwallDictTarget = 'lib/phosWallDict.cpp'
+   pwallDictHeaders = ['include/PhosWall.h', 'include/LinkDefPhosWall.h'] 
+   env.RootCint(pwallDictTarget, pwallDictHeaders)
 
-pwallLibTarget = 'lib/phosWall'
-pwallLibSources = ['lib/phosWallDict.cpp', 'src/PhosWall.cpp']
-env.SharedLibrary(target = pwallLibTarget, source = pwallLibSources, 
-                  SHLIBPREFIX='lib')
+   pwallLibTarget = 'lib/phosWall'
+   pwallLibSources = ['lib/phosWallDict.cpp', 'src/PhosWall.cpp']
+   env.SharedLibrary(target = pwallLibTarget, source = pwallLibSources, 
+                     SHLIBPREFIX='lib')
+
+## Building Unpack executable ###########################################
+unpackTarget = 'Unpack'
+unpackSources = ['src/Unpack.cpp', 
+	         'src/Globals.cpp', 'src/UnpackUtilities.cpp', 
+		 'src/S800Functions.cpp']
+if S800==1:
+   envUnpack.Append(LIBS=['S800'])
+if PhosWall==1:
+   envUnpack.Append(LIBS=['phosWall'])
+if LENDA==1:
+   envUnpack.Append(LIBS=['Lenda'])
+if GODDESS==1:
+   envUnpack.Append(LIBS=['GODDESS'])
+
+envUnpack.Append(LIBS=['GRETINA'], LIBPATH=['lib'])
+envUnpack.Program(target = unpackTarget, source = unpackSources)
+
+## Building GEB_HFC executable ###########################################
+gebTarget = 'GEB_HFC'
+gebSources = ['src/hfc/GEB_HFC.cpp', 'src/hfc/HFC.cpp']
+env.Program(target = gebTarget, source = gebSources)
+
+
+
+
+
+
+
+####################### OLD STUFF....but might need... #########################
 
 ## Building DecompViewerDict and libDecompViewer ########################
 #decompViewerDictTarget = 'src/DecompViewerDict.cpp'
-#decompViewerDictHeaders = ['src/decompViewer.h', 'src/decompViewerLinkDef.h'] 
+#decompViewerDictHeaders = ['include/decompViewer.h', 'include/decompViewerLinkDef.h'] 
 #env.RootCint(decompViewerDictTarget, decompViewerDictHeaders)
 
 #decompViewerLibTarget = 'DecompViewer'
@@ -179,26 +232,12 @@ env.SharedLibrary(target = pwallLibTarget, source = pwallLibSources,
 #env.SharedLibrary(target = decompViewerLibTarget, 
 #	 	  source = decompViewerLibSources, SHLIBPREFIX='lib')
 
-## Building Unpack executable ###########################################
-unpackTarget = 'Unpack'
-unpackSources = ['src/Unpack.cpp', 
-	         'src/Globals.cpp', 'src/UnpackUtilities.cpp', 
-		 'src/S800Functions.cpp']
-envUnpack.Append(LIBS=['GRETINA', 'S800', 'chico', 'phosWall', 'Lenda'],
-		 LIBPATH=['lib'])
-envUnpack.Program(target = unpackTarget, source = unpackSources)
-
 ## Building AddGlobalHeaders executable ##################################
 #addHeadersTarget = 'AddGlobalHeaders'
 #addHeadersSources = ['src/AddGlobalHeaders.cpp', 
 #		     'src/GlobalsAGH.cpp']
 #envAddGH.Append(LIBS=['GRETINA'])
 #envAddGH.Program(target = addHeadersTarget, source = addHeadersSources)
-
-## Building GEB_HFC executable ###########################################
-gebTarget = 'GEB_HFC'
-gebSources = ['src/hfc/GEB_HFC.cpp', 'src/hfc/HFC.cpp']
-env.Program(target = gebTarget, source = gebSources)
 
 ## Building DecompViewer executable ######################################
 #viewerTarget = 'DecompViewer'
