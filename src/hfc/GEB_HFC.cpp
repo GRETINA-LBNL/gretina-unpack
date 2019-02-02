@@ -459,6 +459,17 @@ int main(int argc, char** argv) {
       }
       break;
 
+    case 19: // GODDESS
+      if(!hfc_list.add(aGeb, cBuf) && success) {
+	success = false;
+	if (!pipeflag) {
+	  cerr << "HFC: adding event in HFC failed"
+	       << endl;
+	}
+      }
+      break;
+
+
     case 18: // PHOSWALLAUX
       if(!hfc_list.add(aGeb, cBuf) && success) {
 	success = false;

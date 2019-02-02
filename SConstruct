@@ -102,7 +102,7 @@ except OSError:
     print "scons: ROOT not found!"
     exit(1)
 
-env.Append(CPPPATH=['.', './include'])
+env.Append(CPPPATH=['.', './include', './src', './src/hfc/'])
 env.Append(LIBPATH='./lib')
 
 envUnpack = env.Clone()

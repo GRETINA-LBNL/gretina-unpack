@@ -277,6 +277,11 @@ if (1) {
   teb->Branch("lenda", "lendaEvent", &lendaEv);
 #endif
 
+#ifdef WITH_GOD
+  teb->Branch("god.ts", &(goddess->ts), "god.ts/L");
+  teb->Branch("god.eventRaw", "goddessEvent", &(goddess->rawGoddess));
+#endif
+
   /* GRETINA */
   teb->Branch("g1", "g1OUT", &(gret->g1out));
   teb->Branch("g2", "g2OUT", &(gret->g2out));

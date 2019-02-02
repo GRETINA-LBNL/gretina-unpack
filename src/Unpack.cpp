@@ -209,6 +209,8 @@ int main(int argc, char *argv[]) {
   /* GODDESS */
 #ifdef WITH_GOD
   goddess = new goddessFull();
+  goddess->Initialize();
+  goddess->ReportDetectors();
 #endif
 
   /* DFMA */
@@ -709,8 +711,9 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
 #ifdef WITH_GOD
   case GODDESS:
     { 
+      goddess->ts = (uint64_t)gHeader.timestamp;
       goddess->getAnalogGoddess(inf, gHeader.length); 
-      goddess->printAnalogRawEvent();
+      //     goddess->printAnalogRawEvent();
       cnt->Increment(gHeader.length);
     }
     break;
