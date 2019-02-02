@@ -9,6 +9,7 @@ orrubaDet::orrubaDet() :
 orrubaDet::orrubaDet(std::string serial_Num, UShort_t sector_, UShort_t depth_, Bool_t upstream_) :
   numNtype (0), numPtype(0), serialNum(serial_Num), sector(sector_), depth(depth_), upStream(upstream_)
 {
+  Clear();
   SetPosID();
 }
 
@@ -216,6 +217,18 @@ void superX3::Clear() {
 
 }
 
+Int_t superX3::GetStrip(Int_t channel) {
+  return (channel/2);
+}
+
+UShort_t superX3::GetNearChannel(UShort_t strip) { // UPDATE WITH REAL CHANNEL INFORMATION
+  return strip > 1 ? 2*strip+1 : 2*strip;
+}
+
+UShort_t superX3::GetFarChannel(UShort_t strip) { // UPDATE WITH REAL CHANNEL INFORMATION
+  return strip > 1 ? 2*strip : 2*strip + 1;
+}
+
 void superX3::SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue, Int_t ignoreThresh) {
   if (!ValidChannel(detChannel, nType)) {
     char type = 'p';
@@ -223,6 +236,139 @@ void superX3::SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue, Int
     cout <<"ERROR: Unable to set raw value for SuperX3 " << serialNum << " " << (nType ? 'n':'p') <<  "-type channel." << endl;
   }
   orrubaDet::SetRawEValue(detChannel, nType, rawValue, ignoreThresh);
+}
+
+void superX3::SortAndCalibrate(Bool_t doCalibrate) {
+  orrubaDet::valueMap ePMap = GetRawE(kFALSE);
+  orrubaDet::valueMap eNMap = GetRawE(kTRUE);
+
+  orrubaDet::timeMap tsPMap = GetTSmap(kFALSE);
+  orrubaDet::timeMap tsNMap = GetTSmap(kTRUE);
+  
+  std::vector<Int_t> alreadyDone;
+  alreadyDone.clear();
+
+  for (std::map<Short_t, Float_t>::iterator chItr = ePMap.begin(); chItr != ePMap.end(); ++chItr) {
+    Int_t st_ = superX3::GetStrip(chItr->first);
+
+    if (std::find(alreadyDone.begin(), alreadyDone.end(), st_) != alreadyDone.end()) continue;
+    alreadyDone.push_back(st_);
+    
+    Int_t nearStrip = GetNearChannel(st_);  Int_t farStrip = GetFarChannel(st_);
+    Float_t eNear = 0.0, eFar = 0.0;
+    std::map<Short_t, Float_t>::iterator nearItr = ePMap.find(nearStrip);
+    std::map<Short_t, Float_t>::iterator farItr = ePMap.find(farStrip);
+
+    eNear = (nearItr != ePMap.end()) ? nearItr->second : 0.0;
+    eFar = (farItr != ePMap.end()) ? farItr->second : 0.0;
+    
+    if (eNear > 0.0 && eFar > 0.0) {
+      stripsP.push_back(st_);
+      timeNear.push_back(tsPMap[nearStrip]);
+      timeFar.push_back(tsPMap[farStrip]);
+      eNearRaw.push_back(eNear);
+      eFarRaw.push_back(eFar);
+      
+      if(doCalibrate) {
+	std::vector< std::vector<Float_t> > calPar = GetECalParameters(kFALSE);
+	eNear = eNear*calPar[nearStrip][1] + calPar[nearStrip][0];
+	eFar = eFar*calPar[farStrip][1] + calPar[farStrip][0];
+	
+	if (eNear > 0.0 && eFar > 0.0) {
+	  eNearCal.push_back(eNear);
+	  eFarCal.push_back(eFar);
+	}
+      }
+    }
+  }
+  
+  for (std::map<Short_t, Float_t>::iterator chItr = eNMap.begin(); chItr != eNMap.end(); ++chItr) {
+    Int_t st_ = chItr->first;
+    Float_t e_ = chItr->second;
+    
+    stripsN.push_back(st_);
+    eRawN.push_back(e_);
+    timeN.push_back(tsNMap[st_]);
+    
+    if(doCalibrate) {
+      std::vector< std::vector<Float_t> > calPar = GetECalParameters(kTRUE);
+      eCalN.push_back(e_*calPar[st_][1] + calPar[st_][0]);
+    }
+  }
+
+}
+
+Float_t superX3::GetNearE(Bool_t calibrated) {
+  std::vector<Float_t> *energies;
+  if (calibrated) { energies = &eNearCal; } 
+  else { energies = &eNearRaw; }
+  Float_t nearE = 0.0;
+  for (UInt_t i=0; i<energies->size(); i++) {
+    nearE += energies->at(i);
+  }
+  return nearE;
+}
+
+Float_t superX3::GetFarE(Bool_t calibrated) {
+  std::vector<Float_t> *energies;
+  if (calibrated) { energies = &eFarCal; } 
+  else { energies = &eFarRaw; }
+  Float_t farE = 0.0;
+  for (UInt_t i=0; i<energies->size(); i++) {
+    farE += energies->at(i);
+  }
+  return farE;
+}
+
+void superX3::GetMaxHitInfo(Int_t* stripMaxP, uint64_t* timestampMaxP,
+			    Int_t* stripMaxN, uint64_t* timestampMaxN,
+			    Bool_t calibrated) {
+  std::vector<Float_t> *energiesN_;
+  std::vector<Float_t> *energiesNear_;
+  std::vector<Float_t> *energiesFar_;
+  if (calibrated) {
+    energiesN_ = &eCalN;  energiesNear_ = &eNearCal;  energiesFar_ = &eFarCal;
+  } else {
+    energiesN_ = &eRawN;  energiesNear_ = &eNearRaw;  energiesFar_ = &eFarRaw;
+  }
+
+  Float_t eMax = 0;
+  for (UInt_t i=0; i<energiesNear_->size(); i++) {
+    if (energiesNear_->at(i) + energiesFar_->at(i) > eMax) {
+      if (stripMaxP != nullptr) *stripMaxP = stripsP.at(i);
+      eMax = energiesNear_->at(i) + energiesFar_->at(i);
+      if (timestampMaxP != nullptr) *timestampMaxP = (timeNear.at(i) + timeFar.at(i))/2.;
+    }
+  }
+
+  eMax = 0;
+  for (UInt_t i=0; i<energiesN_->size(); i++) {
+    if (energiesN_->at(i) > eMax) {
+      if (stripMaxN != nullptr) *stripMaxN = stripsN.at(i);
+      eMax = energiesN_->at(i);
+      if (timestampMaxN != nullptr) *timestampMaxN = timeN.at(i);
+    }
+  }
+
+}
+
+TVector3 superX3::GetEventPosition(Bool_t calibrated) {
+
+  Int_t pStripHit, nStripHit;
+  GetMaxHitInfo(&pStripHit, nullptr, &nStripHit, nullptr, calibrated);
+  
+  Float_t eNear, eFar;
+  eNear = GetNearE(calibrated);
+  eFar = GetFarE(calibrated);
+  Float_t reCenter = (parPosCal[pStripHit].at(1) + parPosCal[pStripHit].at(0))/2.;
+  Float_t normalize = parPosCal[pStripHit].at(1) - parPosCal[pStripHit].at(0);
+  normalize = (normalize < 0.01) ? 1 : normalize;
+  Float_t zRes = (((eNear - eFar)/(eNear + eFar)) - reCenter)/normalize;
+  if (!upStream) zRes *= -1;
+  TVector3 zResPos(0., 0., zRes*activeLength);
+  TVector3 interactionPos = pStripCenterPos[pStripHit] + zResPos;
+  return interactionPos;
+
 }
 
 /************************************************************/
@@ -277,6 +423,75 @@ void QQQ5::SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue, Int_t 
   orrubaDet::SetRawEValue(detChannel, nType, rawValue, ignoreThresh);
 }
 
+void QQQ5::SortAndCalibrate(Bool_t doCalibrate) {
+  orrubaDet::valueMap ePMap = GetRawE(kFALSE);
+  orrubaDet::timeMap tsPMap = GetTSmap(kFALSE);
+  
+  for (std::map<Short_t, Float_t>::iterator chItr = ePMap.begin(); chItr != ePMap.end(); ++chItr) {
+    Int_t st_ = chItr->first;
+    Float_t e_ = chItr->second;
+
+    stripsP.push_back(st_);
+    eRawP.push_back(e_);
+    timeP.push_back(tsPMap[st_]);
+    
+    if(doCalibrate) {
+      std::vector< std::vector<Float_t> > calPar = GetECalParameters(kFALSE);
+      eCalP.push_back(e_*calPar[st_][1] + calPar[st_][0]);
+    }
+  }
+
+  orrubaDet::valueMap eNMap = GetRawE(kTRUE);
+  orrubaDet::timeMap tsNMap = GetTSmap(kTRUE);
+  
+  for (std::map<Short_t, Float_t>::iterator chItr = eNMap.begin(); chItr != eNMap.end(); ++chItr) {
+    Int_t st_ = chItr->first;
+    Float_t e_ = chItr->second;
+
+    stripsN.push_back(st_);
+    eRawN.push_back(e_);
+    timeN.push_back(tsNMap[st_]);
+    
+    if(doCalibrate) {
+      std::vector< std::vector<Float_t> > calPar = GetECalParameters(kTRUE);
+      eCalN.push_back(e_*calPar[st_][1] + calPar[st_][0]);
+    }
+  }
+
+}
+
+void QQQ5::GetMaxHitInfo(Int_t* stripMaxP, uint64_t* timestampMaxP,  
+			 Int_t* stripMaxN, uint64_t* timestampMaxN, 
+			 Bool_t calibrated) {
+  std::vector<Float_t>* energiesN_;
+  std::vector<Float_t>* energiesP_;
+
+  if (calibrated) { energiesN_ = &eCalN;  energiesP_ = &eCalP; }
+  else { energiesN_ = &eRawN;  energiesP_ = &eRawP; }
+  
+  Float_t eMax = 0.0;
+  for (UInt_t i=0; i<energiesP_->size(); i++) {
+    if (energiesP_->at(i) > eMax) {
+      if (stripMaxP != nullptr) *stripMaxP = stripsP.at(i);
+      eMax = energiesP_->at(i);
+      if (timestampMaxP != nullptr) *timestampMaxP = timeP.at(i);
+    }
+  }
+  eMax = 0.0;
+  for (UInt_t i=0; i<energiesN_->size(); i++) {
+    if (energiesN_->at(i) > eMax) {
+      if (stripMaxN != nullptr) *stripMaxN = stripsN.at(i);
+      eMax = energiesN_->at(i);
+      if (timestampMaxN != nullptr) *timestampMaxN = timeN.at(i);
+    }
+  }
+
+
+} 
+
+TVector3 QQQ5::GetEventPosition(Bool_t calibrated) {
+
+}
 
 /************************************************************/
 /* BB10 detector functions                                  */
@@ -308,6 +523,50 @@ void BB10::Clear() {
 void BB10::SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue, Int_t ignoreThresh) {
   orrubaDet::SetRawEValue(detChannel, nType, rawValue, ignoreThresh);
 }
+
+void BB10::SortAndCalibrate(Bool_t doCalibrate) {
+  orrubaDet::valueMap ePMap = GetRawE(kFALSE);
+  orrubaDet::timeMap tsPMap = GetTSmap(kFALSE);
+  
+  for (std::map<Short_t, Float_t>::iterator chItr = ePMap.begin(); chItr != ePMap.end(); ++chItr) {
+    Int_t st_ = chItr->first;
+    Float_t e_ = chItr->second;
+
+    stripsP.push_back(st_);
+    eRawP.push_back(e_);
+    timeP.push_back(tsPMap[st_]);
+    
+    if(doCalibrate) {
+      std::vector< std::vector<Float_t> > calPar = GetECalParameters(kFALSE);
+      eCalP.push_back(e_*calPar[st_][1] + calPar[st_][0]);
+    }
+  }
+}
+
+void BB10::GetMaxHitInfo(Int_t* stripMaxP, uint64_t* timestampMaxP,  
+			 Int_t* stripMaxN, uint64_t* timestampMaxN, 
+			 Bool_t calibrated) {
+  std::vector<Float_t>* energiesP_;
+  if (calibrated) { energiesP_ = &eCalP; }
+  else { energiesP_ = &eRawP; }
+
+  Float_t eMax = 0.0;
+  for(UInt_t i=0; i<energiesP_->size(); i++) {
+    if (energiesP_->at(i) > eMax) {
+      if (stripMaxP != nullptr) *stripMaxP = stripsP.at(i);
+      eMax = energiesP_->at(i);
+      if (timestampMaxP != nullptr) *timestampMaxP = timeP.at(i);
+    }
+  }
+
+}
+
+TVector3 BB10::GetEventPosition(Bool_t calibrated) {
+
+}
+
+
+
 
 
 

@@ -149,12 +149,14 @@ class counterVariables : public TObject {
   long long int bytes_read_since_last_time;
   UInt_t MBread;
 
+  long long int treeWrites;
+
   /* Mode3 analysis variables */
   UInt_t eoBuffer;
   Int_t eofInBuffer;
   UInt_t eofPosInBuffer;
   UInt_t mode3i;
-  UInt_t b29i;
+  UInt_t b88i;
 
   long long int old3Bytes;
 

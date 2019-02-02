@@ -93,6 +93,8 @@ class GRETINAVariables : public TObject {
   Double_t GetNextValue(FILE *file);
   void Reset();
 
+  void ReadGeCalFile(TString filename);
+
  private:
   
   ClassDef(GRETINAVariables, 1);
@@ -273,7 +275,7 @@ class g3HistoryEvent : public TObject {
   ClassDef(g3HistoryEvent, 1);
 };
 
-class Bank29 : public TObject {
+class Bank88 : public TObject {
  
  public:
   vector<g3ChannelEvent> chn;
@@ -281,10 +283,10 @@ class Bank29 : public TObject {
   long long int wfCFD;
 
  public:
-  Bank29() { ; }
-  ~Bank29() { ; }
+  Bank88() { ; }
+  ~Bank88() { ; }
  
-  ClassDef(Bank29, 2);
+  ClassDef(Bank88, 2);
 };
 
 /*--------------------------------------------------------*/
@@ -775,7 +777,7 @@ class GRETINA : public TObject {
   g1OUT g1out;
   g4SimOUT gSimOut;
   
-  Bank29 b29;
+  Bank88 b88;
 
   Track track;
 
@@ -815,7 +817,7 @@ class GRETINA : public TObject {
 		 counterVariables *cnt);
   Int_t getSimulated(FILE *inf);
   void getScaler(FILE *inf, Int_t evtLength);
-  Int_t getBank29(FILE *inf, Int_t evtLength, counterVariables *cnt);
+  Int_t getBank88(FILE *inf, Int_t evtLength, counterVariables *cnt);
 
   Int_t analyzeMode2(g2CrystalEvent *g2, GRETINAVariables *gVar);
   void calibrateMode2CC(Int_t crystal, mode2ABCD5678 *g2, 

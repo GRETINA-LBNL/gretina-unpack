@@ -358,9 +358,9 @@ Int_t controlVariables::ReportRunFlags() {
   } else if (fileType == "gr" && !pgh) {
     cout << "GRETINA mode3 file WITH global headers -- GlobalRaw.dat";
   } else if (fileType == "m") {
-    cout << "merged GRETINA mode3 + (most likely) BGS file WITH global headers -- Merged.dat";
+    cout << "merged GRETINA mode3 + auxiliary WITH global headers -- Merged.dat";
   } else if (fileType == "m2") {
-    cout << "merged GRETINA mode2 + (most likely) BGS file WITH global headers -- Merged.Mode2.dat";
+    cout << "merged GRETINA mode2 + auxiliary WITH global headers -- Merged.Mode2.dat";
   }
   if (compressedFile) {
     cout << ".gz " << endl;
@@ -615,7 +615,9 @@ void counterVariables::Initialize() {
   
   eoBuffer = 0; eofInBuffer = 0; eofPosInBuffer = 0;
   mode3i = 0; old3Bytes = 0;
-  b29i = 0;
+  b88i = 0;
+
+  treeWrites = 0;
   
   badEvent = 0; badSegment = 0; badCC1 = 0; badCC2 = 0;
   for (Int_t i=0; i<(MAXCHANNELS); i++) {
@@ -658,10 +660,12 @@ void counterVariables::ResetRunCounters() {
   
   bytes_read = 0; bytes_read_since_last_time = 0;
   MBread = 0;
+
+  treeWrites = 0;
   
   eoBuffer = 0; eofInBuffer = 0; eofPosInBuffer = 0;
   mode3i = 0; old3Bytes = 0;
-  b29i = 0;
+  b88i = 0;
 
   badEvent = 0; badSegment = 0; badCC1 = 0; badCC2 = 0;
   for (Int_t i=0; i<(MAXCHANNELS); i++) {
@@ -711,8 +715,8 @@ void counterVariables::PrintRunStatistics(Int_t pgh, Int_t withWAVE, Int_t super
     
     if (headerType[GRETSCALER] > 0)
       printf("  Scaler GRETINA headers:     %d\n", headerType[GRETSCALER]);
-    if (headerType[BANK29] > 0)
-      printf("  Bank29 GRETINA headers:     %d\n", headerType[BANK29]);
+    if (headerType[BANK88] > 0)
+      printf("  Bank88 GRETINA headers:     %d\n", headerType[BANK88]);
     
     printf("\n Auxiliary detectors...\n");
     if (headerType[BGS] > 0) 
@@ -731,6 +735,8 @@ void counterVariables::PrintRunStatistics(Int_t pgh, Int_t withWAVE, Int_t super
       printf("  S800 Aux. headers:     %d\n", (headerType[S800AUX]+headerType[S800AUX_TS]));
     if (headerType[LENDA] > 0) 
       printf("  LENDA headers:   %d\n", headerType[LENDA]);
+    if (headerType[GODDESS] > 0) 
+      printf("  GODDESS headers: %d\n", headerType[GODDESS]);
   }
   printf("\n TS errors:   %d\n", TSerrors);
   printf("\n\n Run time (from TS): %0.3f seconds\n", (TSLast - TSFirst)*1e-8);

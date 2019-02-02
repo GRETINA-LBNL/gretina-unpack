@@ -97,14 +97,14 @@ class orrubaDet : public TObject {
   virtual Bool_t SetThresholds(std::vector<Int_t> thresholds, Bool_t nType, Int_t thrSize);
   virtual std::vector<Int_t> GetThresholds(Bool_t nType);
   
-  //  virtual TVector3 GetEventPosition(Bool_t calibrated = kTRUE); // from orrubaDet
+  virtual TVector3 GetEventPosition(Bool_t calibrated = kTRUE) = 0; // from orrubaDet
 
   //virtual Float_t GetESum(Bool_t nType = kFALSE, Bool_t calibrated = kTRUE) = 0; 
-  //virtual void GetMaxHitInfo(Int_t* stripMaxP, uint64_t* timestampMaxP,  
-  //			     Int_t* stripMaxN, uint64_t* timestampMaxN, 
-  //			     Bool_t calibrated = kTRUE) = 0; 
+  virtual void GetMaxHitInfo(Int_t* stripMaxP, uint64_t* timestampMaxP,  
+  			     Int_t* stripMaxN, uint64_t* timestampMaxN, 
+  			     Bool_t calibrated = kTRUE) = 0; 
 			     
-  //virtual void SortAndCalibrate(Bool_t doCalibrate = kTRUE) = 0;  // from orrubaDet
+  virtual void SortAndCalibrate(Bool_t doCalibrate = kTRUE) = 0;  // from orrubaDet
   
   //virtual std::vector<Float_t> GetHitsInfo(std::string info, std::vector<Float_t> dest = nullptr) = 0; 
   //virtual std::vector<Int_t> GetHitsInfo(std::string info, std::vector<Int_t> dest = nullptr) = 0; 
@@ -138,8 +138,8 @@ class superX3 : public orrubaDet {
   std::vector<uint64_t> timeN; 
 
  private: 
-  /*   TVector3 pStripEdgePos[5], nStripEdgePos[5]; // vector to mid point of edge, in mm */
-  /*   TVector3 pStripCenterPos[4], nStripCenterPos[4]; // absolute center, in mm */
+  TVector3 pStripEdgePos[5], nStripEdgePos[5]; // vector to mid point of edge, in mm 
+  TVector3 pStripCenterPos[4], nStripCenterPos[4]; // absolute center, in mm 
   TVector3 eventPos; 
   
   /*   Float_t binsP[5], binsN[5];  */
@@ -149,7 +149,7 @@ class superX3 : public orrubaDet {
   
   orrubaDet::valueMap stripPosRaw, stripPosCal; 
   Int_t stripContactMult[4]; 
-  /*   std::vector<Float_t> parPosCal[4], parStripECal[4]; */
+  std::vector<Float_t> parPosCal[4], parStripECal[4]; 
   
  public: 
   superX3(); 
@@ -158,8 +158,23 @@ class superX3 : public orrubaDet {
   
   void Clear(); 
   
+  Int_t GetStrip(Int_t channel);
+  UShort_t GetNearChannel(UShort_t strip);
+  UShort_t GetFarChannel(UShort_t strip);
+
   virtual void SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue, Int_t ignoreThresh); 
+
   
+  Float_t GetNearE(Bool_t calibrated = kTRUE);
+  Float_t GetFarE(Bool_t calibrated = kTRUE);
+  virtual void SortAndCalibrate(Bool_t doCalibrate);
+
+  virtual void GetMaxHitInfo(Int_t* stripMaxP, uint64_t* timestampMaxP,  
+  			     Int_t* stripMaxN, uint64_t* timestampMaxN, 
+  			     Bool_t calibrated = kTRUE); 
+
+  virtual TVector3 GetEventPosition(Bool_t calibrated = kTRUE);
+
   /*   void UpdatePosition(Int_t strip); */
   
   /*   TVector3 GetPStripCenterPos(Int_t strip) { return pStripCenterPos[strip]; } */
@@ -178,9 +193,6 @@ class superX3 : public orrubaDet {
   /*   orrubaDet::valueMap GetStripPosRaw() { return stripPosRaw; } */
   /*   orrubaDet::valueMap GetStripPosCal() { return stripPosCal; } */
   /*   std::vector<Float_t>* GetResStripParCal() { return parStripECal; } */
-  
-  /*   UShort_t GetNearContact(UShort_t strip); */
-  /*   UShort_t GetFarContact(UShort_t strip); */
   
  private: 
   void ContructBins(); 
@@ -214,6 +226,14 @@ class QQQ5 : public orrubaDet {
 
   virtual void SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue,  
    			   Int_t ignoreThresh); 
+  virtual void SortAndCalibrate(Bool_t doCalibrate);
+
+  virtual void GetMaxHitInfo(Int_t* stripMaxP, uint64_t* timestampMaxP,  
+  			     Int_t* stripMaxN, uint64_t* timestampMaxN, 
+  			     Bool_t calibrated = kTRUE); 
+
+  virtual TVector3 GetEventPosition(Bool_t calibrated = kTRUE);
+  
 
 
  protected:
@@ -243,7 +263,16 @@ class BB10 : public orrubaDet {
 
   virtual void SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue,  
 			    Int_t ignoreThresh); 
-  
+  virtual void SortAndCalibrate(Bool_t doCalibrate = kTRUE);  
+
+  virtual void GetMaxHitInfo(Int_t* stripMaxP, uint64_t* timestampMaxP,  
+  			     Int_t* stripMaxN, uint64_t* timestampMaxN, 
+  			     Bool_t calibrated = kTRUE); 
+
+  virtual TVector3 GetEventPosition(Bool_t calibrated = kTRUE);
+
+
+
 
  private:
   ClassDef(BB10, 1);

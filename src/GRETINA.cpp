@@ -1290,6 +1290,44 @@ void GRETINAVariables::Reset() {
 }
 
 /**************************************************************/
+
+void GRETINAVariables::ReadGeCalFile(TString filename) {
+  FILE *fp;
+  Int_t i1, nn;  Float_t f1, f2;
+  char *st, str[128];
+
+  /* Open file */
+  fp = fopen(filename.Data(), "r");
+  if (fp == NULL) {
+    printf("Could not open \"%s\".\n", filename.Data());
+    exit(1);
+  }
+  printf("\"%s\" open...", filename.Data());
+
+  /* Read values */
+  nn = 0;
+  st = fgets(str, 64, fp);
+  while (st!=NULL) {
+    if (str[0] == 35 || str[0] == 59 || str[0] == 10) {
+      /* Comment or blank line.  Do nothing. */
+    } else {
+      sscanf(str, "%i %f %f", &i1, &f1, &f2);
+      if (i1 >= 0 && i1 < MAXCHANNELS) {
+	ehiGeOffset[i1] = f1;
+	ehiGeGain[i1] = f2;
+      }
+      nn++;
+    }
+
+    /* Attempt to read next line. */
+    st = fgets(str, 64, fp);
+  }
+  printf("Read %i gain calibration coefficients.\n", nn);
+  
+  fclose(fp);
+}
+
+/**************************************************************/
 /* GRETINA Class Functions ************************************/
 /**************************************************************/
 
@@ -1426,9 +1464,9 @@ void GRETINA::Reset() {
   g2out.Reset();  g2out.Clear();
   g1out.Reset();  g1out.Clear();
   gSimOut.Reset();  gSimOut.Clear();
-  b29.chn.clear();
-  b29.timestamp = 0;  b29.wfCFD = 0;
-  b29.Clear();
+  b88.chn.clear();
+  b88.timestamp = 0;  b88.wfCFD = 0;
+  b88.Clear();
 };
 
 /**************************************************************/
@@ -2853,7 +2891,7 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
   
 }
 
-Int_t GRETINA::getBank29(FILE *inf, Int_t evtLength, counterVariables *cnt) {
+Int_t GRETINA::getBank88(FILE *inf, Int_t evtLength, counterVariables *cnt) {
 
   Int_t siz = 0, remaining = 0;
   mode3DataPacket *dp;
@@ -2871,13 +2909,13 @@ Int_t GRETINA::getBank29(FILE *inf, Int_t evtLength, counterVariables *cnt) {
   for (Int_t j=0; j<evtLength; j=j+2) {
     swap(*(gBuf + j), *(gBuf + j + 1));
   }
-  cnt->b29i = 0;
+  cnt->b88i = 0;
   
   remaining = 1;
   
   while (remaining) {
     unsigned char *tmp = (gBuf);
-    tmp = (gBuf + cnt->b29i*2);
+    tmp = (gBuf + cnt->b88i*2);
     
     /* Allocate memory... */
     if ( !(dp = (mode3DataPacket*)malloc(sizeof(dp->aahdr) +
@@ -2912,112 +2950,112 @@ Int_t GRETINA::getBank29(FILE *inf, Int_t evtLength, counterVariables *cnt) {
     Int_t sign = g3ch.sign();
     Int_t TL = g3ch.tracelength();
 
-    cnt->b29i += (sizeof(dp->aahdr) + sizeof(dp->hdr)) / 2;
-    tmp = (gBuf + cnt->b29i*2);
+    cnt->b88i += (sizeof(dp->aahdr) + sizeof(dp->hdr)) / 2;
+    tmp = (gBuf + cnt->b88i*2);
     
     /* Copy the waveform! */
     memmove(&dp->waveform[0], tmp, TL*sizeof(UShort_t));
     
-    cnt->b29i += (TL * sizeof(UShort_t)) / 2;
-    tmp = (gBuf + cnt->b29i*2);
+    cnt->b88i += (TL * sizeof(UShort_t)) / 2;
+    tmp = (gBuf + cnt->b88i*2);
   
-    g3ch.ID = channel;
+    // g3ch.ID = channel;
 
-    Int_t hiEnergy = 0;
-    hiEnergy = (dp->hdr[7] & 0x00ff);
-    UInt_t tmpEnergy = 0;  Int_t tmpIntEnergy = 0;
-    tmpEnergy = ((UInt_t)(hiEnergy) << 16);
-    tmpEnergy += dp->hdr[4];
-    tmpIntEnergy = (Int_t)tmpEnergy;
-    if (sign) {
-      tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    } else {
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    }
-    if (tmpIntEnergy == 65536) { /* Guard against weird FPGA energy anomoly */
-      g3ch.eRaw = 0.; 
-    } else { g3ch.eRaw = (Float_t)(tmpIntEnergy/32.); }
+    // Int_t hiEnergy = 0;
+    // hiEnergy = (dp->hdr[7] & 0x00ff);
+    // UInt_t tmpEnergy = 0;  Int_t tmpIntEnergy = 0;
+    // tmpEnergy = ((UInt_t)(hiEnergy) << 16);
+    // tmpEnergy += dp->hdr[4];
+    // tmpIntEnergy = (Int_t)tmpEnergy;
+    // if (sign) {
+    //   tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+    //   }
+    // } else {
+    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+    //   }
+    // }
+    // if (tmpIntEnergy == 65536) { /* Guard against weird FPGA energy anomoly */
+    //   g3ch.eRaw = 0.; 
+    // } else { g3ch.eRaw = (Float_t)(tmpIntEnergy/32.); }
     
-    hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
-    hiEnergy = (dp->hdr[11] & 0x00ff);
-    sign = (dp->hdr[11] & 0x0100);
-    tmpEnergy = ((UInt_t)(hiEnergy) << 16);
-    tmpEnergy += dp->hdr[8];
-    tmpIntEnergy = (Int_t)(tmpEnergy);
-    if (sign) {
-      tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    } else {
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    }
-    g3ch.eCalPO = (Float_t)(tmpIntEnergy/32.);
+    // hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
+    // hiEnergy = (dp->hdr[11] & 0x00ff);
+    // sign = (dp->hdr[11] & 0x0100);
+    // tmpEnergy = ((UInt_t)(hiEnergy) << 16);
+    // tmpEnergy += dp->hdr[8];
+    // tmpIntEnergy = (Int_t)(tmpEnergy);
+    // if (sign) {
+    //   tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+    //   }
+    // } else {
+    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+    //   }
+    // }
+    // g3ch.eCalPO = (Float_t)(tmpIntEnergy/32.);
 
-    hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
-    hiEnergy = (dp->hdr[13] & 0x0001);
-    sign = (dp->hdr[13] & 0x0002);
-    tmpEnergy = ((UInt_t)(hiEnergy) << 23);
-    tmpEnergy += ((UInt_t)(dp->hdr[10]) << 7);
-    tmpEnergy += ((UInt_t)(dp->hdr[11] & 0xfe00) >> 9);
-    tmpIntEnergy = (Int_t)(tmpEnergy);
-    if (sign) {
-      tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    } else {
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    }
-    g3ch.prevE1 = (Float_t)(tmpIntEnergy/32.);
+    // hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
+    // hiEnergy = (dp->hdr[13] & 0x0001);
+    // sign = (dp->hdr[13] & 0x0002);
+    // tmpEnergy = ((UInt_t)(hiEnergy) << 23);
+    // tmpEnergy += ((UInt_t)(dp->hdr[10]) << 7);
+    // tmpEnergy += ((UInt_t)(dp->hdr[11] & 0xfe00) >> 9);
+    // tmpIntEnergy = (Int_t)(tmpEnergy);
+    // if (sign) {
+    //   tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+    //   }
+    // } else {
+    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+    //   }
+    // }
+    // g3ch.prevE1 = (Float_t)(tmpIntEnergy/32.);
     
-    hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
-    hiEnergy = (dp->hdr[12] & 0x03ff);
-    sign = (dp->hdr[12] & 0x0400);
-    tmpEnergy = ((UInt_t)(hiEnergy) << 14);
-    tmpEnergy += ((UInt_t)(dp->hdr[13] & 0xfffc) >> 2);
-    tmpIntEnergy = (Int_t)(tmpEnergy);
-    if (sign) {
-      tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    } else {
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    }
-    g3ch.prevE2 = (Float_t)(tmpIntEnergy/32.);
-    g3ch.PZrollover = ((UInt_t)(dp->hdr[12] & 0xf800) >> 11);
+    // hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
+    // hiEnergy = (dp->hdr[12] & 0x03ff);
+    // sign = (dp->hdr[12] & 0x0400);
+    // tmpEnergy = ((UInt_t)(hiEnergy) << 14);
+    // tmpEnergy += ((UInt_t)(dp->hdr[13] & 0xfffc) >> 2);
+    // tmpIntEnergy = (Int_t)(tmpEnergy);
+    // if (sign) {
+    //   tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+    //   }
+    // } else {
+    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+    //   }
+    // }
+    // g3ch.prevE2 = (Float_t)(tmpIntEnergy/32.);
+    // g3ch.PZrollover = ((UInt_t)(dp->hdr[12] & 0xf800) >> 11);
 
-    /* Transform the waveform */
-    g3ch.wf.raw.clear();
-    for (Int_t j=0; j<TL+1; j=j+2) {
-      if (dp->waveform[j+1] & 0x8000) {
-	g3ch.wf.raw.push_back(dp->waveform[j+1] - std::numeric_limits<unsigned int>::max());
-      } else {
-	g3ch.wf.raw.push_back(dp->waveform[j+1]);
-      }
-      if (dp->waveform[j] & 0x8000) {
-	g3ch.wf.raw.push_back(dp->waveform[j] - std::numeric_limits<unsigned int>::max());
-      } else {
-	g3ch.wf.raw.push_back(dp->waveform[j]);
-      } 
-    }
+    // /* Transform the waveform */
+    // g3ch.wf.raw.clear();
+    // for (Int_t j=0; j<TL+1; j=j+2) {
+    //   if (dp->waveform[j+1] & 0x8000) {
+    // 	g3ch.wf.raw.push_back(dp->waveform[j+1] - std::numeric_limits<unsigned int>::max());
+    //   } else {
+    // 	g3ch.wf.raw.push_back(dp->waveform[j+1]);
+    //   }
+    //   if (dp->waveform[j] & 0x8000) {
+    // 	g3ch.wf.raw.push_back(dp->waveform[j] - std::numeric_limits<unsigned int>::max());
+    //   } else {
+    // 	g3ch.wf.raw.push_back(dp->waveform[j]);
+    //   } 
+    // }
 
-    /* For the CC always get a baseline value from the minimum trace, which is 6 samples. */
-    if (g3ch.wf.raw.size() >= 6) {  g3ch.baseline = g3ch.wf.BL(0, 6);  }
+    // /* For the CC always get a baseline value from the minimum trace, which is 6 samples. */
+    // if (g3ch.wf.raw.size() >= 6) {  g3ch.baseline = g3ch.wf.BL(0, 6);  }
     
-    g3ch.calcTime = g3ch.wf.CFD(0);
+    // g3ch.calcTime = g3ch.wf.CFD(0);
 
     g3ch.timestamp = (ULong64_t)( ((ULong64_t)(dp->hdr[3])) + 
 				  ((ULong64_t)(dp->hdr[2]) << 16) +
@@ -3028,13 +3066,13 @@ Int_t GRETINA::getBank29(FILE *inf, Int_t evtLength, counterVariables *cnt) {
     g3ch.deltaT1 = (UShort_t)(dp->hdr[6]);
     g3ch.deltaT2 = (UShort_t)(dp->hdr[9]);
    
-    b29.timestamp = g3ch.timestamp; 
-    b29.chn.push_back(g3ch);
+    b88.timestamp = g3ch.timestamp; 
+    b88.chn.push_back(g3ch);
 
     free(dp);
 
-    if ( (Int_t)(cnt->b29i*2) == evtLength ) { remaining = 0; }
-    else if ( (Int_t)(cnt->b29i*2) < evtLength ) { remaining = 1; }
+    if ( (Int_t)(cnt->b88i*2) == evtLength ) { remaining = 0; }
+    else if ( (Int_t)(cnt->b88i*2) < evtLength ) { remaining = 1; }
   }
   
   return (0);

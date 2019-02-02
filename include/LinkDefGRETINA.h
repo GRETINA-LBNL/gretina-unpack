@@ -20,7 +20,7 @@
 #pragma link C++ struct historyEvent+;
 #pragma link C++ class g3HistoryEvent+;
 
-#pragma link C++ class Bank29+;
+#pragma link C++ class Bank88+;
 
 #pragma link C++ struct ipOLD+;
 #pragma link C++ struct ip+;

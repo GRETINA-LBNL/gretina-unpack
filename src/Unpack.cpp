@@ -60,8 +60,6 @@
 /* Tracking... */
 #include "Track.h"
 
-#include "RdGeCalFile.c"
-
 /* Phoswich Wall header files */
 #ifdef WITH_PWALL
 #include "PhosWall.h"
@@ -93,16 +91,6 @@
 #include "ddasChannel.h"
 #include "LENDA-DDAS.h"
 #include "LENDA-Controls.h"
-#endif
-
-/* BGS header files */
-#ifdef WITH_BGS
-#include "BGSParamList.h"
-#include "BGSConditions.h"
-#include "BGSFPPositions.h"
-#include "BGSCalibrations.h"
-#include "BGSThresholds.h"
-#include "BGSAnalyze.h"
 #endif
 
 #include "Tree.h"
@@ -156,7 +144,6 @@ int main(int argc, char *argv[]) {
   GRETINAVariables*  gVar = new GRETINAVariables();
   gVar->Initialize();
   gVar->InitializeGRETINAVariables("gretina.set");
-  //RdGeDINOCalFile(37, "Co60Pairs-dino.dat", gVar);
 
   gret = new GRETINA();
   gret->Initialize();
@@ -187,10 +174,10 @@ int main(int argc, char *argv[]) {
   
   /* Get the calibration parameters. */
   if (ctrl->specifyCalibration) {
-    RdGeCalFile(ctrl->calibrationFile.Data(), gVar);
+    gVar->ReadGeCalFile(ctrl->calibrationFile);
   } else {
     cout << "Using default GRETINA energy calibration file. " << endl;
-    RdGeCalFile("gCalibration.dat", gVar);
+    gVar->ReadGeCalFile("gCalibration.dat");
   }
   cout << endl;
 
@@ -210,7 +197,7 @@ int main(int argc, char *argv[]) {
 #ifdef WITH_GOD
   goddess = new goddessFull();
   goddess->Initialize();
-  goddess->ReportDetectors();
+  if (0) goddess->ReportDetectors();
 #endif
 
   /* DFMA */
@@ -357,7 +344,21 @@ int main(int argc, char *argv[]) {
 	cout << "No ROOT output requested -- no histos or trees. " << endl;
       }
       
-      if (ctrl->withTREE) { InitializeTree(ctrl); }
+      if (ctrl->withTREE) { 
+	InitializeTree(); 
+#ifdef WITH_S800
+	InitializeTreeS800(ctrl);
+#endif
+#ifdef WITH_CHICO
+	InitializeTreeCHICO();
+#endif
+#ifdef WITH_PWALL
+	InitializeTreePhosWall();
+#endif
+#ifdef WITH_GOD
+	InitializeTreeGODDESS();
+#endif
+      }
       
       // teb->SetMaxTreeSize(1000000000LL); /* Max tree size is 1GB */
 
@@ -527,10 +528,10 @@ int main(int argc, char *argv[]) {
       if (ctrl->gateTree) {
 #ifdef WITH_S800
 	Int_t pidOK = CheckS800PIDGates(incomingBeam, outgoingBeam);
-	if (pidOK && ctrl->withTREE) { teb->Fill(); }	
+	if (pidOK && ctrl->withTREE) { teb->Fill();  cnt->treeWrites++; }	
 #endif
       } else {
-	if (ctrl->withTREE) { teb->Fill(); }
+	if (ctrl->withTREE) { teb->Fill();  cnt->treeWrites++; }
       }
       
       timer.Stop();
@@ -586,12 +587,9 @@ int main(int argc, char *argv[]) {
   }
   
   /* Declare victory!!! */
-  
   cout << endl;
   timer.Delete();
-  cout << "We finished!! Yay us! :)" << endl;
-  cout << endl;
-  
+
   return 1;
 }
 
@@ -601,30 +599,56 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
 	     GRETINAVariables* gVar, INLCorrection *inlCor, UShort_t junk[]) {
   
   cnt->Increment(sizeof(struct globalHeader));
-  
+
   switch(gHeader.type) {
     
   case DECOMP:
-    { gret->getMode2(inf, gHeader.length, gVar, cnt); }
+    { 
+      if (cnt->headerType[DECOMP] == 0 && ctrl->withTREE) {
+	InitializeTreeMode2();
+	for (Int_t i=0; i<cnt->treeWrites; i++) {
+	  teb->FindBranch("g2")->Fill();
+	}
+      }
+      gret->getMode2(inf, gHeader.length, gVar, cnt); 
+    }
     break;
   case TRACK:
-    { gret->getMode1(inf, gVar, cnt); }
+    { 
+      if (cnt->headerType[TRACK] == 0 && ctrl->withTREE) {
+	InitializeTreeMode1();
+	for (Int_t i=0; i<cnt->treeWrites; i++) {
+	  teb->FindBranch("g1")->Fill();
+	}
+      }
+      gret->getMode1(inf, gVar, cnt); 
+    }
     break;
   case RAW:
-    { gret->getMode3(inf, gHeader.length, cnt, ctrl, gVar); }
+    { 
+      if (cnt->headerType[RAW] == 0 && ctrl->withTREE) {
+	InitializeTreeMode3();
+	for (Int_t i=0; i<cnt->treeWrites; i++) {
+	  teb->FindBranch("g3")->Fill();
+	}
+      }
+      gret->getMode3(inf, gHeader.length, cnt, ctrl, gVar); 
+    }
     break;
   case RAWHISTORY:
-    { gret->getMode3History(inf, gHeader.length, gHeader.timestamp, cnt, gVar); }
+    { 
+      if (cnt->headerType[RAWHISTORY] == 0 && ctrl->withTREE) {
+	InitializeTreeHistory();
+	for (Int_t i=0; i<cnt->treeWrites; i++) {
+	  teb->FindBranch("g3H")->Fill();
+	}
+      }
+      gret->getMode3History(inf, gHeader.length, gHeader.timestamp, cnt, gVar); 
+    }
     break;
-#ifdef WITH_BGS
   case BGS:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
-#else 
-  case BGS:
-    { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
-    break;
-#endif
 #ifdef WITH_S800
   case S800:
     { s800->getAndProcessS800(inf, gHeader.length);  cnt->Increment(gHeader.length); }
@@ -645,8 +669,6 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     break;
   case S800PHYSICS:
     {
-      //SkipData(inf, junk);
-      //printf("%0.3f\n", s800->fp.crdc1.x);
       s800->phys.Reset();
       s800->getPhysics(inf);
       cnt->Increment(gHeader.length);
@@ -666,14 +688,30 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
 #endif
-  case BANK29:
-    { gret->getBank29(inf, gHeader.length, cnt);  cnt->Increment(gHeader.length); }
+  case BANK88:
+    { 
+      if (cnt->headerType[BANK88] == 0 && ctrl->withTREE) {
+	InitializeTreeBank88();
+	for (Int_t i=0; i<cnt->treeWrites; i++) {
+	  teb->FindBranch("b88")->Fill();
+	}
+      }
+      gret->getBank88(inf, gHeader.length, cnt);  cnt->Increment(gHeader.length); 
+    }
     break;
   case GRETSCALER:
     { gret->getScaler(inf, gHeader.length);  cnt->Increment(gHeader.length); }
     break;
   case G4SIM:
-    { SkipData(inf, junk);  cnt->Increment(gHeader.length); } 
+    { 
+      if (cnt->headerType[G4SIM] == 0 && ctrl->withTREE) {
+	InitializeTreeSimulation();
+	for (Int_t i=0; i<cnt->treeWrites; i++) {
+	  teb->FindBranch("gSim")->Fill();
+	}
+      }
+      SkipData(inf, junk);  cnt->Increment(gHeader.length); 
+    } 
     //gret->getSimulated(inf);  cnt->Increment(gHeader.length); }
     break;
 #ifdef WITH_CHICO
@@ -713,7 +751,7 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     { 
       goddess->ts = (uint64_t)gHeader.timestamp;
       goddess->getAnalogGoddess(inf, gHeader.length); 
-      //     goddess->printAnalogRawEvent();
+      // goddess->printAnalogRawEvent();
       cnt->Increment(gHeader.length);
     }
     break;
@@ -859,9 +897,6 @@ void PrintHelpInformation() {
 void PrintConditions() {
   printf("\n***************************************************************************\n\n");
   printf("    Initializing -- GRETINA ");
-#ifdef WITH_BGS
-  printf("+ BGS ");
-#endif
 #ifdef WITH_CHICO
   printf("+ CHICO2 ");
 #endif
@@ -871,12 +906,10 @@ void PrintConditions() {
 #ifdef WITH_S800
   printf("+ S800 ");
 #endif
-#ifndef WITH_BGS
 #ifndef WITH_CHICO
 #ifndef WITH_PWALL
 #ifndef WITH_S800
   printf("only ");
-#endif
 #endif
 #endif
 #endif

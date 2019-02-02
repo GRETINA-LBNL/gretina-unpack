@@ -408,7 +408,7 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt,
       gret->fillHistos(2);
     }
     if (ctrl->withTREE) { 
-      teb->Fill(); 
+      teb->Fill(); cnt->treeWrites++;
 #ifdef WITH_PWALL
       /* Reset Phoswall */
       phosWall->Reset();
@@ -420,6 +420,9 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt,
       }
       ddasEv->getData().clear();
       lendaEv->Clear();
+#endif
+#ifdef WITH_GOD
+      goddess->Clear();
 #endif
     }
   } 
@@ -434,7 +437,7 @@ void ResetEvent(controlVariables* ctrl, counterVariables* cnt) {
       (cnt->getEventBit(TRACK)) || (cnt->getEventBit(GRETSCALER))) {
     gret->Reset();
   }
-  /* Reset temporary crystal event structures, BGS structures too. */
+  /* Reset temporary crystal event structures. */
 #ifdef WITH_S800
   if ((cnt->event & 0x10) || (cnt->event & 0x100)) { s800->Reset(); }
 #endif

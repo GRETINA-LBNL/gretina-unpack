@@ -30,7 +30,7 @@
 #define S800   5
 #define S800AUX 6
 #define GRETSCALER 7
-#define BANK29 8
+#define BANK88 8
 #define S800PHYSICS 9
 #define S800AUX_TS 10
 #define G4SIM 11
@@ -43,6 +43,7 @@
 #define GODDESS 19
 #define ANLLaBr 20
 #define LENDA 21
+#define GODDESSAUX 22
 
 /********** Superpulse information **********/
 
