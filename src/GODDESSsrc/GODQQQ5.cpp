@@ -165,7 +165,7 @@ void QQQ5::GetMaxHitInfo(Int_t* stripMaxP, uint64_t* timestampMaxP,
   }
 } 
 
-void QQQ5::LoadEvent(goddessEvent *ev) {
+void QQQ5::LoadEvent(goddessEvent *ev, Bool_t ignoreThresholds) {
   std::map<Short_t, Short_t>::iterator itr;
   std::map<Short_t, Short_t> mapP, mapN;
   mapP = GetChannelMap(0);
@@ -182,14 +182,14 @@ void QQQ5::LoadEvent(goddessEvent *ev) {
     if (ev->channels[i] >= beginP && ev->channels[i] <= endP) {
       for (itr=mapP.begin(); itr!=mapP.end(); ++itr) {
 	if (ev->channels[i] == itr->second) {
-	  SetRawEValue(itr->first-1, 0, ev->values[i], 1);
+	  SetRawEValue(itr->first-1, 0, ev->values[i], ignoreThresholds);
 	  break;
 	}
       }
     } else if (ev->channels[i] >= beginN && ev->channels[i] <= endN) {
       for (itr=mapN.begin(); itr!=mapN.end(); ++itr) {
 	if (ev->channels[i] == itr->second) {
-	  SetRawEValue(itr->first-1, 1, ev->values[i], 1);
+	  SetRawEValue(itr->first-1, 1, ev->values[i], ignoreThresholds);
 	  break;
 	}
       }

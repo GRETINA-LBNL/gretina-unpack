@@ -112,7 +112,7 @@ class orrubaDet : public TObject {
   Bool_t ChannelHit(UInt_t detChannel, Bool_t nType);
 
   /* Loading an event into the detector, setting/getting values. */
-  virtual void LoadEvent(goddessEvent *ev) = 0;
+  virtual void LoadEvent(goddessEvent *ev, Bool_t ignoreThresholds) = 0;
   
   virtual void SetRawEValue(UInt_t detChannel, UInt_t rawValue, Int_t ignoreThresh); 
   virtual void SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue,  
@@ -230,7 +230,7 @@ class superX3 : public orrubaDet {
   std::vector<Float_t> GetResE(Bool_t calibrated = kTRUE);
 
   /* Actual main analysis-ish functions */
-  virtual void LoadEvent(goddessEvent *ev);
+  virtual void LoadEvent(goddessEvent *ev, Bool_t ignoreThresholds);
   virtual void SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue, Int_t ignoreThresh); 
   
   virtual void SortAndCalibrate(Bool_t doCalibrate);
@@ -305,7 +305,7 @@ class QQQ5 : public orrubaDet {
   virtual Int_t GetChannelMult(Bool_t nType, Bool_t calibrated);
   virtual Float_t GetESum(Bool_t nType = kFALSE, Bool_t calibrated = kTRUE);
 
-  virtual void LoadEvent(goddessEvent *ev);
+  virtual void LoadEvent(goddessEvent *ev, Bool_t ignoreThresholds);
   virtual void SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue,  
    			   Int_t ignoreThresh); 
   virtual void SortAndCalibrate(Bool_t doCalibrate);
@@ -369,7 +369,7 @@ class BB10 : public orrubaDet {
   virtual Int_t GetChannelMult(Bool_t nType, Bool_t calibrated);
   virtual Float_t GetESum(Bool_t nType = kFALSE, Bool_t calibrated = kTRUE);
 
-  virtual void LoadEvent(goddessEvent *ev);
+  virtual void LoadEvent(goddessEvent *ev, Bool_t ignoreThresholds);
   virtual void SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue,  
 			    Int_t ignoreThresh); 
   virtual void SortAndCalibrate(Bool_t doCalibrate = kTRUE);  
@@ -379,9 +379,6 @@ class BB10 : public orrubaDet {
   			     Bool_t calibrated = kTRUE); 
 
   virtual TVector3 GetEventPosition(Bool_t calibrated = kTRUE);
-
-
-
 
  private:
   ClassDef(BB10, 1);
@@ -394,36 +391,73 @@ class BB10 : public orrubaDet {
 
 class ionChamber: public TObject {
  public:
+  typedef std::map<Short_t, Float_t> valueMap; 
+  typedef std::map<Short_t, Short_t> chMap;
 
  private:
-  Int_t numDE, numEres;
-  std::vector<Float_t> anodeRaw, scintRawE, scintRawT;
-  std::vector<Float_t> anodeCal, scintCalE, scintCalT;
+  Int_t numAnode, numWireX, numWireY, numDE, numEres;
+  valueMap anodeRaw, anodeCal;
+  valueMap wireX, wireY;
   Float_t dE, resE, E; // All in MeV
-  std::vector< std::vector<Float_t> > parAnodeECal, parScintECal, parScintTCal;
+  std::vector< std::vector<Float_t> > parAnodeECal;
+  std::vector<Int_t> threshAnode, threshX, threshY; 
+
+  chMap mapAnode, mapX, mapY;
 
  public:
-  ionChamber(Int_t numAnode, Int_t numScint, Int_t numDE, Int_t numEres);
+  ionChamber() { ; }
+  ionChamber(Int_t numAnode, Int_t numWireX, Int_t numWireY, Int_t numDE, Int_t numEres);
   ~ionChamber() { ; }
-  
-  void Clear();
-  void SetAnodeECalPars(Int_t ch, std::vector<Float_t> pars);
-  void SetScintECalPars(Int_t ch, std::vector<Float_t> pars);
-  void SetScintTCalPars(Int_t ch, std::vector<Float_t> pars);
-  
-  void SetRawValue(UInt_t channel, Bool_t scintType, UInt_t rawValue, Int_t ignoreThresh);
-  void SetTimestamp(UInt_t channel, Bool_t secondaryType, uint64_t timestamp);
 
-  Int_t GetNumChannels(Bool_t scintType);
+  void Clear();
+  
+  void SetChannelMap(std::map<Short_t, Short_t> channelMap, Int_t chType);
+  std::map<Short_t, Short_t> GetChannelMap(Int_t chType);
+
+  Bool_t ValidChannel(UInt_t channel, Int_t chType); 
+
+  void SetRawValue(UInt_t channel, Int_t chType, UInt_t rawValue, Int_t ignoreThresh);
+  
+  Bool_t SetThresholds(std::vector<Int_t> thresholds, Int_t chType);
+  std::vector<Int_t> GetThresholds(Int_t chType);
+  // void SetAnodeECalPars(Int_t ch, std::vector<Float_t> pars);
+
+  void LoadEvent(goddessEvent *ev, Bool_t ignoreThresholds);
+
+  Int_t GetNumChannels(Int_t chType);
   Float_t GetAnodeDE() { return dE; }
   Float_t GetAnodeResE() { return resE; }
   Float_t GetAnodeE() { return E; }
-
-  Bool_t ValidAnode(size_t ch);
-  Bool_t ValidScint(size_t ch);
+  Int_t GetMaxX();
+  Int_t GetMaxY();
 
  private:
   ClassDef(ionChamber, 1);
+};
+
+struct detectorOUT {
+  UShort_t depth;
+  Int_t pStrip, nStrip;
+  Float_t pECal, nECal;
+  TVector3 evPos;
+};
+
+class goddessOut: public TObject {
+ public:
+  std::vector<string> siID;
+  std::vector<detectorOUT> si;
+  Float_t icDE;
+  Float_t icE;
+  Float_t icX;
+  Float_t icY;
+
+ public:
+  goddessOut() { ; }
+  ~goddessOut() { ; }
+  void Clear();
+
+ private:
+  ClassDef(goddessOut, 1);
 };
 
 /**************************************************************************/
@@ -438,6 +472,9 @@ class goddessFull: public TObject {
   std::vector<QQQ5> qqs;
   std::vector<superX3> s3s;
   std::vector<BB10> bbs;
+  std::vector<ionChamber> ics;
+
+  goddessOut *eventOut;
 
   uint64_t ts;
 
@@ -459,7 +496,7 @@ class goddessFull: public TObject {
   void getAnalogGoddess(FILE *inf, Int_t evtLength);
   void printAnalogRawEvent();
   void ProcessEvent();
-
+  void ResetOutput(detectorOUT* det);
 
  public:
     

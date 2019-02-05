@@ -173,7 +173,7 @@ std::vector< std::vector<Float_t> > orrubaDet::GetECalParameters(Bool_t nType) {
 Bool_t orrubaDet::SetThresholds(std::vector<Int_t> thresholds, Bool_t nType, Int_t thrSize) {
   if (thrSize == 0) { thrSize = (UInt_t)GetNumChannels(nType); }
   if (thresholds.size() != (UInt_t)thrSize) {
-    printf("ERROR: Size of vector for thresholds (%d) was net as expected (%d)\n",
+    printf("ERROR: Size of vector for thresholds (%d) was not as expected (%d)\n",
 	   thresholds.size(), thrSize);
     return kFALSE;
   }
@@ -188,11 +188,23 @@ std::vector<Int_t> orrubaDet::GetThresholds(Bool_t nType) {
 }
 
 /************************************************************/
+/* GODDESS Tree Output                                      */
+/************************************************************/
+
+void goddessOut::Clear() {
+  siID.clear();
+  si.clear();
+}
+
+
+/************************************************************/
 /* Overall GODDESS                                          */
 /************************************************************/
 
 void goddessFull::Initialize() {
   rawGoddess = new goddessEvent;
+  eventOut = new goddessOut();
+  eventOut->Clear();
   InitializeDetectors();
 }
 
@@ -206,6 +218,19 @@ void goddessFull::Clear() {
   for (Int_t i=0; i<bbs.size(); i++) {
     bbs[i].Clear();
   }
+  for (Int_t i=0; i<ics.size(); i++) {
+    ics[i].Clear();
+  }
+  eventOut->Clear();
+}
+
+void goddessFull::ResetOutput(detectorOUT *det) { 
+  det->depth = 0;
+  det->pStrip = -1;
+  det->nStrip = -1;
+  det->pECal = -1.0;
+  det->nECal = -1.0;
+  det->evPos.SetXYZ(0,0,0);
 }
 
 Bool_t goddessFull::ParseID(std::string id, Short_t &sector, Short_t &depth, Bool_t &upStream) {
@@ -282,18 +307,17 @@ void goddessFull::ReadPositions(TString filename) {
 	return;
       }
       geomInfo[geomKey+ " Y"] = atof(valStr.substr(comma+1, nextComma-(comma+1)).c_str());
-      cout << "Found parameter \"" << geomKey + " Y" << "\" : " 
-	   << geomInfo[geomKey + " Y"] << endl;
+      if (0) { cout << "Found parameter \"" << geomKey + " Y" << "\" : " 
+		    << geomInfo[geomKey + " Y"] << endl; }
       geomInfo[geomKey+ " Z"] = atof(valStr.substr(nextComma+1, closePar-(nextComma+1)).c_str());
-      cout << "Found parameter \"" << geomKey + " Z" << "\" : " 
-	   << geomInfo[geomKey + " Z"] << endl;
+      if (0) { cout << "Found parameter \"" << geomKey + " Z" << "\" : " 
+		    << geomInfo[geomKey + " Z"] << endl; }
     } else {
       geomInfo[geomKey] = atof(readLine.substr(equalPos+1).c_str());
-      cout << "Found parameter \"" << geomKey << "\" : "
-	   << geomInfo[geomKey] << endl;
+      if (0) { cout << "Found parameter \"" << geomKey << "\" : "
+		    << geomInfo[geomKey] << endl; }
     }
   }
-  cin.get();
   return;
 }
 
@@ -370,6 +394,7 @@ void goddessFull::ReadConfiguration(TString filename) {
   superX3 *s3 = 0;
   BB10 *bb = 0;
   QQQ5 *qq = 0;
+  ionChamber *ic = 0;
 
   std::ifstream inFile(filename.Data(), std::ifstream::in);
 
@@ -399,7 +424,26 @@ void goddessFull::ReadConfiguration(TString filename) {
     cout << "\nRegistering " << detType << " detector:\n";
     
     if (detType == "ion") {
-    
+      std::map<Short_t, Short_t> tempMap = std::map<Short_t, Short_t>(); 
+      
+      Int_t aDaqCh, xDaqCh, yDaqCh = 0;
+      if (!(lineStream >> aDaqCh >> xDaqCh >> yDaqCh)) { break; }
+      ic = new ionChamber(2, 32, 32, 1, 1);
+      for (Int_t j=1; j<=2; j++) {
+	tempMap[j] = j + aDaqCh;
+      }
+      ic->SetChannelMap(tempMap, 1);
+      tempMap = std::map<Short_t, Short_t>(); 
+      for (Int_t j=1; j<=32; j++) {
+	tempMap[j] = j + xDaqCh;
+      }
+      ic->SetChannelMap(tempMap, 2);
+      tempMap = std::map<Short_t, Short_t>(); 
+      for (Int_t j=1; j<=32; j++) {
+	tempMap[j] = j + yDaqCh;
+      }
+      ic->SetChannelMap(tempMap, 3);
+
     } else if (detType == "liquidScint") {
 
 
@@ -525,7 +569,7 @@ void goddessFull::ReadConfiguration(TString filename) {
       
       /* Check subtype is valid */
       if (detType == "ion") { 
-	if (subType != "scint" && subType != "anode") {
+	if (subType != "x" && subType != "anode" && subType != "y") {
 	  cout << "Error! (goddessFull::ReadConfiguration) - Unknown calibration subtype: " 
 	       << subType << "!\n";
 	  continue;
@@ -543,14 +587,27 @@ void goddessFull::ReadConfiguration(TString filename) {
 	Int_t threshold;
 	std::vector<Int_t> thresholds;
 	while (lineStream >> threshold) { thresholds.push_back(threshold); }
-	if (secondaryType) {
-	  cout << "Setting n-type thresholds (" << thresholds.size() << ").\n";
+	if (detType == "ion") {
+	  if (subType == "anode") { 
+	    cout << "Setting anode thresholds (" << thresholds.size() << ").\n";
+	    ic->SetThresholds(thresholds, 1);
+	  } else if (subType == "x") { 
+	    cout << "Setting x thresholds (" << thresholds.size() << ").\n";
+	    ic->SetThresholds(thresholds, 2);
+	  } else if (subType == "y") {
+	    cout << "Setting y thresholds (" << thresholds.size() << ").\n";
+	    ic->SetThresholds(thresholds, 3);
+	  }
 	} else {
-	  cout << "Setting p-type thresholds (" << thresholds.size() << ").\n";
+	  if (secondaryType) {
+	    cout << "Setting n-type thresholds (" << thresholds.size() << ").\n";
+	  } else {
+	    cout << "Setting p-type thresholds (" << thresholds.size() << ").\n";
+	  }
+	  if (detType == "BB10") { bb->SetThresholds(thresholds, secondaryType, thresholds.size()); }
+	  if (detType == "QQQ5") { qq->SetThresholds(thresholds, secondaryType, thresholds.size()); }
+	  if (detType == "superX3") { s3->SetThresholds(thresholds, secondaryType, thresholds.size()); }
 	}
-	if (detType == "BB10") { bb->SetThresholds(thresholds, secondaryType, thresholds.size()); }
-	if (detType == "QQQ5") { qq->SetThresholds(thresholds, secondaryType, thresholds.size()); }
-	if (detType == "superX3") { s3->SetThresholds(thresholds, secondaryType, thresholds.size()); }
 	continue;
       } else {
 	if (!(lineStream >> detChannel)) {
@@ -572,9 +629,7 @@ void goddessFull::ReadConfiguration(TString filename) {
 	else if (detType == "QQQ5") { qq->SetECalParameters(params, detChannel, secondaryType); }
       }
       prevPos = inFile.tellg();
-      
     }
-
     
     if (detType == "QQQ5") { 
       cout << "Read " << qq->GetECalParameters(0).size() << " energy calibrations (p-type).\n";
@@ -587,10 +642,11 @@ void goddessFull::ReadConfiguration(TString filename) {
     } else if (detType == "BB10") { 
       cout << "Read " << bb->GetECalParameters(0).size() << " energy calibrations (p-type).\n";
       bbs.push_back(*bb); 
+    } else if (detType == "ion") {
+      ics.push_back(*ic);
     }
-
   }
-
+  
   if (inFile.good()) { 
     cout << "Error! (goddessFull::ReadConfiguration) - Failed on line " << nn << "\n";
   }
@@ -602,23 +658,67 @@ void goddessFull::InitializeDetectors() {
 }
 
 void goddessFull::ProcessEvent() {
+  detectorOUT detOut;
+
   for (UInt_t i=0; i<qqs.size(); i++) {
-    qqs[i].LoadEvent(rawGoddess);
+    qqs[i].LoadEvent(rawGoddess, 0);
     qqs[i].SortAndCalibrate(kTRUE);
+    ResetOutput(&detOut);
+    qqs[i].GetMaxHitInfo(&detOut.pStrip, nullptr, &detOut.nStrip, nullptr);
+    if (detOut.pStrip >= 0) {
+      detOut.depth = qqs[i].GetDepth();
+      detOut.pECal = -1.0;  detOut.nECal = -1.0;
+      for (Int_t j=0; j<qqs[i].stripsP.size(); j++) {
+	if (qqs[i].stripsP[j] == detOut.pStrip) {
+	  detOut.pECal = qqs[i].eCalP[j];
+	}
+      }
+      for (Int_t j=0; j<qqs[i].stripsN.size(); j++) {
+	if (qqs[i].stripsN[j] == detOut.nStrip) {
+	  detOut.nECal = qqs[i].eCalN[j];
+	}
+      }
+      detOut.evPos = qqs[i].GetEventPosition();
+      eventOut->siID.push_back(qqs[i].GetPosID());
+      eventOut->si.push_back(detOut);
+    }
   }
   for (UInt_t i=0; i<s3s.size(); i++) {
-    s3s[i].LoadEvent(rawGoddess);
+    s3s[i].LoadEvent(rawGoddess, 0);
     s3s[i].SortAndCalibrate(kTRUE);
   }
   for (UInt_t i=0; i<bbs.size(); i++) {
-    bbs[i].LoadEvent(rawGoddess);
+    bbs[i].LoadEvent(rawGoddess, 0);
     bbs[i].SortAndCalibrate(kTRUE);
+    ResetOutput(&detOut);
+    bbs[i].GetMaxHitInfo(&detOut.pStrip, nullptr, nullptr, nullptr);
+    if (detOut.pStrip >= 0) {
+      detOut.nStrip = -1;
+      detOut.depth = bbs[i].GetDepth();
+      detOut.pECal = -1.0;  detOut.nECal = -1.0;
+      for (Int_t j=0; j<bbs[i].stripsP.size(); j++) {
+	if (bbs[i].stripsP[j] == detOut.pStrip) {
+	  detOut.pECal = bbs[i].eCalP[j];
+	}
+      }
+      detOut.evPos = bbs[i].GetEventPosition();
+      eventOut->siID.push_back(bbs[i].GetPosID());
+      eventOut->si.push_back(detOut);
+    }
+  }
+  for (UInt_t i=0; i<ics.size(); i++) {
+    ics[i].LoadEvent(rawGoddess, 0);
+    eventOut->icDE = ics[i].GetAnodeDE();
+    eventOut->icE = ics[i].GetAnodeE();
+    eventOut->icX = ics[i].GetMaxX();
+    eventOut->icY = ics[i].GetMaxY();
   }
 
   if (0) {
     std::map<Short_t, Float_t> eMap;
     std::map<Short_t, Float_t>::iterator itr;
     for (Int_t i=0; i<qqs.size(); i++) {
+      cout << "QQQ5 ID: " << qqs[i].GetPosID() << endl;
       eMap = qqs[i].GetRawE(0);
       if (eMap.size() > 0) {
 	for (itr=eMap.begin(); itr!= eMap.end(); ++itr) {
@@ -654,8 +754,8 @@ void goddessFull::ProcessEvent() {
 	}
       }
     }
+    cin.get();
   }
-
 
   if (0) {
     cout << "-------------------------" << endl;
@@ -679,7 +779,7 @@ void goddessFull::ProcessEvent() {
       // }
       if (s3s[i].eCalN.size() > 0) {
 	for (Int_t j=0; j<s3s[i].eCalN.size(); j++) {
-	  cout << "SuperX3-" << i+1 << " (N) Ch. " << s3s[i].stripsP[j] << ", E = " << s3s[i].eCalN[j] << endl;
+	  cout << "SuperX3-" << i+1 << " (N) Ch. " << s3s[i].stripsN[j] << ", E = " << s3s[i].eCalN[j] << endl;
 	}
       }
     }

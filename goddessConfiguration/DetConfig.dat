@@ -730,7 +730,7 @@ eCal  n   1  0  1
 eCal  n   2  0  1
 eCal  n   3  0  1
 QQQ5  1234-56  D1-E2   544 500
-thresh p 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+thresh p 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 155 0 140 135 0 0 0 140 150 0 140 140 165 150
 thresh n 0 0 0 0
 eCal  p  0  0  1
 eCal  p  1  0  1
@@ -758,9 +758,9 @@ eCal  p  22  0  1
 eCal  p  23  0  1
 eCal  p  24  0  1
 eCal  p  25  0  1
-eCal  p  26  0  1
-eCal  p  27  0  1
-eCal  p  28  0  1
+eCal  p  26  0  1 
+eCal  p  27  0  1 
+eCal  p  28  0  1 
 eCal  p  29  0  1
 eCal  p  30  0  1
 eCal  p  31  0  1
@@ -807,7 +807,10 @@ eCal  n   0  0  1
 eCal  n   1  0  1
 eCal  n   2  0  1
 eCal  n   3  0  1
-
+ion 720 656 688
+thresh anode 0 0
+thresh x 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+thresh y 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 
 
 

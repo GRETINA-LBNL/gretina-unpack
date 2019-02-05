@@ -45,7 +45,7 @@ Int_t BB10::GetChannelMult(Bool_t nType, Bool_t calibrated) {
   return eRawP.size();
 }
 
-void BB10::LoadEvent(goddessEvent *ev) {
+void BB10::LoadEvent(goddessEvent *ev, Bool_t ignoreThresholds) {
   std::map<Short_t, Short_t>::iterator itr;
   std::map<Short_t, Short_t> mapP;
   mapP = GetChannelMap(0);
@@ -58,7 +58,7 @@ void BB10::LoadEvent(goddessEvent *ev) {
     if (ev->channels[i] >= beginP && ev->channels[i] <= endP) {
       for (itr=mapP.begin(); itr!=mapP.end(); ++itr) {
 	if (ev->channels[i] == itr->second) {
-	  SetRawEValue(itr->first-1, 0, ev->values[i], 1);
+	  SetRawEValue(itr->first-1, 0, ev->values[i], ignoreThresholds);
 	  break;
 	}
       }

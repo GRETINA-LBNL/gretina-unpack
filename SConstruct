@@ -179,7 +179,7 @@ if GODDESS==1:
    godLibTarget = 'lib/GODDESS'
    godLibSources = ['lib/GoddessDict.cpp', 'src/GODDESSsrc/GODDESS.cpp', 
                     'src/GODDESSsrc/GODBB10.cpp', 'src/GODDESSsrc/GODQQQ5.cpp',
-		    'src/GODDESSsrc/GODSuperX3.cpp']
+		    'src/GODDESSsrc/GODSuperX3.cpp', 'src/GODDESSsrc/GODIonChamber.cpp']
    env.SharedLibrary(target = godLibTarget, source = godLibSources, 
                      SHLIBPREFIX='lib')
 

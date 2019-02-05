@@ -266,6 +266,7 @@ void InitializeTreeLENDA() {
 #ifdef WITH_GOD
 void InitializeTreeGODDESS() {
   teb->Branch("god.ts", &(goddess->ts), "god.ts/L");
+  teb->Branch("godEv", "goddessOut", &(goddess->eventOut));
   teb->Branch("god.eventRaw", "goddessEvent", &(goddess->rawGoddess));
 }
 #endif
