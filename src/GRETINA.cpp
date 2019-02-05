@@ -1195,6 +1195,8 @@ void GRETINAVariables::Initialize() {
   ataCor = 0.0; btaCor = 0.0;
   for (Int_t i=0; i<MAXCRYSTALS; i++) { radiusCor[i] = 1.0; }
   for (Int_t i=0; i<MAXQUADS; i++) { hole[i] = -1; electronicsOrder[i] = -1; }
+
+  ReadSegmentCenters("gretinaCalibrations/segmentCenters.dat");
   
   minCrossTime = 70; maxCrossTime = 90;
 }
@@ -1327,6 +1329,44 @@ void GRETINAVariables::ReadGeCalFile(TString filename) {
   fclose(fp);
 }
 
+
+void GRETINAVariables::ReadSegmentCenters(TString filename) {
+  FILE *fp;
+  Int_t i1, i2, nn;  Float_t f1, f2, f3;
+  char *st, str[128];
+
+  /* Open file */
+  fp = fopen(filename.Data(), "r");
+  if (fp == NULL) {
+    printf("Could not open \"%s\".\n", filename.Data());
+    exit(1);
+  }
+  printf("\"%s\" open...", filename.Data());
+
+  /* Read values */
+  nn = 0;
+  st = fgets(str, 64, fp);
+  while (st!=NULL) {
+    if (str[0] == 35 || str[0] == 59 || str[0] == 10) {
+      /* Comment or blank line.  Do nothing. */
+    } else {
+      sscanf(str, "%i %i %f %f %f", &i1, &i2, &f1, &f2, &f3);
+      if (i1>=0 && i1<=1 && i2>=0 && i2<=35) {
+	segCenter[i1][0][i2] = f1;
+	segCenter[i1][1][i2] = f2;
+	segCenter[i1][2][i2] = f3;
+      }
+      nn++;
+    }
+
+    /* Attempt to read next line. */
+    st = fgets(str, 64, fp);
+  }
+  printf("Read %i segment positions.\n", nn-1);
+  
+  fclose(fp);
+}
+
 /**************************************************************/
 /* GRETINA Class Functions ************************************/
 /**************************************************************/
@@ -1334,82 +1374,7 @@ void GRETINAVariables::ReadGeCalFile(TString filename) {
 void GRETINA::Initialize() {
 
   wfMinCrossTime = 70.; wfMaxCrossTime = 90.;
-  
-  /* Segment positions for Doppler corrections */
-  xA[0] = 20.6;    yA[0] = 0.0;     zA[0] = 4.1;
-  xA[1] = 9.7;     yA[1] = -17.2;   zA[1] = 4.1;
-  xA[2] = -10.3;   yA[2] = -15.7;   zA[2] = 4.1;
-  xA[3] = -18.3;   yA[3] = 0.9;     zA[3] = 4.1;
-  xA[4] = -8.4;    yA[4] = 16.2;    zA[4] = 4.1;
-  xA[5] = 11.1;    yA[5] = 16.6;    zA[5] = 4.1;
-  xA[6] = 22.2;    yA[6] = 0.0;     zA[6] = 15.1;
-  xA[7] = 10.4;    yA[7] = -18.7;   zA[7] = 15.1;
-  xA[8] = -11.2;   yA[8] = -17.0;   zA[8] = 15.1;
-  xA[9] = -20.0;   yA[9] = 0.9;     zA[9] = 15.1;
-  xA[10] = -9.2;   yA[10] = 17.6;   zA[10] = 15.1;
-  xA[11] = 12.0;   yA[11] = 18.0;   zA[11] = 15.1;
-  xA[12] = 24.0;   yA[12] = 0.0;    zA[12] = 30.2;
-  xA[13] = 11.2;   yA[13] = -20.4;  zA[13] = 30.2;
-  xA[14] = -12.4;  yA[14] = -18.7;  zA[14] = 30.2;
-  xA[15] = -21.9;  yA[15] = 1.1;    zA[15] = 30.2;
-  xA[16] = -10.1;  yA[16] = 19.3;   zA[16] = 30.2;
-  xA[17] = 12.9;   yA[17] = 19.7;   zA[17] = 30.2;
-  xA[18] = 25.3;   yA[18] = 0.0;    zA[18] = 46.7;
-  xA[19] = 11.7;   yA[19] = -21.8;  zA[19] = 46.7;
-  xA[20] = -13.4;  yA[20] = -20.2;  zA[20] = 46.7;
-  xA[21] = -23.7;  yA[21] = 1.2;    zA[21] = 46.7;
-  xA[22] = -11.0;  yA[22] = 20.9;   zA[22] = 46.7;
-  xA[23] = 13.6;   yA[23] = 21.1;   zA[23] = 46.7;
-  xA[24] = 25.9;   yA[24] = -0.3;   zA[24] = 65.6;
-  xA[25] = 12.1;   yA[25] = -22.7;  zA[25] = 65.6;
-  xA[26] = -14.2;  yA[26] = -21.3;  zA[26] = 65.7;
-  xA[27] = -25.5;  yA[27] = 1.2;    zA[27] = 65.7;
-  xA[28] = -11.9;  yA[28] = 22.4;   zA[28] = 65.7;
-  xA[29] = 13.7;   yA[29] = 22.0;   zA[29] = 65.6;
-  xA[30] = 26.1;   yA[30] = -0.4;   zA[30] = 82.9;
-  xA[31] = 12.1;   yA[31] = -23.1;  zA[31] = 82.9;
-  xA[32] = -14.6;  yA[32] = -21.7;  zA[32] = 82.9;
-  xA[33] = -26.2;  yA[33] = 1.4;    zA[33] = 82.9;
-  xA[34] = -12.3;  yA[34] = 23.1;   zA[34] = 82.9;
-  xA[35] = 13.6;   yA[35] = 22.4;   zA[35] = 82.9;
-  
-  xB[0] = 18.0;    yB[0] = 10.0;    zB[0] = 4.1;
-  xB[1] = 18.4;    yB[1] = -9.8;    zB[1] = 4.1;
-  xB[2] = 1.8;     yB[2] = -19.9;   zB[2] = 4.1;
-  xB[3] = -16.1;   yB[3] = -10.1;   zB[3] = 4.1;
-  xB[4] = -17.5;   yB[4] = 9.1;     zB[4] = 4.1;
-  xB[5] = -0.3;    yB[5] = 19.8;    zB[5] = 4.1;
-  xB[6] = 19.4;    yB[6] = 10.8;    zB[6] = 15.1;
-  xB[7] = 19.9;    yB[7] = -10.6;   zB[7] = 15.1;
-  xB[8] = 1.9;     yB[8] = -21.5;   zB[8] = 15.1;
-  xB[9] = -17.6;   yB[9] = -11.0;   zB[9] = 15.1;
-  xB[10] = -19.0;  yB[10] = 9.9;    zB[10] = 15.1;
-  xB[11] = -0.5;   yB[11] = 21.5;   zB[11] = 15.1;
-  xB[12] = 20.9;   yB[12] = 11.8;   zB[12] = 30.2;
-  xB[13] = 21.5;   yB[13] = -11.6;  zB[13] = 30.2;
-  xB[14] = 1.9;    yB[14] = -23.4;  zB[14] = 30.2;
-  xB[15] = -19.3;  yB[15] = -12.0;  zB[15] = 30.2;
-  xB[16] = -20.9;  yB[16] = 10.8;   zB[16] = 30.2;
-  xB[17] = -0.7;   yB[17] = 23.4;   zB[17] = 30.2;
-  xB[18] = 22.1;   yB[18] = 12.4;   zB[18] = 46.6;
-  xB[19] = 22.6;   yB[19] = -12.2;  zB[19] = 46.6;
-  xB[20] = 1.9;    yB[20] = -25.0;  zB[20] = 46.7;
-  xB[21] = -20.9;  yB[21] = -12.9;  zB[21] = 46.7;
-  xB[22] = -22.3;  yB[22] = 11.6;   zB[22] = 46.7;
-  xB[23] = -0.8;   yB[23] = 24.9;   zB[23] = 46.7;
-  xB[24] = 22.4;   yB[24] = 13.0;   zB[24] = 65.6;
-  xB[25] = 22.9;   yB[25] = -12.5;  zB[25] = 65.5;
-  xB[26] = 1.5;    yB[26] = -25.8;  zB[26] = 65.6;
-  xB[27] = -21.8;  yB[27] = -13.7;  zB[27] = 65.6;
-  xB[28] = -23.1;  yB[28] = 11.9;   zB[28] = 65.6;
-  xB[29] = -0.9;   yB[29] = 25.8;   zB[29] = 65.6;
-  xB[30] = 22.5;   yB[30] = 13.2;   zB[30] = 82.9;
-  xB[31] = 23.1;   yB[31] = -12.6;  zB[31] = 82.9;
-  xB[32] = 1.3;    yB[32] = -26.1;  zB[32] = 82.9;
-  xB[33] = -22.1;  yB[33] = -14.0;  zB[33] = 82.9;
-  xB[34] = -23.3;  yB[34] = 12.0;   zB[34] = 82.9;
-  xB[35] = -1.0;   yB[35] = 26.0;   zB[35] = 82.9;
-  
+   
   for (Int_t i=0; i<4; i++) {
     for (Int_t j=0; j<40; j++) {
       if (j<9) { 
@@ -1471,8 +1436,7 @@ void GRETINA::Reset() {
 
 /**************************************************************/
 
-Int_t GRETINA::getMode1(FILE* inf, GRETINAVariables *gVar,
-			counterVariables *cnt) {
+Int_t GRETINA::getMode1(FILE* inf, counterVariables *cnt) {
   
   Int_t siz = 0;
   trackedGamma g1;
@@ -1516,7 +1480,7 @@ Int_t GRETINA::getMode1(FILE* inf, GRETINAVariables *gVar,
     g1X.timestamp = g1.timestamp;
     
     /* Doppler correction -- simple only right here */
-    g1X.doppler = getDopplerSimple(g1X.xyzLab1, gVar->beta);
+    g1X.doppler = getDopplerSimple(g1X.xyzLab1, var.beta);
     
     g1out.gammas.push_back(g1X);
     
@@ -1531,8 +1495,7 @@ Int_t GRETINA::getMode1(FILE* inf, GRETINAVariables *gVar,
 
 /**************************************************************/
 
-Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar, 
-			counterVariables *cnt) {
+Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, counterVariables *cnt) {
  
   Int_t siz = 0; Int_t t34 = 0, t78 = 0, t89 = 0;
   mode2ABCD6789 g2_89; mode2ABCD5678 g2_78; mode2ABCD1234 g2_34; 
@@ -1609,13 +1572,13 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
 	 We need to know this for the calibration...*/
       Int_t crystal = -1;
       for (Int_t index=0; index<MAXQUADS; index++) {
-	if ((Int_t)(g2X.crystalID/4) == gVar->hole[index]) {
-	  crystal = ((gVar->electronicsOrder[index]*4) + 
+	if ((Int_t)(g2X.crystalID/4) == var.hole[index]) {
+	  crystal = ((var.electronicsOrder[index]*4) + 
 		     (Int_t)(g2X.crystalID%4));
 	}
       }
       
-      if (crystal != -1) { calibrateMode2CC(crystal, &g2_89, &g2X, gVar); }
+      if (crystal != -1) { calibrateMode2CC(crystal, &g2_89, &g2X); }
       
       pt.Clear();
       for (Int_t m=0; m<MAX_INTPTS; m++) {
@@ -1625,10 +1588,10 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
 	  pt.xyz.SetXYZ(g2_89.intpts[m].x,
 			g2_89.intpts[m].y,
 			g2_89.intpts[m].z);
-	  pt.xyzLab = rot.crys2Lab(g2_89.crystal_id, pt.xyz);
-	  pt.xyzLabSeg = rot.crys2Lab(g2_89.crystal_id, TVector3(xA[pt.segNum], 
-							     yA[pt.segNum], 
-							     zA[pt.segNum]));
+	  pt.xyzLab = rot.crys2Lab(g2_89.crystal_id, pt.xyz);   // THIS NEEDS TO BE FIXED
+	  pt.xyzLabSeg = rot.crys2Lab(g2_89.crystal_id, TVector3(var.segCenter[0][0][pt.segNum], 
+								 var.segCenter[0][1][pt.segNum], 
+								 var.segCenter[0][2][pt.segNum]));
 	  pt.xyzLabCrys = rot.crys2Lab(g2_89.crystal_id, TVector3(0., 0., 0.));
 	  pt.e = g2_89.intpts[m].e;
 	  pt.segE = g2_89.intpts[m].seg_energy;
@@ -1636,7 +1599,7 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
 	}
       }
       
-      analyzeMode2(&g2X, gVar);
+      analyzeMode2(&g2X);
       g2out.xtals.push_back(g2X);
 
     } else if (t78) {
@@ -1655,13 +1618,13 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
 	 We need to know this for the calibration...*/
       Int_t crystal = -1;
       for (Int_t index=0; index<MAXQUADS; index++) {
-	if ((Int_t)(g2X.crystalID/4) == gVar->hole[index]) {
-	  crystal = ((gVar->electronicsOrder[index]*4) + 
+	if ((Int_t)(g2X.crystalID/4) == var.hole[index]) {
+	  crystal = ((var.electronicsOrder[index]*4) + 
 		     (Int_t)(g2X.crystalID%4));
 	}
       }
       
-      if (crystal != -1) { calibrateMode2CC(crystal, &g2_78, &g2X, gVar); }
+      if (crystal != -1) { calibrateMode2CC(crystal, &g2_78, &g2X); }
       
       pt.Clear();
       for (Int_t m=0; m<MAX_INTPTS; m++) {
@@ -1672,9 +1635,9 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
 			g2_78.intpts[m].y,
 			g2_78.intpts[m].z);
 	  pt.xyzLab = rot.crys2Lab(g2_78.crystal_id, pt.xyz);
-	  pt.xyzLabSeg = rot.crys2Lab(g2_78.crystal_id, TVector3(xA[pt.segNum], 
-							     yA[pt.segNum], 
-							     zA[pt.segNum]));
+	  pt.xyzLabSeg = rot.crys2Lab(g2_78.crystal_id, TVector3(var.segCenter[0][0][pt.segNum], 
+								 var.segCenter[0][1][pt.segNum], 
+								 var.segCenter[0][2][pt.segNum]));
 	  pt.xyzLabCrys = rot.crys2Lab(g2_78.crystal_id, TVector3(0., 0., 0.));
 	  pt.e = g2_78.intpts[m].e;
 	  pt.segE = g2_78.intpts[m].seg_energy;
@@ -1682,7 +1645,7 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
 	}
       }
       
-      analyzeMode2(&g2X, gVar);
+      analyzeMode2(&g2X);
       g2out.xtals.push_back(g2X);
 
     } else if (t34) {
@@ -1712,7 +1675,7 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, GRETINAVariables *gVar,
 	}
       }
       
-      analyzeMode2(&g2X, gVar);
+      analyzeMode2(&g2X);
       g2out.xtals.push_back(g2X);   
     }
     
@@ -1760,14 +1723,14 @@ Int_t GRETINA::getSimulated(FILE* inf) {
 
 /**************************************************************/
 
-Int_t GRETINA::analyzeMode2(g2CrystalEvent *g2, GRETINAVariables* gVar) {
+Int_t GRETINA::analyzeMode2(g2CrystalEvent *g2) {
 
   /* Figure out the basics...what detector is this in terms of quads? */
   Int_t detectorFound = 0;  Int_t crystal = -1;
   for (Int_t index=0; index<MAXQUADS; index++) {
-    if ((Int_t)(g2->crystalID/4) == gVar->hole[index]) {
+    if ((Int_t)(g2->crystalID/4) == var.hole[index]) {
       detectorFound = 1;
-      crystal = ((gVar->electronicsOrder[index]*4) + 
+      crystal = ((var.electronicsOrder[index]*4) + 
    		 (Int_t)(g2->crystalID%4));
       g2->crystalNum = crystal+1; /* crystal starts from 0; crystalNum goes from 1 */
       g2->quadNum = index+1;
@@ -1807,13 +1770,13 @@ Int_t GRETINA::analyzeMode2(g2CrystalEvent *g2, GRETINAVariables* gVar) {
   if (vecSizeID>0 && crystal >= 0 && crystal < MAXCRYSTALS) {
     for (UInt_t uj=0; uj<vecSizeID; uj++) {
       for (UInt_t uk=uj+1; uk<vecSizeID; uk++) {
-	divisor += (gVar->dinoFactor[crystal][hitID[uj]][hitID[uk]]*
-		    gVar->dinoFactor[crystal][hitID[uk]][hitID[uj]]);
+	divisor += (var.dinoFactor[crystal][hitID[uj]][hitID[uk]]*
+		    var.dinoFactor[crystal][hitID[uk]][hitID[uj]]);
       }
       netdino = 1;
       for (UInt_t um=0; um<vecSizeID; um++) {
 	if (um != uj) {
-	  netdino -= gVar->dinoFactor[crystal][hitID[uj]][hitID[um]];
+	  netdino -= var.dinoFactor[crystal][hitID[uj]][hitID[um]];
 	}
       }  
       sum += (hitE[uj])*netdino;
@@ -1826,22 +1789,22 @@ Int_t GRETINA::analyzeMode2(g2CrystalEvent *g2, GRETINAVariables* gVar) {
      if necessary. */
   
   if (g2->intpts.size() > 0) {
-    g2->doppler = getDopplerSimple(g2->maxIntPtXYZLab(), gVar->beta);
+    g2->doppler = getDopplerSimple(g2->maxIntPtXYZLab(), var.beta);
     if ((g2->crystalNum)%2 == 0) { // Position 2 or 4: A type (--> crystalNum numbers starting at 1)
       g2->dopplerSeg = getDopplerSimple(rot.crys2Lab(g2->crystalID,
-						     TVector3(xA[g2->maxIntPtSegNum()], 
-							      yA[g2->maxIntPtSegNum()], 
-							      zA[g2->maxIntPtSegNum()])),
-					gVar->beta);
+						     TVector3(var.segCenter[0][0][g2->maxIntPtSegNum()], 
+							      var.segCenter[0][1][g2->maxIntPtSegNum()], 
+							      var.segCenter[0][2][g2->maxIntPtSegNum()])),
+					var.beta);
     } else if ((g2->crystalNum)%2 == 1) { // Position 1 or 3: B type
       g2->dopplerSeg = getDopplerSimple(rot.crys2Lab(g2->crystalID,
-						     TVector3(xB[g2->maxIntPtSegNum()], 
-							      yB[g2->maxIntPtSegNum()], 
-							      zB[g2->maxIntPtSegNum()])),
-					gVar->beta);
+						     TVector3(var.segCenter[1][0][g2->maxIntPtSegNum()], 
+							      var.segCenter[1][1][g2->maxIntPtSegNum()], 
+							      var.segCenter[1][2][g2->maxIntPtSegNum()])),
+					var.beta);
     }
     g2->dopplerCrystal = getDopplerSimple (rot.crys2Lab(g2->crystalID,
-							TVector3(0., 0., 0.)), gVar->beta);
+							TVector3(0., 0., 0.)), var.beta);
     
   }
   
@@ -1869,23 +1832,23 @@ Float_t GRETINA::getDopplerSimple(TVector3 xyz, Float_t beta) {
 
 /**************************************************************/
 
-void GRETINA::calibrateMode2CC(Int_t crystal, mode2ABCD6789 *g2, g2CrystalEvent *g2crystal, GRETINAVariables *gVar) {
+void GRETINA::calibrateMode2CC(Int_t crystal, mode2ABCD6789 *g2, g2CrystalEvent *g2crystal) {
   TRandom *random = new TRandom1();
   for (Int_t i=0; i<4; i++) {
     Float_t tmpE = (Float_t)g2->core_e[i] + random->Rndm() - 0.5;
     Int_t idNum;
     if (i == 0) { 
       idNum = (crystal)*40 + 9; 
-      g2crystal->cc1 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+      g2crystal->cc1 = (Float_t)(tmpE*var.ehiGeGain[idNum] + var.ehiGeOffset[idNum]);
     }  else if (i == 1) { 
       idNum = (crystal)*40 + 19; 
-      g2crystal->cc2 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+      g2crystal->cc2 = (Float_t)(tmpE*var.ehiGeGain[idNum] + var.ehiGeOffset[idNum]);
     } else if (i == 2) { 
       idNum = (crystal)*40 + 29; 
-      g2crystal->cc3 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+      g2crystal->cc3 = (Float_t)(tmpE*var.ehiGeGain[idNum] + var.ehiGeOffset[idNum]);
     } else if (i == 3) { 
       idNum = (crystal)*40 + 39;  
-      g2crystal->cc4 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+      g2crystal->cc4 = (Float_t)(tmpE*var.ehiGeGain[idNum] + var.ehiGeOffset[idNum]);
     }
   }
   random->Delete();
@@ -1893,23 +1856,23 @@ void GRETINA::calibrateMode2CC(Int_t crystal, mode2ABCD6789 *g2, g2CrystalEvent 
 
 /**************************************************************/
 
-void GRETINA::calibrateMode2CC(Int_t crystal, mode2ABCD5678 *g2, g2CrystalEvent *g2crystal, GRETINAVariables *gVar) {
+void GRETINA::calibrateMode2CC(Int_t crystal, mode2ABCD5678 *g2, g2CrystalEvent *g2crystal) {
   TRandom *random = new TRandom1();
   for (Int_t i=0; i<4; i++) {
     Float_t tmpE = (Float_t)g2->core_e[i] + random->Rndm() - 0.5;
     Int_t idNum;
     if (i == 0) { 
       idNum = (crystal)*40 + 9; 
-      g2crystal->cc1 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+      g2crystal->cc1 = (Float_t)(tmpE*var.ehiGeGain[idNum] + var.ehiGeOffset[idNum]);
     }  else if (i == 1) { 
       idNum = (crystal)*40 + 19; 
-      g2crystal->cc2 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+      g2crystal->cc2 = (Float_t)(tmpE*var.ehiGeGain[idNum] + var.ehiGeOffset[idNum]);
     } else if (i == 2) { 
       idNum = (crystal)*40 + 29; 
-      g2crystal->cc3 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+      g2crystal->cc3 = (Float_t)(tmpE*var.ehiGeGain[idNum] + var.ehiGeOffset[idNum]);
     } else if (i == 3) { 
       idNum = (crystal)*40 + 39;  
-      g2crystal->cc4 = (Float_t)(tmpE*gVar->ehiGeGain[idNum] + gVar->ehiGeOffset[idNum]);
+      g2crystal->cc4 = (Float_t)(tmpE*var.ehiGeGain[idNum] + var.ehiGeOffset[idNum]);
     }
   }
   random->Delete();
@@ -1917,10 +1880,11 @@ void GRETINA::calibrateMode2CC(Int_t crystal, mode2ABCD5678 *g2, g2CrystalEvent 
 
 /**************************************************************/
 
-void GRETINA::printSegCenters() {
+void GRETINAVariables::PrintSegCenters() {
   for (Int_t i=0; i<36; i++) {
     printf("%d:  A: (%0.3f, %0.3f, %0.3f)  B: (%0.3f, %0.3f, %0.3f)\n",
-	   i, xA[i], yA[i], zA[i],xB[i], yB[i],zB[i]);
+    	   i, segCenter[0][0][i], segCenter[0][1][i], segCenter[0][2][i],
+    	   segCenter[0][0][i], segCenter[0][1][i], segCenter[0][2][i]);
   }
 }
 
@@ -2021,7 +1985,7 @@ Int_t GRETINA::fillShell2Track() {
 
 /**************************************************************/
 
-void GRETINA::fillMode1(Int_t trackStatus, GRETINAVariables *gVar) {
+void GRETINA::fillMode1(Int_t trackStatus) {
   Int_t iClust, nmTS;
   Int_t i, j, ng = 0;
   Int_t writeOut[1000];
@@ -2091,7 +2055,7 @@ void GRETINA::fillMode1(Int_t trackStatus, GRETINAVariables *gVar) {
 	}
 
 	/* Doppler correction... simple only here */
-	g1.doppler = getDopplerSimple(g1.xyzLab1, gVar->beta);
+	g1.doppler = getDopplerSimple(g1.xyzLab1, var.beta);
 
 	g1out.gammas.push_back(g1);
       }
@@ -2192,7 +2156,7 @@ void GRETINA::checkSPIntegrity() {
 /**************************************************************/
 
 Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
-			controlVariables *ctrl, GRETINAVariables *gVar) {
+			controlVariables *ctrl) {
 
   Int_t siz = 0, remaining = 0;
   mode3DataPacket *dp;
@@ -2262,8 +2226,8 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
   
     g3ch.ID = -1;
     for (Int_t i=0; i<MAXQUADS; i++) {
-      if (module/16 == gVar->hole[i]) {
-	g3ch.ID = (module - (gVar->hole[i] - gVar->electronicsOrder[i])*4*4)*10 + channel;
+      if (module/16 == var.hole[i]) {
+	g3ch.ID = (module - (var.hole[i] - var.electronicsOrder[i])*4*4)*10 + channel;
       } 
     }
     if (g3ch.ID < 0) { g3ch.ID = module*10 + channel; } /* Need to think about this... */
@@ -2394,7 +2358,7 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
     // printf("           Sign2: %d\n", sign2);
     // cin.get();
 
-    if (!ctrl->superPulse) { calibrateMode3(&g3ch, gVar); }
+    if (!ctrl->superPulse) { calibrateMode3(&g3ch); }
     else { calibrateMode3SP(&g3ch); }
     
     /* Transform the waveform, if needed */
@@ -2463,32 +2427,29 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
 
 /**************************************************************/
 
-void GRETINA::calibrateMode3(g3ChannelEvent *g3, GRETINAVariables *gVar) {
+void GRETINA::calibrateMode3(g3ChannelEvent *g3) {
 
   Float_t tmpE = (g3->eRaw)*0.25;
-  g3->eCal = (tmpE * gVar->ehiGeGain[g3->ID] + gVar->ehiGeOffset[g3->ID]);
+  g3->eCal = (tmpE * var.ehiGeGain[g3->ID] + var.ehiGeOffset[g3->ID]);
   tmpE = (g3->eCalPO)*0.25;
-  g3->eCalPO = (tmpE * gVar->ehiGeGain[g3->ID] + gVar->ehiGeOffset[g3->ID]);
+  g3->eCalPO = (tmpE * var.ehiGeGain[g3->ID] + var.ehiGeOffset[g3->ID]);
   tmpE = (g3->prevE1)*0.25;
-  g3->prevE1 = (tmpE * gVar->ehiGeGain[g3->ID] + gVar->ehiGeOffset[g3->ID]);
+  g3->prevE1 = (tmpE * var.ehiGeGain[g3->ID] + var.ehiGeOffset[g3->ID]);
   tmpE = (g3->prevE2)*0.25;
-  g3->prevE2 = (tmpE * gVar->ehiGeGain[g3->ID] + gVar->ehiGeOffset[g3->ID]);
+  g3->prevE2 = (tmpE * var.ehiGeGain[g3->ID] + var.ehiGeOffset[g3->ID]);
 
 }
 
 /**************************************************************/
 
 void GRETINA::calibrateMode3SP(g3ChannelEvent *g3) {
-  
   Float_t tmpE = (g3->eRaw)*0.25;
   g3->eCal = (tmpE * sp.ehiGeGain[g3->ID] + sp.ehiGeOffset[g3->ID]);
-  // printf("tmpE %f / ID %d, GeGain %f GeOffset %f\n", tmpE, g3->ID, sp.ehiGeGain[g3->ID], sp.ehiGeOffset[g3->ID]);
-
 }
 
 /**************************************************************/
 
-void GRETINA::analyzeMode3(GRETINAVariables *gVar, controlVariables *ctrl) {
+void GRETINA::analyzeMode3(controlVariables *ctrl) {
   
   if (g3Temp.size() > 0) {
     
@@ -2552,8 +2513,8 @@ void GRETINA::analyzeMode3(GRETINAVariables *gVar, controlVariables *ctrl) {
     g3out.xtals[ui].crystalNum += 1; /* And now crystalNum goes from 1 */
       
       for (Int_t qN=0; qN<MAXQUADS; qN++) {
-	if ((g3out.xtals[ui].crystalNum-1) < (gVar->electronicsOrder[qN]+1)*4 &&
-	    (g3out.xtals[ui].crystalNum-1) >= (gVar->electronicsOrder[qN]*4)) {
+	if ((g3out.xtals[ui].crystalNum-1) < (var.electronicsOrder[qN]+1)*4 &&
+	    (g3out.xtals[ui].crystalNum-1) >= (var.electronicsOrder[qN]*4)) {
 	  g3out.xtals[ui].quadNum = qN + 1; /* quadNum goes from 1 as well... */
 	}
       }
@@ -2611,12 +2572,12 @@ void GRETINA::analyzeMode3(GRETINAVariables *gVar, controlVariables *ctrl) {
       if (vecSizeID>0) {
 	for (UInt_t uj=0; uj<vecSizeID; uj++) {
 	  for (UInt_t uk=uj+1; uk<vecSizeID; uk++) {
-	    divisor += (gVar->dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitID[uj]][hitID[uk]]*
-			gVar->dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitID[uk]][hitID[uj]]);
+	    divisor += (var.dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitID[uj]][hitID[uk]]*
+			var.dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitID[uk]][hitID[uj]]);
 	  }
 	  netdino = 1.;
 	  for (UInt_t um=0; um<vecSizeID; um++) {
-	    if (um != uj) { netdino -= gVar->dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitID[uj]][hitID[um]]; }
+	    if (um != uj) { netdino -= var.dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitID[uj]][hitID[um]]; }
 	  }  
 	  sum += (hitE[uj])*netdino;
 	}
@@ -2633,12 +2594,12 @@ void GRETINA::analyzeMode3(GRETINAVariables *gVar, controlVariables *ctrl) {
 	if (vecSizeIDT>0) {
 	  for (UInt_t uj=0; uj<vecSizeIDT; uj++) {
 	    for (UInt_t uk=uj+1; uk<vecSizeIDT; uk++) {
-	      divisor += (gVar->dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT[uj]][hitIDT[uk]]*
-			  gVar->dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT[uk]][hitIDT[uj]]);
+	      divisor += (var.dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT[uj]][hitIDT[uk]]*
+			  var.dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT[uk]][hitIDT[uj]]);
 	    }
 	    netdino = 1;
 	    for (UInt_t um=0; um<vecSizeIDT; um++) {
-	      if (um != uj) { netdino -= gVar->dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT[uj]][hitIDT[um]]; }
+	      if (um != uj) { netdino -= var.dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT[uj]][hitIDT[um]]; }
 	    }  
 	    sum += (hitET[uj])*netdino;
 	  }
@@ -2656,12 +2617,12 @@ void GRETINA::analyzeMode3(GRETINAVariables *gVar, controlVariables *ctrl) {
 	if (vecSizeIDT2>0) {
 	  for (UInt_t uj=0; uj<vecSizeIDT2; uj++) {
 	    for (UInt_t uk=uj+1; uk<vecSizeIDT2; uk++) {
-	      divisor += (gVar->dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT2[uj]][hitIDT2[uk]]*
-			  gVar->dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT2[uk]][hitIDT2[uj]]);
+	      divisor += (var.dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT2[uj]][hitIDT2[uk]]*
+			  var.dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT2[uk]][hitIDT2[uj]]);
 	    }
 	    netdino = 1;
 	    for (UInt_t um=0; um<vecSizeIDT2; um++) {
-	      if (um != uj) { netdino -= gVar->dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT2[uj]][hitIDT2[um]]; }
+	      if (um != uj) { netdino -= var.dinoFactor[(g3out.xtals[ui].crystalNum - 1)][hitIDT2[uj]][hitIDT2[um]]; }
 	    }  
 	    sum += (hitET2[uj])*netdino;
 	  }
@@ -2681,21 +2642,21 @@ void GRETINA::analyzeMode3(GRETINAVariables *gVar, controlVariables *ctrl) {
 	  xyzL = rot.crys2Lab(g3out.xtals[ui].module/4, TVector3(0., 0., 0.));
 	} else if ((g3out.xtals[ui].crystalNum)%2 == 0) { /* Position 2 or 4: A type 
 							     (--> remember crystalNum starts at 1 ) */
-	  xyzL = rot.crys2Lab(g3out.xtals[ui].module/4, TVector3(xA[g3out.xtals[ui].maxSegNum()],
-								 yA[g3out.xtals[ui].maxSegNum()],
-								 zA[g3out.xtals[ui].maxSegNum()]));
+	  xyzL = rot.crys2Lab(g3out.xtals[ui].module/4, TVector3(var.segCenter[0][0][g3out.xtals[ui].maxSegNum()],
+								 var.segCenter[0][1][g3out.xtals[ui].maxSegNum()],
+								 var.segCenter[0][2][g3out.xtals[ui].maxSegNum()]));
 	  
 	} else if ((g3out.xtals[ui].crystalNum)%2 == 1) { /* Position 1 or 3: B type */
-	  xyzL = rot.crys2Lab(g3out.xtals[ui].module/4, TVector3(xB[g3out.xtals[ui].maxSegNum()],
-								 yB[g3out.xtals[ui].maxSegNum()],
-								 zB[g3out.xtals[ui].maxSegNum()]));
+	  xyzL = rot.crys2Lab(g3out.xtals[ui].module/4, TVector3(var.segCenter[1][0][g3out.xtals[ui].maxSegNum()],
+								 var.segCenter[1][1][g3out.xtals[ui].maxSegNum()],
+								 var.segCenter[1][2][g3out.xtals[ui].maxSegNum()]));
 	}
       }
-      g3out.xtals[ui].dopplerSeg = getDopplerSimple(xyzL, gVar->beta);
+      g3out.xtals[ui].dopplerSeg = getDopplerSimple(xyzL, var.beta);
       
       if (g3out.xtals[ui].module > 0 && g3out.xtals[ui].module/4 <= 30) {
 	xyzL = rot.crys2Lab(g3out.xtals[ui].module/4, TVector3(0., 0., 0.));
-	g3out.xtals[ui].dopplerCrystal = getDopplerSimple(xyzL, gVar->beta);
+	g3out.xtals[ui].dopplerCrystal = getDopplerSimple(xyzL, var.beta);
       }
   } /* Loop over hit crystals */
   
@@ -2784,8 +2745,7 @@ void GRETINA::fillHistos(Int_t ctrl) {
   }
 }
 
-Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, counterVariables *cnt,
-			       GRETINAVariables *gVar) {
+Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, counterVariables *cnt) {
 
   Int_t siz = 0, remaining = 0;
   mode3HistoryPacket *dp;

@@ -222,8 +222,7 @@ Int_t OpenInputFile(FILE** inf, controlVariables* ctrl, TString runNumber) {
   return(0);
 }
 
-int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt, 
-		  GRETINAVariables* gVar) {
+int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) {
 
   int badCrystal = 0;
 
@@ -236,7 +235,7 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt,
     //FillFoldHist(histos, gVar, multTemp, ctrl->xtLowE, ctrl->xtHighE);
   }
 
-  if (gret->g3Temp.size() > 0) { gret->analyzeMode3(gVar, ctrl); }
+  if (gret->g3Temp.size() > 0) { gret->analyzeMode3(ctrl); }
 
   if (gret->g2out.crystalMult() > 0) {
     if (ctrl->doTRACK) {
@@ -245,7 +244,7 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt,
 	gret->track.findTargetPos();
 	Int_t trackStatus;
 	trackStatus = gret->track.trackEvent();
-	gret->fillMode1(trackStatus, gVar);
+	gret->fillMode1(trackStatus);
       }
     }
   }
@@ -332,8 +331,8 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt,
 	  TVector3 xyz = gret->g2out.xtals[ui].maxIntPtXYZ();
 	  Double_t pR = xyz.XYvector().Mod();
 	  Double_t pTheta = TMath::ATan(xyz.Y()/xyz.X());
-	  Float_t xPrime = gVar->radiusCor[gret->g2out.xtals[ui].crystalNum]*pR*TMath::Cos(pTheta);
-	  Float_t yPrime = gVar->radiusCor[gret->g2out.xtals[ui].crystalNum]*pR*TMath::Sin(pTheta);
+	  Float_t xPrime = gret->var.radiusCor[gret->g2out.xtals[ui].crystalNum]*pR*TMath::Cos(pTheta);
+	  Float_t yPrime = gret->var.radiusCor[gret->g2out.xtals[ui].crystalNum]*pR*TMath::Sin(pTheta);
 	  
 	  /* This is a check against flipping the sign of the x/y coordinates...*/
 	  if (xyz.X() < 0 && xPrime > 0) { xPrime = -xPrime; }
@@ -344,13 +343,13 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt,
 	  
 	  /* And translate to world coordinates... */
 	  TVector3 xyzL = gret->rot.crys2Lab(gret->g2out.xtals[ui].crystalID, xyz);
-	  xyzL -= gVar->targetXYZ;      
+	  xyzL -= gret->var.targetXYZ;      
 	  /* Calculate vector from target to interaction point, 
 	   including shifts in position (in cm). */
 	  
-	  gret->g2out.xtals[ui].doppler = s800->getDoppler(xyzL, gVar->beta, gVar);
+	  gret->g2out.xtals[ui].doppler = s800->getDoppler(xyzL, gret->var.beta, gVar);
 	  if (gret->g2out.xtals[ui].doppler == 0) { 
-	    gret->g2out.xtals[ui].doppler = gret->getDopplerSimple(gret->g2out.xtals[ui].maxIntPtXYZLab(), gVar->beta); 
+	    gret->g2out.xtals[ui].doppler = gret->getDopplerSimple(gret->g2out.xtals[ui].maxIntPtXYZLab(), gret->var.beta); 
 	  }
 	}
 #else /* WITH_S800 */
@@ -378,7 +377,7 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt,
 	  Float_t dopplerR = (lgamma*(1-lbeta*chico->particle.pgCosR));
 	  gret->g2out.xtals[ui].doppler = dopplerL;
 	} else { /* No CHICO particle info -- simple doppler */
-	  gret->g2out.xtals[ui].doppler = gret->getDopplerSimple(gret->g2out.xtals[ui].maxIntPtXYZLab(), gVar->beta);
+	  gret->g2out.xtals[ui].doppler = gret->getDopplerSimple(gret->g2out.xtals[ui].maxIntPtXYZLab(), gret->var.beta);
 	}
 #else
 	/* Nothing to do, no particle information available. */
@@ -389,9 +388,9 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt,
     if (gret->g1out.gammaMult() > 0) {
       for (UInt_t ui=0; ui<gret->g1out.gammaMult(); ui++) {
 #ifdef WITH_S800
-	gret->g1out.gammas[ui].doppler = s800->getDoppler(gret->g1out.gammas[ui].xyzLab1, gVar->beta, gVar);
+	gret->g1out.gammas[ui].doppler = s800->getDoppler(gret->g1out.gammas[ui].xyzLab1, gret->var.beta, gVar);
 	if (gret->g1out.gammas[ui].doppler == 0) {
-	  gret->g1out.gammas[ui].doppler = gret->getDopplerSimple(gret->g1out.gammas[ui].xyzLab1, gVar->beta);
+	  gret->g1out.gammas[ui].doppler = gret->getDopplerSimple(gret->g1out.gammas[ui].xyzLab1, gret->var.beta);
 	}
 #else
 	/* Nothing to do, no particle information available. */

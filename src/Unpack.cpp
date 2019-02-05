@@ -93,6 +93,16 @@
 #include "LENDA-Controls.h"
 #endif
 
+/* BGS header files */
+#ifdef WITH_BGS
+#include "BGSParamList.h"
+#include "BGSConditions.h"
+#include "BGSFPPositions.h"
+#include "BGSCalibrations.h"
+#include "BGSThresholds.h"
+#include "BGSAnalyze.h"
+#endif
+
 #include "Tree.h"
 
 #define DEBUG2AND3 0
@@ -103,8 +113,7 @@ void PrintHelpInformation();
 void PrintConditions();
 
 void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
-	     GRETINAVariables* gVar, INLCorrection *inlCor, 
-	     UShort_t junk[]);
+	     INLCorrection *inlCor, UShort_t junk[]);
 
 void ReadMario(FILE* inf);
 void SkipData(FILE* inf, UShort_t junk[]);
@@ -139,25 +148,21 @@ int main(int argc, char *argv[]) {
   if (good2Go != 1) { exit(-2); }
   printf("\n");
 
-  /* Declare and then initialize GRETINA variables, i.e. geometry
-     stuff, and calibration parameters, etc. */
-  GRETINAVariables*  gVar = new GRETINAVariables();
-  gVar->Initialize();
-  gVar->InitializeGRETINAVariables("gretina.set");
-
   gret = new GRETINA();
   gret->Initialize();
+  gret->var.Initialize();
+  gret->var.InitializeGRETINAVariables("gretina.set");
 
   counterVariables *cnt = new counterVariables();
 
   /* Initialize the GRETINA data structures. */
 
   /* Superpulse analysis */
-  gret->sp.Initialize(ctrl, gVar);
+  gret->sp.Initialize(ctrl, &gret->var);
   
   /* INL correction parameters */
   INLCorrection *inlCor = new INLCorrection();
-  inlCor->Initialize(ctrl, gVar);
+  inlCor->Initialize(ctrl, &gret->var);
    
   /* Initialize tracking stuff. */
   if (ctrl->doTRACK) {
@@ -174,10 +179,10 @@ int main(int argc, char *argv[]) {
   
   /* Get the calibration parameters. */
   if (ctrl->specifyCalibration) {
-    gVar->ReadGeCalFile(ctrl->calibrationFile);
+    gret->var.ReadGeCalFile(ctrl->calibrationFile);
   } else {
     cout << "Using default GRETINA energy calibration file. " << endl;
-    gVar->ReadGeCalFile("gCalibration.dat");
+    gret->var.ReadGeCalFile("gretinaCalibrations/gCalibration.dat");
   }
   cout << endl;
 
@@ -197,7 +202,6 @@ int main(int argc, char *argv[]) {
 #ifdef WITH_GOD
   goddess = new goddessFull();
   goddess->Initialize();
-  if (0) goddess->ReportDetectors();
 #endif
 
   /* DFMA */
@@ -397,7 +401,7 @@ int main(int argc, char *argv[]) {
 
 	if (ctrl->noEB) { /* Just get the data, don't event build. */
 
-	  GetData(inf, ctrl, cnt, gVar, inlCor, junk);
+	  GetData(inf, ctrl, cnt, inlCor, junk);
 
 	  /* Fill singles spectra as appropriate */
 	  if (ctrl->withHISTOS && ctrl->calibration && !ctrl->xtalkAnalysis) { 
@@ -439,7 +443,7 @@ int main(int argc, char *argv[]) {
 	    
 	    if (abs(deltaEvent) < EB_DIFF_TIME) {
 	      
-	      GetData(inf, ctrl, cnt, gVar, inlCor, junk);
+	      GetData(inf, ctrl, cnt, inlCor, junk);
 	      
 	      if (ctrl->superPulse) {
 		if (gHeader.type == RAW) {
@@ -460,12 +464,12 @@ int main(int argc, char *argv[]) {
 #ifdef WITH_S800
 		Int_t pidOK = CheckS800PIDGates(incomingBeam, outgoingBeam);
 		if (pidOK) { 
-		  int evtOK = ProcessEvent(currTS, ctrl, cnt, gVar);
+		  int evtOK = ProcessEvent(currTS, ctrl, cnt);
 		  if (evtOK < 0) { raise(SIGINT); }
 		}
 #endif
 	      } else {
-		Int_t evtOK = ProcessEvent(currTS, ctrl, cnt, gVar);
+		Int_t evtOK = ProcessEvent(currTS, ctrl, cnt);
 		if (evtOK < 0) { raise(SIGINT); }
 	      }
 	      
@@ -486,7 +490,7 @@ int main(int argc, char *argv[]) {
 	      currTS = gHeader.timestamp;
 	      deltaEvent = (Float_t)(gHeader.timestamp - currTS);
 	      
-	      GetData(inf, ctrl, cnt, gVar, inlCor, junk);
+	      GetData(inf, ctrl, cnt, inlCor, junk);
 	      
 	    }
 	  } else { /* End of "if (GO_FOR_BUILD)" */	
@@ -596,7 +600,7 @@ int main(int argc, char *argv[]) {
 /****************************************************/
 
 void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
-	     GRETINAVariables* gVar, INLCorrection *inlCor, UShort_t junk[]) {
+	     INLCorrection *inlCor, UShort_t junk[]) {
   
   cnt->Increment(sizeof(struct globalHeader));
 
@@ -610,7 +614,7 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
 	  teb->FindBranch("g2")->Fill();
 	}
       }
-      gret->getMode2(inf, gHeader.length, gVar, cnt); 
+      gret->getMode2(inf, gHeader.length, cnt); 
     }
     break;
   case TRACK:
@@ -621,7 +625,7 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
 	  teb->FindBranch("g1")->Fill();
 	}
       }
-      gret->getMode1(inf, gVar, cnt); 
+      gret->getMode1(inf, cnt); 
     }
     break;
   case RAW:
@@ -632,7 +636,7 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
 	  teb->FindBranch("g3")->Fill();
 	}
       }
-      gret->getMode3(inf, gHeader.length, cnt, ctrl, gVar); 
+      gret->getMode3(inf, gHeader.length, cnt, ctrl); 
     }
     break;
   case RAWHISTORY:
@@ -643,12 +647,18 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
 	  teb->FindBranch("g3H")->Fill();
 	}
       }
-      gret->getMode3History(inf, gHeader.length, gHeader.timestamp, cnt, gVar); 
+      gret->getMode3History(inf, gHeader.length, gHeader.timestamp, cnt); 
     }
     break;
+#ifdef WITH_BGS
   case BGS:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
+#else 
+  case BGS:
+    { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
+    break;
+#endif
 #ifdef WITH_S800
   case S800:
     { s800->getAndProcessS800(inf, gHeader.length);  cnt->Increment(gHeader.length); }
@@ -751,7 +761,8 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     { 
       goddess->ts = (uint64_t)gHeader.timestamp;
       goddess->getAnalogGoddess(inf, gHeader.length); 
-      // goddess->printAnalogRawEvent();
+      goddess->ProcessEvent();
+      goddess->printAnalogRawEvent();
       cnt->Increment(gHeader.length);
     }
     break;
@@ -897,6 +908,9 @@ void PrintHelpInformation() {
 void PrintConditions() {
   printf("\n***************************************************************************\n\n");
   printf("    Initializing -- GRETINA ");
+#ifdef WITH_BGS
+  printf("+ BGS ");
+#endif
 #ifdef WITH_CHICO
   printf("+ CHICO2 ");
 #endif
@@ -906,10 +920,12 @@ void PrintConditions() {
 #ifdef WITH_S800
   printf("+ S800 ");
 #endif
+#ifndef WITH_BGS
 #ifndef WITH_CHICO
 #ifndef WITH_PWALL
 #ifndef WITH_S800
   printf("only ");
+#endif
 #endif
 #endif
 #endif

@@ -102,7 +102,7 @@ except OSError:
     print "scons: ROOT not found!"
     exit(1)
 
-env.Append(CPPPATH=['.', './include', './src', './src/hfc/'])
+env.Append(CPPPATH=['.', './include', './src', './src/hfc/', './src/GODDESSsrc/'])
 env.Append(LIBPATH='./lib')
 
 envUnpack = env.Clone()
@@ -177,7 +177,9 @@ if GODDESS==1:
    env.RootCint(godDictTarget, godDictHeaders)
 
    godLibTarget = 'lib/GODDESS'
-   godLibSources = ['lib/GoddessDict.cpp', 'src/GODDESS.cpp']
+   godLibSources = ['lib/GoddessDict.cpp', 'src/GODDESSsrc/GODDESS.cpp', 
+                    'src/GODDESSsrc/GODBB10.cpp', 'src/GODDESSsrc/GODQQQ5.cpp',
+		    'src/GODDESSsrc/GODSuperX3.cpp']
    env.SharedLibrary(target = godLibTarget, source = godLibSources, 
                      SHLIBPREFIX='lib')
 

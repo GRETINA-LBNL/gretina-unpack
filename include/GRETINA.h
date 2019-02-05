@@ -55,6 +55,8 @@ class GRETINAVariables : public TObject {
   Int_t hole[MAXQUADS];
   Int_t electronicsOrder[MAXQUADS];
 
+  Double_t segCenter[2][3][36]; /* Segment centers */
+
   /* Doppler correction stuff */
   Float_t beta;
   TVector3 targetXYZ;
@@ -79,10 +81,6 @@ class GRETINAVariables : public TObject {
   Int_t Q2Special[4][36];
   Int_t QSegmentOrder[4][36];
   
-  /* Segment positions */
-  Float_t CrystalAPositions[3][36];
-  Float_t CrystalBPositions[3][36];
-
  public:
   GRETINAVariables();
   ~GRETINAVariables() { ; }
@@ -94,6 +92,11 @@ class GRETINAVariables : public TObject {
   void Reset();
 
   void ReadGeCalFile(TString filename);
+  void ReadSegmentCenters(TString filename);
+
+  void PrintSegCenters();
+  
+
 
  private:
   
@@ -759,6 +762,7 @@ class GRETINA : public TObject {
 
  public:
   rotationMatrix rot;
+  GRETINAVariables var;
 
   SuperPulse sp;
 
@@ -786,8 +790,6 @@ class GRETINA : public TObject {
  public:
   /* Basic geometry-related variables.  Maybe there is a better
      place for these? */
-  Double_t xA[36], yA[36], zA[36]; /* Segment centers */
-  Double_t xB[36], yB[36], zB[36]; /* Segment centers */
 
   Int_t cloverModuleNumber;
   Float_t cloverSlope[40];
@@ -808,24 +810,21 @@ class GRETINA : public TObject {
   Float_t getDopplerSimple(TVector3 xyz, Float_t beta);
 
   Int_t getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
-		 controlVariables *ctrl, GRETINAVariables *gVar);
-  Int_t getMode3History(FILE *inf, Int_t evtLength, long long int hTS, counterVariables *cnt,
-			GRETINAVariables *gVar);
-  Int_t getMode2(FILE *inf, Int_t evtLength, GRETINAVariables *gVar,
-		 counterVariables *cnt);
-  Int_t getMode1(FILE *inf, GRETINAVariables *gVar,
-		 counterVariables *cnt);
+		 controlVariables *ctrl);
+  Int_t getMode3History(FILE *inf, Int_t evtLength, long long int hTS, counterVariables *cnt);
+  Int_t getMode2(FILE *inf, Int_t evtLength, counterVariables *cnt);
+  Int_t getMode1(FILE *inf, counterVariables *cnt);
   Int_t getSimulated(FILE *inf);
   void getScaler(FILE *inf, Int_t evtLength);
   Int_t getBank88(FILE *inf, Int_t evtLength, counterVariables *cnt);
 
-  Int_t analyzeMode2(g2CrystalEvent *g2, GRETINAVariables *gVar);
+  Int_t analyzeMode2(g2CrystalEvent *g2);
   void calibrateMode2CC(Int_t crystal, mode2ABCD5678 *g2, 
-			g2CrystalEvent *g2crystal, GRETINAVariables *gVar);
+			g2CrystalEvent *g2crystal);
   void calibrateMode2CC(Int_t crystal, mode2ABCD6789 *g2, 
-			g2CrystalEvent *g2crystal, GRETINAVariables *gVar);
-  void analyzeMode3(GRETINAVariables *gVar, controlVariables *ctrl);
-  void calibrateMode3(g3ChannelEvent *g3, GRETINAVariables* gVar);
+			g2CrystalEvent *g2crystal);
+  void analyzeMode3(controlVariables *ctrl);
+  void calibrateMode3(g3ChannelEvent *g3);
   void calibrateMode3SP(g3ChannelEvent *g3);
 
   void fillHistos(Int_t ctrl);
@@ -833,9 +832,8 @@ class GRETINA : public TObject {
   void checkSPIntegrity();
 
   Int_t fillShell2Track();
-  void fillMode1(Int_t trackStatus, GRETINAVariables *gVar);
-  void printSegCenters();
-  
+  void fillMode1(Int_t trackStatus);
+
  public:
   ClassDef(GRETINA, 1);
 

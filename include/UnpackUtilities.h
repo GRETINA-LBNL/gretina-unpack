@@ -43,7 +43,7 @@ Int_t OpenInputFile(FILE** inf, controlVariables* ctrl, TString runNumber);
 */
 
 int ProcessEvent(Float_t currTS, controlVariables* ctrl, 
-		  counterVariables* cnt, GRETINAVariables* gVar);
+		  counterVariables* cnt);
 /*! \fn void ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt, GRETINAVariables* gVar, SuperPulse* sp, Histos* histos)
     \brief Analyzes time-grouped physics events, making calls to do segment 
            energy analysis, tracking etc.
@@ -52,8 +52,6 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl,
            to identify cross-talk or superpulse analysis
     \param cnt An instance of the counterVariables class, which is required to 
            pass to analysis functions for tallying event characteristics
-    \param gVar An instance of the GRETINAVariables class, required to pass to 
-           analysis functions
     \param histos An instance of the Histos class, if histogram filling is 
            active in the analysis.
     \return Returns int = 0 if no problems, -1 if weird crystal number observed
