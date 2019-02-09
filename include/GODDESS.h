@@ -209,7 +209,7 @@ class superX3 : public orrubaDet {
   void ConstructBins();
 
   /* Resistive strip stuff */
-  Bool_t ValidStrip(UShort_t strip) { if (strip>=0 && strip<3) { return kTRUE; } return kFALSE; }
+  Bool_t ValidStrip(UShort_t strip) { if (strip>=0 && strip<=3) { return kTRUE; } return kFALSE; }
   Int_t GetStrip(Int_t channel);
   UShort_t GetNearChannel(UShort_t strip);
   UShort_t GetFarChannel(UShort_t strip);
@@ -440,6 +440,10 @@ struct detectorOUT {
   Int_t pStrip, nStrip;
   Float_t pECal, nECal;
   TVector3 evPos;
+  // sx3
+  Float_t eNearCal, eFarCal;
+  // Int_t nearStrip, farStrip;
+
 };
 
 class goddessOut: public TObject {

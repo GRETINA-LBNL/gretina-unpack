@@ -1,5 +1,6 @@
 #include "GODDESS.h"
-
+//
+//
 solidVector::solidVector(Double_t x_, Double_t y_, Double_t z_, Double_t rot_Z, Double_t rot_Phi):
   TVector3(x_, y_, z_), rotZ(rot_Z), rotPhi(rot_Phi) 
 { ; }
@@ -231,6 +232,12 @@ void goddessFull::ResetOutput(detectorOUT *det) {
   det->pECal = -1.0;
   det->nECal = -1.0;
   det->evPos.SetXYZ(0,0,0);
+  //sx3 
+  det->eNearCal = -1.0;
+  det->eFarCal = -1.0;
+  // det->nearStrip = -1;
+  //det->farStrip = -1;
+
 }
 
 Bool_t goddessFull::ParseID(std::string id, Short_t &sector, Short_t &depth, Bool_t &upStream) {
@@ -665,6 +672,9 @@ void goddessFull::ProcessEvent() {
     qqs[i].SortAndCalibrate(kTRUE);
     ResetOutput(&detOut);
     qqs[i].GetMaxHitInfo(&detOut.pStrip, nullptr, &detOut.nStrip, nullptr);
+
+    //  cout << "QQS stripsP.size(): " << qqs[i].stripsP.size() << endl;
+    //  cout << "QQS stripsN.size(): " << qqs[i].stripsN.size() << endl;
     if (detOut.pStrip >= 0) {
       detOut.depth = qqs[i].GetDepth();
       detOut.pECal = -1.0;  detOut.nECal = -1.0;
@@ -683,10 +693,48 @@ void goddessFull::ProcessEvent() {
       eventOut->si.push_back(detOut);
     }
   }
+  // cout << "i<s3s.size(): " << s3s.size() << endl;
   for (UInt_t i=0; i<s3s.size(); i++) {
     s3s[i].LoadEvent(rawGoddess, 0);
-    s3s[i].SortAndCalibrate(kTRUE);
-  }
+    s3s[i].SortAndCalibrate(kTRUE);//test
+    ResetOutput(&detOut);
+    s3s[i].GetMaxHitInfo(&detOut.pStrip, nullptr, &detOut.nStrip, nullptr, kTRUE);
+    // cout << "stripsP.size(): " << s3s[i].stripsP.size() << endl;
+    // cout << "stripsN.size(): " << s3s[i].stripsN.size() << endl; 
+    // cout << "detOut.pStrip: " << detOut.pStrip << endl;
+    // cout << "detOut.nStrip: " << detOut.nStrip << endl;
+     if (detOut.pStrip >= 0) {
+      // detOut.depth = qqs[i].GetDepth();
+      detOut.pECal    = -1.0; detOut.nECal   = -1.0;
+      detOut.eNearCal = -1.0; detOut.eFarCal = -1.0;
+
+  
+
+      for (Int_t j=0; j<s3s[i].stripsP.size(); j++) { //cout << "s3s[i].stripsP.size(): " << s3s[i].stripsP.size() << endl;
+	if (s3s[i].stripsP[j] == detOut.pStrip) {
+	  // detOut.pECal = s3s[i].eCalP[j];
+	  detOut.eNearCal = s3s[i].eNearCal[j];
+	  detOut.eFarCal  = s3s[i].eFarCal[j];
+	  // cout << "eNearCal[0]:   " << s3s[i].eNearCal[j] << "\t i: " << i << "\t j:" << j << endl;
+	}
+	}
+      /* for (Int_t j=0; j<s3s[i].stripsN.size(); j++) {
+	if (s3s[i].stripsN[j] == detOut.nStrip) {
+	  detOut.nECal = s3s[i].eCalN[j];
+	  // detOut.eNearCal = s3s[i].eNearCal[j];
+	  //detOut.eFarCal  = s3s[i].eFarCal[j];
+	}
+	}*/
+   
+      //detOut.evPos = s3s[i].GetEventPosition();// NEED POSITION CALIB PARAMETERS IN .DAT FILE
+      eventOut->siID.push_back(s3s[i].GetPosID());
+      eventOut->si.push_back(detOut);
+      }
+
+
+
+
+  } //cout << "leaving s3s loop --- " << endl;
   for (UInt_t i=0; i<bbs.size(); i++) {
     bbs[i].LoadEvent(rawGoddess, 0);
     bbs[i].SortAndCalibrate(kTRUE);

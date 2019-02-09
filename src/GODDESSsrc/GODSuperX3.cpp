@@ -213,6 +213,7 @@ void superX3::SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue, Int
 
 
 void superX3::SortAndCalibrate(Bool_t doCalibrate) {
+  // cout << "------------------------------------- ENTERING SUPER X3 SORT AND CALIBRATE" << endl;
   orrubaDet::valueMap ePMap = GetRawE(kFALSE);
   orrubaDet::valueMap eNMap = GetRawE(kTRUE);
 
@@ -225,6 +226,8 @@ void superX3::SortAndCalibrate(Bool_t doCalibrate) {
   for (std::map<Short_t, Float_t>::iterator chItr = ePMap.begin(); chItr != ePMap.end(); ++chItr) {
     Int_t st_ = superX3::GetStrip(chItr->first);
 
+    // cout << "GetStrip st_: " << st_ << endl;
+
     if (std::find(alreadyDone.begin(), alreadyDone.end(), st_) != alreadyDone.end()) continue;
     alreadyDone.push_back(st_);
     
@@ -235,15 +238,21 @@ void superX3::SortAndCalibrate(Bool_t doCalibrate) {
 
     eNear = (nearItr != ePMap.end()) ? nearItr->second : 0.0;
     eFar = (farItr != ePMap.end()) ? farItr->second : 0.0;
+
+    // cout << "nearStrip: " << nearStrip << "\t eNear: " << eNear << endl;
+    //cout << "farStrip : " << farStrip << "\t eFar:   " << eFar << endl;
+
+
     
-    if (eNear > 0.0 && eFar > 0.0) {
-      stripsP.push_back(st_);
+    if (eNear > 0.0 && eFar > 0.0) {// cout << "eNear > 0 && eFar > 0" << endl;
+      stripsP.push_back(st_);// cout << "stripsP.back(): " << stripsP.back() << "\t stripsP.size(): " << stripsP.size() <<  endl;
       timeNear.push_back(tsPMap[nearStrip]);
       timeFar.push_back(tsPMap[farStrip]);
       eNearRaw.push_back(eNear);
       eFarRaw.push_back(eFar);
+
       
-      if(doCalibrate) {
+      if(doCalibrate) { //cout << "if(doCalibrate)" << endl;
 	std::vector< std::vector<Float_t> > calPar = GetECalParameters(kFALSE);
 	eNear = eNear*calPar[nearStrip][1] + calPar[nearStrip][0];
 	eFar = eFar*calPar[farStrip][1] + calPar[farStrip][0];
@@ -251,13 +260,15 @@ void superX3::SortAndCalibrate(Bool_t doCalibrate) {
 	if (eNear > 0.0 && eFar > 0.0) {
 	  eNearCal.push_back(eNear);
 	  eFarCal.push_back(eFar);
+	  //cout << "eNearCal: " << eNearCal.back() << endl;
+	  //cout << "eFarCal:  " << eFarCal.back() << endl;
 	}
       }
     }
   }
   
   for (std::map<Short_t, Float_t>::iterator chItr = eNMap.begin(); chItr != eNMap.end(); ++chItr) {
-    Int_t st_ = chItr->first;
+    Int_t st_ = chItr->first; //cout << "Int_t st_: " << st_ << endl;
     Float_t e_ = chItr->second;
     
     stripsN.push_back(st_);
@@ -267,9 +278,10 @@ void superX3::SortAndCalibrate(Bool_t doCalibrate) {
     if(doCalibrate) {
       std::vector< std::vector<Float_t> > calPar = GetECalParameters(kTRUE);
       eCalN.push_back(e_*calPar[st_][1] + calPar[st_][0]);
+      // cout << "eCalN: " << eCalN.back() << endl;
     }
   }
-
+  // cout << "-------------------------------------- EXITING SUPER X3 SORT AND CALIBRATE" << endl;
 }
 
 Float_t superX3::GetESum(Bool_t nType, Bool_t calibrated) {
@@ -300,11 +312,16 @@ void superX3::GetMaxHitInfo(Int_t* stripMaxP, uint64_t* timestampMaxP,
   std::vector<Float_t> *energiesN_;
   std::vector<Float_t> *energiesNear_;
   std::vector<Float_t> *energiesFar_;
+
+  // cout << "superX3::GetMaxHitInfo" << endl;
+
+
   if (calibrated) {
     energiesN_ = &eCalN;  energiesNear_ = &eNearCal;  energiesFar_ = &eFarCal;
   } else {
     energiesN_ = &eRawN;  energiesNear_ = &eNearRaw;  energiesFar_ = &eFarRaw;
   }
+  // cout << "energiesN_" << energiesN_ << endl;
 
   if (stripMaxP != nullptr) { *stripMaxP = -1; }
   if (stripMaxN != nullptr) { *stripMaxN = -1; }
@@ -338,12 +355,14 @@ TVector3 superX3::GetEventPosition(Bool_t calibrated) {
   eNear = GetNearE(calibrated);
   eFar = GetFarE(calibrated);
 
-  TVector3 interactionPos;
+  // cout << "pStripHit: " << pStripHit << endl;
+
+  TVector3 interactionPos;// cout << "parStripPosCal[pStripHit].at(1): " << parStripPosCal[pStripHit].at(1) << endl;
 
   if (pStripHit >= 0 && pStripHit < GetNumChannels(kFALSE) && eNear >= 0. && eFar >= 0.) {
       Float_t reCenter = (parStripPosCal[pStripHit].at(1) + parStripPosCal[pStripHit].at(0))/2.;
       Float_t normalize = parStripPosCal[pStripHit].at(1) - parStripPosCal[pStripHit].at(0);
-      normalize = (normalize < 0.01) ? 1 : normalize;
+      normalize = (normalize < 0.01) ? 1 : normalize; 
       Float_t zRes = (((eNear - eFar)/(eNear + eFar)) - reCenter)/normalize;
       if (!upStream) zRes *= -1;
       TVector3 zResPos(0., 0., zRes*activeLength);

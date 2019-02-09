@@ -7,12 +7,14 @@
   if (foundlib) {
     gSystem->Load("libGRETINA.so");
     cout << "Loaded: libGRETINA.so, ";
-    gSystem->Load("lib/libphosWall.so");
-    cout << " libphosWall.so, ";
-    gSystem->Load("lib/libLenda.so");
-    cout << " libLenda.so, ";
-    gSystem->Load("lib/libS800.so");
-    cout << "and libS800.so" << endl;
+    gSystem->Load("libGODDESS.so");
+    cout << " and libGODDESS.so";
+    // gSystem->Load("lib/libphosWall.so");
+    // cout << " libphosWall.so, ";
+    // gSystem->Load("lib/libLenda.so");
+    //cout << " libLenda.so, ";
+    //gSystem->Load("lib/libS800.so");
+    //cout << "and libS800.so" << endl;
 
   } else {
     gretinaLib = "lib/libGRETINA.dll";
@@ -20,16 +22,16 @@
     if (foundlib) {
       gSystem->Load("lib/libGRETINA.dll");
       cout << "Loaded: libGRETINA.dll, ";
-      gSystem->Load("lib/libS800.dll");
-      cout << "and libS800.dll" << endl;
+      //gSystem->Load("lib/libS800.dll");
+      //cout << "and libS800.dll" << endl;
     } else {
       gretinaLib = "lib/libGRETINA.dylib";
       foundlib = gSystem->Which(searchP, gretinaLib, EAccessMode::kFileExists);
       if (foundlib) {
 	gSystem->Load("lib/libGRETINA.dylib");
 	cout << "Loaded: libGRETINA.dylib, ";
-	gSystem->Load("lib/libS800.dylib");
-	cout << "and libS800.dylib" << endl;
+	//gSystem->Load("lib/libS800.dylib");
+	//cout << "and libS800.dylib" << endl;
       } else { 
 	cout << "Could not load shared libraries!" << endl;
       }
