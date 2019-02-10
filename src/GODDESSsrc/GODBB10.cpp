@@ -28,6 +28,7 @@ void BB10::Clear() {
 }
 
 void BB10::ConstructBins() {
+  activeWidth = 40.3;
   for (Int_t i = 0; i<8; i++) {
     TVector3 pStPosRefDetCenter( ((7./16.)*activeWidth) - (i*activeWidth/8.), 0., 0.);
     pStPosRefDetCenter.SetPhi(pStPosRefDetCenter.Phi() + detPos.GetRotZ());

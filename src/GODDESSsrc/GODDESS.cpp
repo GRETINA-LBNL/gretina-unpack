@@ -231,7 +231,7 @@ void goddessFull::ResetOutput(detectorOUT *det) {
   det->nStrip = -1;
   det->pECal = -1.0;
   det->nECal = -1.0;
-  det->evPos.SetXYZ(0,0,0);
+  det->evPos.SetXYZ(-65000,-65000,-65000);
   //sx3 
   det->eNearCal = -1.0;
   det->eFarCal = -1.0;
@@ -289,7 +289,7 @@ void goddessFull::ReadPositions(TString filename) {
   string readLine;
   while (getline(geomFile, readLine)) {
     if (readLine.find('#') != std::string::npos) continue;
-    if (readLine.find('-') != std::string::npos) continue;
+    //if (readLine.find('-') != std::string::npos) continue;
     if (readLine.empty()) continue;
     size_t firstCharPos = readLine.find_first_not_of(" \b\n\t\v");
     size_t equalPos = readLine.find('=');
@@ -314,17 +314,18 @@ void goddessFull::ReadPositions(TString filename) {
 	return;
       }
       geomInfo[geomKey+ " Y"] = atof(valStr.substr(comma+1, nextComma-(comma+1)).c_str());
-      if (0) { cout << "Found parameter \"" << geomKey + " Y" << "\" : " 
+      if (1) { cout << "Found parameter \"" << geomKey + " Y" << "\" : " 
 		    << geomInfo[geomKey + " Y"] << endl; }
       geomInfo[geomKey+ " Z"] = atof(valStr.substr(nextComma+1, closePar-(nextComma+1)).c_str());
-      if (0) { cout << "Found parameter \"" << geomKey + " Z" << "\" : " 
+      if (1) { cout << "Found parameter \"" << geomKey + " Z" << "\" : " 
 		    << geomInfo[geomKey + " Z"] << endl; }
     } else {
       geomInfo[geomKey] = atof(readLine.substr(equalPos+1).c_str());
-      if (0) { cout << "Found parameter \"" << geomKey << "\" : "
+      if (1) { cout << "Found parameter \"" << geomKey << "\" : "
 		    << geomInfo[geomKey] << endl; }
     }
   }
+ 
   return;
 }
 
@@ -332,7 +333,15 @@ solidVector goddessFull::GetPosVector(std::string type, Short_t sector, Short_t 
   Float_t barrelRadius = geomInfo["Barrel Radius"];
   Float_t barrelLength = geomInfo["Barrel Length"];
   Float_t sX3ActiveLength = geomInfo["SuperX3 Active Length"];
-  
+  Float_t qqq5FirstStripWidth = geomInfo["QQQ5 First Strip Width"];
+  Float_t qqq5DeltaPitch = geomInfo["QQQ5 Delta Pitch"];
+
+
+  for(int j=0; j<qqs.size(); j++){
+    qqs[j].firstStripWidth = qqq5FirstStripWidth;
+    qqs[j].deltaPitch = qqq5DeltaPitch;
+  }
+
   solidVector pos(0.0, 0.0, 0.0);
   TVector3 zAxis(0, 0, 1);
   
@@ -353,7 +362,7 @@ solidVector goddessFull::GetPosVector(std::string type, Short_t sector, Short_t 
     TVector3 qqq5Offset(geomInfo["QQQ5 Offset X"], geomInfo["QQQ5 Offset Y"],
 			geomInfo["QQQ5 Offset Z"]);
     TVector3 refQQQ5D_sectA = TVector3(0, 0, barrelLength/2.) + qqq5Offset + layerOffset;
-    
+
     pos.SetXYZ(0, 0, 1);
     pos.SetTheta(upStream ? (TMath::Pi() - refQQQ5D_sectA.Angle(zAxis)) : refQQQ5D_sectA.Angle(zAxis));
     pos.SetPhi(geomInfo["QQQ5 Ref Phi"] + sector*geomInfo["QQQ5 Delta Phi"]);

@@ -34,7 +34,15 @@ void QQQ5::Clear() {
 }
 
 void QQQ5::ConstructBins() {
-  TVector3 firstStripOffset(0., firstStripWidth/2., 0.); 
+  cout << "FirstStripWidth: " << firstStripWidth << endl;
+  cout << "deltaPitch: " << deltaPitch << endl; 
+
+  // Parameters from the geom file, set by hand for now as there is a problem getting the map back out ?!
+  deltaPitch = 0.05;
+  firstStripWidth = 2.55;
+
+  TVector3 firstStripOffset(0., firstStripWidth/2., 0.);
+
   TVector3 prevStripRefDetCenter = firstStripOffset;
   pStripCenterPos[0] = detPos.GetTVector3() + firstStripOffset;
 
