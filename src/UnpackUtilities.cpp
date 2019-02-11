@@ -347,7 +347,7 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
 	  /* Calculate vector from target to interaction point, 
 	   including shifts in position (in cm). */
 	  
-	  gret->g2out.xtals[ui].doppler = s800->getDoppler(xyzL, gret->var.beta, gVar);
+	  gret->g2out.xtals[ui].doppler = s800->getDoppler(xyzL, gret->var.beta, &gret->var);
 	  if (gret->g2out.xtals[ui].doppler == 0) { 
 	    gret->g2out.xtals[ui].doppler = gret->getDopplerSimple(gret->g2out.xtals[ui].maxIntPtXYZLab(), gret->var.beta); 
 	  }
@@ -388,7 +388,7 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
     if (gret->g1out.gammaMult() > 0) {
       for (UInt_t ui=0; ui<gret->g1out.gammaMult(); ui++) {
 #ifdef WITH_S800
-	gret->g1out.gammas[ui].doppler = s800->getDoppler(gret->g1out.gammas[ui].xyzLab1, gret->var.beta, gVar);
+	gret->g1out.gammas[ui].doppler = s800->getDoppler(gret->g1out.gammas[ui].xyzLab1, gret->var.beta, &gret->var);
 	if (gret->g1out.gammas[ui].doppler == 0) {
 	  gret->g1out.gammas[ui].doppler = gret->getDopplerSimple(gret->g1out.gammas[ui].xyzLab1, gret->var.beta);
 	}
