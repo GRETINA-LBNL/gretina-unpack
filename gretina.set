@@ -1,6 +1,6 @@
 GRETINA
 Doppler Correction
-bbeta 0.3909
+bbeta 0.024
 ATAcor 0.204
 BTAcor -0.168
 targetX 0.
@@ -61,16 +61,16 @@ targetZ 0.2
 #7 -1
 
 # MSU Standard In-Beam Configuration - First campaign
-Geometry
+#Geometry
 # QNumber HoleNumber
-7
-1 15
-2 6
-3 16
-4 8
-5 9
-6 7
-7 17
+#7
+#1 15
+#2 6
+#3 16
+#4 8
+#5 9
+#6 7
+#7 17
 
 # MSU 90 degree configuration
 #Geometry
@@ -119,9 +119,58 @@ Geometry
 #6 14
 #7 11
 
+# ANL 1stExp 2017-11-28
+#Geometry
+# QNumber OrderNumber (from 0)
+#10
+#1 15
+#2 22
+#3 27
+#4 14
+#5 26
+#6 17
+#7 16
+#8 29
+#9 24
+#10 28
+
+#hole_list="15 22 27 14 26 17 16 29 24 28 21 31";#   hole list for ATLAS-FMA 11 quad configuration plus GOBox in hole31, 2018-02-12
+
+# ANL FMA campaign 2018-02-15
+#Geometry
+# QNumber OrderNumber (from 0)
+#11
+#1 15
+#2 22
+#3 27
+#4 14
+#5 26
+#6 17
+#7 16
+#8 29
+#9 24
+#10 28
+#11 21
+
+# ANL FMA campaign 2019-01-26
+Geometry
+# QNumber OrderNumber (from 0)
+11
+1 21
+2 6
+3 22
+4 14
+5 26
+6 17
+7 19
+8 29
+9 24
+10 25
+11 12
+
 Electronics Order
 # QNumber OrderNumber (from 0)
-7
+11
 1 0
 2 1
 3 2
@@ -129,6 +178,8 @@ Electronics Order
 5 4
 6 5
 7 6
-
-
+8 7
+9 8
+10 9
+11 10
 

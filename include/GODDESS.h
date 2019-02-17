@@ -31,7 +31,7 @@ using namespace std;
 struct goddessEvent {
   std::vector<UShort_t> channels;
   std::vector<UShort_t> values;
-  unsigned long long timestamp;
+  ULong64_t timestamp;
 };
 
 /**************************************************************************/
@@ -282,10 +282,10 @@ class QQQ5 : public orrubaDet {
   void Clear();
 
   /* Geometry functions */
-  /*void SetGeomParameters(map<string, Double_t> geoInfo) { 
+  void SetGeomParameters(map<string, Double_t> geoInfo) { 
     firstStripWidth = geoInfo["QQQ5 First Strip Width"]; 
     deltaPitch = geoInfo["QQQ5 Delta Pitch"];
-    }*/
+  }
   TVector3 GetPStripCenterPos(Int_t strip) { return pStripCenterPos[strip]; }
   TVector3* GetNStripCenterPos() { return nStripCenterPos; }
   Int_t GetNumNTypeBins() { return 4; }
@@ -355,7 +355,7 @@ class BB10 : public orrubaDet {
   void Clear();
 
   /* Geometry functions */
-  //void SetGeomParameters(map<string, Double_t> geoInfo) { activeWidth = geoInfo["BB10 Active Width"]; }
+  void SetGeomParameters(map<string, Double_t> geoInfo) { activeWidth = geoInfo["BB10 Active Width"]; }
   TVector3 GetPStripCenterPos(Int_t strip) { return pStripCenterPos[strip]; }
   Int_t GetNumBins() { return 8; }
   Float_t* GetPTypeBins() { return binsP; }
@@ -437,6 +437,7 @@ class ionChamber: public TObject {
 
 struct detectorOUT {
   UShort_t depth;
+  UShort_t upstream;
   Int_t pStrip, nStrip;
   Float_t pECal, nECal;
   TVector3 evPos;
@@ -449,6 +450,7 @@ struct detectorOUT {
 class goddessOut: public TObject {
  public:
   std::vector<string> siID;
+  std::vector<string> siType;
   std::vector<detectorOUT> si;
   Float_t icDE;
   Float_t icE;

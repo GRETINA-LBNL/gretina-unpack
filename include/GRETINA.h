@@ -262,6 +262,8 @@ struct historyEvent{
   Float_t energy;
   long long int TS;
   Int_t BLpreSum;
+  // 2016-07-23 CMC added module to gH to differentiate between digitizers
+  Int_t module;
 };
 
 class g3HistoryEvent : public TObject {

@@ -52,12 +52,17 @@ Int_t superX3::GetStrip(Int_t channel) {
   return (channel/2);
 }
 
+/* Strip 0:  Near 1  Far 0
+   Strip 1:  Near 3  Far 2
+   Strip 2:  Near 5  Far 4
+   Strip 3:  Near 7  Far 6  */
+
 UShort_t superX3::GetNearChannel(UShort_t strip) { // UPDATE WITH REAL CHANNEL INFORMATION
-  return strip > 1 ? 2*strip+1 : 2*strip;
+  return 2*strip+1;
 }
 
 UShort_t superX3::GetFarChannel(UShort_t strip) { // UPDATE WITH REAL CHANNEL INFORMATION
-  return strip > 1 ? 2*strip : 2*strip + 1;
+  return 2*strip;
 }
 
 Float_t superX3::GetNearE(Bool_t calibrated) {
@@ -213,7 +218,7 @@ void superX3::SetRawEValue(UInt_t detChannel, Bool_t nType, UInt_t rawValue, Int
 
 
 void superX3::SortAndCalibrate(Bool_t doCalibrate) {
-  // cout << "------------------------------------- ENTERING SUPER X3 SORT AND CALIBRATE" << endl;
+  //cout << "------------------------------------- ENTERING SUPER X3 SORT AND CALIBRATE" << endl;
   orrubaDet::valueMap ePMap = GetRawE(kFALSE);
   orrubaDet::valueMap eNMap = GetRawE(kTRUE);
 
@@ -226,7 +231,7 @@ void superX3::SortAndCalibrate(Bool_t doCalibrate) {
   for (std::map<Short_t, Float_t>::iterator chItr = ePMap.begin(); chItr != ePMap.end(); ++chItr) {
     Int_t st_ = superX3::GetStrip(chItr->first);
 
-    // cout << "GetStrip st_: " << st_ << endl;
+    //cout << "GetStrip st_: " << st_ << endl;
 
     if (std::find(alreadyDone.begin(), alreadyDone.end(), st_) != alreadyDone.end()) continue;
     alreadyDone.push_back(st_);
@@ -239,23 +244,20 @@ void superX3::SortAndCalibrate(Bool_t doCalibrate) {
     eNear = (nearItr != ePMap.end()) ? nearItr->second : 0.0;
     eFar = (farItr != ePMap.end()) ? farItr->second : 0.0;
 
-    // cout << "nearStrip: " << nearStrip << "\t eNear: " << eNear << endl;
-    //cout << "farStrip : " << farStrip << "\t eFar:   " << eFar << endl;
-
-
-    
-    if (eNear > 0.0 && eFar > 0.0) {// cout << "eNear > 0 && eFar > 0" << endl;
-      stripsP.push_back(st_);// cout << "stripsP.back(): " << stripsP.back() << "\t stripsP.size(): " << stripsP.size() <<  endl;
+    if (eNear > 0.0 && eFar > 0.0) {
+      stripsP.push_back(st_);
       timeNear.push_back(tsPMap[nearStrip]);
       timeFar.push_back(tsPMap[farStrip]);
       eNearRaw.push_back(eNear);
       eFarRaw.push_back(eFar);
 
-      
       if(doCalibrate) { //cout << "if(doCalibrate)" << endl;
 	std::vector< std::vector<Float_t> > calPar = GetECalParameters(kFALSE);
 	eNear = eNear*calPar[nearStrip][1] + calPar[nearStrip][0];
 	eFar = eFar*calPar[farStrip][1] + calPar[farStrip][0];
+	std::vector<Float_t> *rCalPar = GetResStripParCal();
+	eNear = eNear*rCalPar[st_][1] + rCalPar[st_][0];	
+	eFar = eFar*rCalPar[st_][1] + rCalPar[st_][0];
 	
 	if (eNear > 0.0 && eFar > 0.0) {
 	  eNearCal.push_back(eNear);
@@ -355,21 +357,19 @@ TVector3 superX3::GetEventPosition(Bool_t calibrated) {
   eNear = GetNearE(calibrated);
   eFar = GetFarE(calibrated);
 
-  // cout << "pStripHit: " << pStripHit << endl;
-
-  TVector3 interactionPos;// cout << "parStripPosCal[pStripHit].at(1): " << parStripPosCal[pStripHit].at(1) << endl;
-
+  TVector3 interactionPos;
+  
   if (pStripHit >= 0 && pStripHit < GetNumChannels(kFALSE) && eNear >= 0. && eFar >= 0.) {
-      Float_t reCenter = (parStripPosCal[pStripHit].at(1) + parStripPosCal[pStripHit].at(0))/2.;
-      Float_t normalize = parStripPosCal[pStripHit].at(1) - parStripPosCal[pStripHit].at(0);
-      normalize = (normalize < 0.01) ? 1 : normalize; 
-      Float_t zRes = (((eNear - eFar)/(eNear + eFar)) - reCenter)/normalize;
-      if (!upStream) zRes *= -1;
-      TVector3 zResPos(0., 0., zRes*activeLength);
-      interactionPos = pStripCenterPos[pStripHit] + zResPos;
-    } else {
-      interactionPos.SetXYZ(0,0,0);
-    }
-      return interactionPos;
-
+    Float_t reCenter = (parStripPosCal[pStripHit].at(1) + parStripPosCal[pStripHit].at(0))/2.;
+    Float_t normalize = parStripPosCal[pStripHit].at(1) - parStripPosCal[pStripHit].at(0);
+    normalize = (normalize < 0.01) ? 1 : normalize; 
+    Float_t zRes = (((eNear - eFar)/(eNear + eFar)) - reCenter)/normalize;
+    if (!upStream) zRes *= -1;
+    TVector3 zResPos(0., 0., zRes*activeLength);
+    interactionPos = pStripCenterPos[pStripHit] + zResPos;
+  } else {
+    interactionPos.SetXYZ(0,0,0);
+  }
+  return interactionPos;
+  
 }

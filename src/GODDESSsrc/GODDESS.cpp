@@ -194,6 +194,7 @@ std::vector<Int_t> orrubaDet::GetThresholds(Bool_t nType) {
 
 void goddessOut::Clear() {
   siID.clear();
+  siType.clear();
   si.clear();
 }
 
@@ -223,6 +224,10 @@ void goddessFull::Clear() {
     ics[i].Clear();
   }
   eventOut->Clear();
+  rawGoddess->timestamp = 0;
+  rawGoddess->channels.clear();
+  rawGoddess->values.clear();
+  ts = 0; /*2019-02-15 CMC test*/ 
 }
 
 void goddessFull::ResetOutput(detectorOUT *det) { 
@@ -385,13 +390,14 @@ void goddessFull::getAnalogGoddess(FILE *inf, Int_t evtLength) {
     UShort_t channel = (*p - 0x8000) & 0xffff;
     UShort_t value = (*p >> 16) & 0xffff;
     if (channel >= 1000 && channel <= 1003) {
-      rawGoddess->timestamp |= (unsigned long long) value << (16*(246-channel));
+      rawGoddess->timestamp |= (unsigned long long) value << (16*(channel-1000));
     } else {
       rawGoddess->channels.push_back(channel);
       rawGoddess->values.push_back(value);
     }
     p++;
   }
+  
 }
 
 void goddessFull::printAnalogRawEvent() {
@@ -506,7 +512,7 @@ void goddessFull::ReadConfiguration(TString filename) {
 	  tempMap[j] = j+nTypeDaqCh;
 	}
 	s3->SetChannelMap(tempMap, 1); // n-type
-
+	s3->SetGeomParameters(geomInfo);
 	s3->ConstructBins();
       } else if (detType == "BB10") {
 	bb = new BB10();
@@ -515,7 +521,7 @@ void goddessFull::ReadConfiguration(TString filename) {
 	  tempMap[j] = j+pTypeDaqCh;
 	}
 	bb->SetChannelMap(tempMap, 0); // p-type
-	
+	bb->SetGeomParameters(geomInfo);
 	bb->ConstructBins();
       } else if (detType == "QQQ5") {
 	qq = new QQQ5();
@@ -529,7 +535,7 @@ void goddessFull::ReadConfiguration(TString filename) {
 	  tempMap[j] = j+nTypeDaqCh;
 	}
 	qq->SetChannelMap(tempMap, 1); // n-type
-
+	qq->SetGeomParameters(geomInfo);
 	qq->ConstructBins();
       } else {
 	cout << "Error! (goddessFull::ReadConfiguration) - Unknown detector type: " 
@@ -681,11 +687,11 @@ void goddessFull::ProcessEvent() {
     qqs[i].SortAndCalibrate(kTRUE);
     ResetOutput(&detOut);
     qqs[i].GetMaxHitInfo(&detOut.pStrip, nullptr, &detOut.nStrip, nullptr);
-
     //  cout << "QQS stripsP.size(): " << qqs[i].stripsP.size() << endl;
     //  cout << "QQS stripsN.size(): " << qqs[i].stripsN.size() << endl;
     if (detOut.pStrip >= 0) {
       detOut.depth = qqs[i].GetDepth();
+      detOut.upstream = qqs[i].GetUpStream();
       detOut.pECal = -1.0;  detOut.nECal = -1.0;
       for (Int_t j=0; j<qqs[i].stripsP.size(); j++) {
 	if (qqs[i].stripsP[j] == detOut.pStrip) {
@@ -699,6 +705,7 @@ void goddessFull::ProcessEvent() {
       }
       detOut.evPos = qqs[i].GetEventPosition();
       eventOut->siID.push_back(qqs[i].GetPosID());
+      eventOut->siType.push_back("QQQ5");
       eventOut->si.push_back(detOut);
     }
   }
@@ -713,37 +720,31 @@ void goddessFull::ProcessEvent() {
     // cout << "detOut.pStrip: " << detOut.pStrip << endl;
     // cout << "detOut.nStrip: " << detOut.nStrip << endl;
      if (detOut.pStrip >= 0) {
-      // detOut.depth = qqs[i].GetDepth();
-      detOut.pECal    = -1.0; detOut.nECal   = -1.0;
-      detOut.eNearCal = -1.0; detOut.eFarCal = -1.0;
-
-  
-
-      for (Int_t j=0; j<s3s[i].stripsP.size(); j++) { //cout << "s3s[i].stripsP.size(): " << s3s[i].stripsP.size() << endl;
+       detOut.depth = s3s[i].GetDepth();
+       detOut.upstream = s3s[i].GetUpStream();
+       detOut.pECal    = -1.0; detOut.nECal   = -1.0;
+       detOut.eNearCal = -1.0; detOut.eFarCal = -1.0;
+      
+      for (Int_t j=0; j<s3s[i].stripsP.size(); j++) { 
 	if (s3s[i].stripsP[j] == detOut.pStrip) {
-	  // detOut.pECal = s3s[i].eCalP[j];
 	  detOut.eNearCal = s3s[i].eNearCal[j];
 	  detOut.eFarCal  = s3s[i].eFarCal[j];
-	  // cout << "eNearCal[0]:   " << s3s[i].eNearCal[j] << "\t i: " << i << "\t j:" << j << endl;
+	  detOut.pECal = s3s[i].eNearCal[j] + s3s[i].eFarCal[j];
 	}
-	}
-      /* for (Int_t j=0; j<s3s[i].stripsN.size(); j++) {
+      }
+      for (Int_t j=0; j<s3s[i].stripsN.size(); j++) {
 	if (s3s[i].stripsN[j] == detOut.nStrip) {
 	  detOut.nECal = s3s[i].eCalN[j];
-	  // detOut.eNearCal = s3s[i].eNearCal[j];
-	  //detOut.eFarCal  = s3s[i].eFarCal[j];
 	}
-	}*/
-   
-      //detOut.evPos = s3s[i].GetEventPosition();// NEED POSITION CALIB PARAMETERS IN .DAT FILE
-      eventOut->siID.push_back(s3s[i].GetPosID());
-      eventOut->si.push_back(detOut);
       }
-
-
-
-
+   
+      detOut.evPos = s3s[i].GetEventPosition();// NEED POSITION CALIB PARAMETERS IN .DAT FILE
+      eventOut->siID.push_back(s3s[i].GetPosID());
+      eventOut->siType.push_back("SuperX3");
+      eventOut->si.push_back(detOut);
+     }
   } //cout << "leaving s3s loop --- " << endl;
+  
   for (UInt_t i=0; i<bbs.size(); i++) {
     bbs[i].LoadEvent(rawGoddess, 0);
     bbs[i].SortAndCalibrate(kTRUE);
@@ -752,6 +753,7 @@ void goddessFull::ProcessEvent() {
     if (detOut.pStrip >= 0) {
       detOut.nStrip = -1;
       detOut.depth = bbs[i].GetDepth();
+      detOut.upstream = bbs[i].GetUpStream();
       detOut.pECal = -1.0;  detOut.nECal = -1.0;
       for (Int_t j=0; j<bbs[i].stripsP.size(); j++) {
 	if (bbs[i].stripsP[j] == detOut.pStrip) {
@@ -760,6 +762,7 @@ void goddessFull::ProcessEvent() {
       }
       detOut.evPos = bbs[i].GetEventPosition();
       eventOut->siID.push_back(bbs[i].GetPosID());
+      eventOut->siType.push_back("BB10");
       eventOut->si.push_back(detOut);
     }
   }

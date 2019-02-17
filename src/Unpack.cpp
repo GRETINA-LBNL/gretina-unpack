@@ -390,7 +390,7 @@ int main(int argc, char *argv[]) {
       if (ctrl->pgh == 0) { /* We expect global headers, so read one */
 	siz = fread(&gHeader, sizeof(struct globalHeader), 1, inf);
       }
-      
+
       while (siz && !gotsignal) {
 
 	if (cnt->TSFirst == 0 && gHeader.timestamp > 0) { cnt->TSFirst = gHeader.timestamp; }
@@ -762,7 +762,7 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
       goddess->ts = (uint64_t)gHeader.timestamp;
       goddess->getAnalogGoddess(inf, gHeader.length); 
       goddess->ProcessEvent();
-      // goddess->printAnalogRawEvent();
+      //goddess->printAnalogRawEvent();
       cnt->Increment(gHeader.length);
     }
     break;

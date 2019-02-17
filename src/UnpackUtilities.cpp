@@ -433,6 +433,7 @@ void ResetEvent(controlVariables* ctrl, counterVariables* cnt) {
     
   /* Clear event structures. */
   if ((cnt->getEventBit(RAW)) || (cnt->getEventBit(DECOMP)) ||
+      (cnt->getEventBit(BANK88)) || (cnt->getEventBit(RAWHISTORY)) ||
       (cnt->getEventBit(TRACK)) || (cnt->getEventBit(GRETSCALER))) {
     gret->Reset();
   }

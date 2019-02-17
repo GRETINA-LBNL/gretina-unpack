@@ -5,10 +5,11 @@
   const char* foundlib;
   foundlib = gSystem->Which(searchP, gretinaLib, EAccessMode::kFileExists);
   if (foundlib) {
-    gSystem->Load("libGRETINA.so");
+    gSystem->Load("lib/libGRETINA.so");
     cout << "Loaded: libGRETINA.so, ";
-    gSystem->Load("libGODDESS.so");
+    gSystem->Load("lib/libGODDESS.so");
     cout << " and libGODDESS.so";
+    cout << endl;
     // gSystem->Load("lib/libphosWall.so");
     // cout << " libphosWall.so, ";
     // gSystem->Load("lib/libLenda.so");
@@ -39,7 +40,7 @@
   }
 
   gStyle->SetPalette(1);
-  gStyle->SetOptStat(0000);
+  gStyle->SetOptStat(1111111);
   gStyle->SetCanvasBorderMode(0);
   gStyle->SetPadBorderMode(0);
   gStyle->SetCanvasColor(0);

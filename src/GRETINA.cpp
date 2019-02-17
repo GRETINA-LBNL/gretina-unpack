@@ -2257,6 +2257,7 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
 
 
 
+#ifdef AGATA_translated
     /* For AGATA translated data due to error in translation code... */
     if ((Int_t)(channel%10) == 9) {
       g3ch.eRaw = -(g3ch.eRaw);
@@ -2267,6 +2268,7 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
     if (g3ch.eRaw > 100000) { g3ch.eRaw = 0.; }
 
     //printf("-----> ID %d, g3ch.eRaw = %f\n", g3ch.ID, g3ch.eRaw);
+#endif
 
 
 
@@ -2798,6 +2800,13 @@ Int_t GRETINA::getMode3History(FILE *inf, Int_t evtLength, long long int hTS, co
 
     gH.energy = 0.;
     gH.TS = 0;
+    gH.module = 0;
+
+    // 2016-07-23 CMC added module to gH to differentiate between digitizers
+    // unlike energy and TS, module should not be reset within the while loop
+    // a mode3 channel event/packet comes from one digitzer, channel 9 by firmware
+    // Int_t module() { return (hdr1 >> 4); }
+    gH.module = (dp->hdr[1]) >> 4;
     
     gH.TS = (ULong64_t)( ((ULong64_t)(dp->hdr[3])) +  
 			 ((ULong64_t)(dp->hdr[2]) << 16) +
