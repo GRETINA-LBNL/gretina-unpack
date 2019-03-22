@@ -502,6 +502,7 @@ struct trackedGamma {
   long long int timestamp; /* timestamp of first interaction point */
   Float_t x0, y0, z0, e0; /* first interaction point */
   Float_t x1, y1, z1, e1; /* second interaction point */
+  Short_t fCryHit; /* First crystal hit ID */
 };
 
 class GTrackEvent : public TObject {
