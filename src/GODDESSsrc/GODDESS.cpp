@@ -174,7 +174,7 @@ std::vector< std::vector<Float_t> > orrubaDet::GetECalParameters(Bool_t nType) {
 Bool_t orrubaDet::SetThresholds(std::vector<Int_t> thresholds, Bool_t nType, Int_t thrSize) {
   if (thrSize == 0) { thrSize = (UInt_t)GetNumChannels(nType); }
   if (thresholds.size() != (UInt_t)thrSize) {
-    printf("ERROR: Size of vector for thresholds (%d) was not as expected (%d)\n",
+    printf("ERROR: Size of vector for thresholds (%lu) was not as expected (%d)\n",
 	   thresholds.size(), thrSize);
     return kFALSE;
   }
@@ -403,7 +403,7 @@ void goddessFull::getAnalogGoddess(FILE *inf, Int_t evtLength) {
 void goddessFull::printAnalogRawEvent() {
   printf("-----------------------------\n");
   printf(" Raw GODDESS event: \n");
-  printf("   TS = %ld\n", rawGoddess->timestamp);
+  printf("   TS = %llu\n", rawGoddess->timestamp);
   printf("   Channel\tValue\n");
   for (UInt_t i=0; i<rawGoddess->channels.size(); i++) {
     printf("    %d\t%d\n", rawGoddess->channels[i], rawGoddess->values[i]);

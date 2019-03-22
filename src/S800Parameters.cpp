@@ -3093,7 +3093,7 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
 	    if (lastEvtNumber && reportEvtIncrease!= 0) {
 	      if ((lastEvtNumber+1) != uint64_evt) {
 		printf("S800 event number increase error!\n");
-		printf("  Last: %f, current: %lld\n", lastEvtNumber, uint64_evt);
+		printf("  Last: %f, current: %lu\n", lastEvtNumber, uint64_evt);
 	      }
 	      lastEvtNumber = uint64_evt;
 	    }
@@ -3626,7 +3626,7 @@ void S800Full::UpdateS800RunVariables(TString filename) {
   Int_t chn;
 
   while (!feof(input)) {
-    fgets(line, 300, input);
+    char* str = fgets(line, 300, input);
     if (strlen(line) == 1) { continue; }
     if (strncmp(line, "#", 1) == 0) { continue; }
     if (strncmp(line, "fp.crdc1.y_slope", 16) == 0) {
@@ -3929,7 +3929,7 @@ void S800Physics::Reset() {
 }
 
 void S800Full::getPhysics(FILE *inf) {
-  fread(&phys.s800Ph, 1, sizeof(s800Phys), inf);
+  size_t siz = fread(&phys.s800Ph, 1, sizeof(s800Phys), inf);
   //printf("GOT IT: %x\n", phys.s800Ph.type);
 
   fp.crdc1.x = phys.s800Ph.crdc1_x;

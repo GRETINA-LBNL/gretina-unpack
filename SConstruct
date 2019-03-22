@@ -5,9 +5,9 @@ import os
 PhosWall=0
 S800=0
 LENDA=0
-CHICO=1
+CHICO=0
 DFMA=0
-GODDESS=0
+GODDESS=1
 
 ########################### You shouldn't need to change anything past this point..... ########
 
@@ -60,6 +60,11 @@ def rootcint(target, source, env):
     ok = os.system(command)
     return ok
 
+def remember_pcm(target, source, env):
+    new_target = os.path.splitext(str(target[0]))[0]+'_rdict.pcm'
+    target.append(new_target)
+    return target, source
+
 ## Create construction environment propagating the external environment
 env = Environment(ENV=os.environ, 
       		  CXXCOMSTR = compile_source_message,
@@ -74,7 +79,7 @@ env = Environment(ENV=os.environ,
   		  JAVACCOMSTR = compile_source_message) 
 
 ## Create a rootcint builder and attach it to the environment
-bld = Builder(action=Action(rootcint,root_dictionary_message))
+bld = Builder(action=Action(rootcint,root_dictionary_message), emitter = remember_pcm)
 env.Append(BUILDERS = {'RootCint':bld})
 
 ## Optimization flags ##################################################
@@ -207,6 +212,8 @@ if LENDA==1:
    envUnpack.Append(LIBS=['Lenda'])
 if CHICO==1:
    envUnpack.Append(LIBS=['chico'])
+if DFMA==1:
+   envUnpack.Append(LIBS=['fma'])
 if GODDESS==1:
    envUnpack.Append(LIBS=['GODDESS'])
 

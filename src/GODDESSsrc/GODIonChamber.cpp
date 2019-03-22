@@ -83,19 +83,19 @@ std::map<Short_t, Short_t> ionChamber::GetChannelMap(Int_t chType) {
 Bool_t ionChamber::SetThresholds(std::vector<Int_t> thresholds, Int_t chType) {
   if (chType == 1) { 
     if (thresholds.size() != numAnode) { 
-      printf("ERROR: Size of vector for thresholds (%d) not as expected (%d).\n", thresholds.size(), numAnode);
+      printf("ERROR: Size of vector for thresholds (%lu) not as expected (%d).\n", thresholds.size(), numAnode);
       return kFALSE;
     }
     threshAnode = thresholds;
   } else if (chType == 2) {
     if (thresholds.size() != numWireX) { 
-      printf("ERROR: Size of vector for thresholds (%d) not as expected (%d).\n", thresholds.size(), numWireX);
+      printf("ERROR: Size of vector for thresholds (%lu) not as expected (%d).\n", thresholds.size(), numWireX);
       return kFALSE;
     }    
     threshX = thresholds; 
   } else if (chType == 3) {
     if (thresholds.size() != numWireY) { 
-      printf("ERROR: Size of vector for thresholds (%d) not as expected (%d).\n", thresholds.size(), numWireY);
+      printf("ERROR: Size of vector for thresholds (%lu) not as expected (%d).\n", thresholds.size(), numWireY);
       return kFALSE;
     }
     threshY = thresholds;

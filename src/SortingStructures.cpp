@@ -422,7 +422,7 @@ void controlVariables::SetS800Controls(TString fileName) {
   int value;
 
   while ( !feof(controlINPUT) ) {
-    fgets(line, 300, controlINPUT);
+    char* chr = fgets(line, 300, controlINPUT);
     if (strlen(line) == 1) { continue; }
     if (strncmp(line, "#", 1) == 0) { continue; }
     if (strncmp(line, "VariableFile", 12) == 0) {

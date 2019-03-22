@@ -840,7 +840,7 @@ struct out4Mario {
 
 void ReadMario(FILE* inf) {
   out4Mario mario;
-  fread(&mario, 1, sizeof(struct out4Mario), inf);
+  size_t siz = fread(&mario, 1, sizeof(struct out4Mario), inf);
   cout << mario.ccEnergy << endl;
   for (Int_t i=0; i<36; i++) {
     cout << mario.segEnergy[i] << endl;

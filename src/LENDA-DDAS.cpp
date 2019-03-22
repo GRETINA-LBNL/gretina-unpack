@@ -87,7 +87,7 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 
   Int_t count = 0;
 
-  fread(&sizeOfWholeThing, sizeof(uint32_t), 1, inf);
+  size_t siz = fread(&sizeOfWholeThing, sizeof(uint32_t), 1, inf);
   bytesReadTotal += sizeof(uint32_t);
   // fread(&typeOfWholeThing, sizeof(uint32_t), 1, inf);
   // bytesReadTotal += sizeof(uint32_t);
@@ -103,16 +103,16 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
     {  
       totalSizeOfBody = sizeOfWholeThing - 4;
       while (1) {
-	fread(&timestamp, sizeof(uint64_t), 1, inf);
+	size_t siz = fread(&timestamp, sizeof(uint64_t), 1, inf);
 	bytesReadTotal += sizeof(uint64_t);
 	bytesReadInBody += sizeof(uint64_t);
 
 	if(deBugFn) {
-	  printf("timestamp = %lld\n", timestamp);
+	  printf("timestamp = %lu\n", timestamp);
 	  printf("bytesReadTotal: %u, bytesReadInBody: %u\n", bytesReadTotal, bytesReadInBody);
 	}
 
-	fread(&sourceID, sizeof(uint32_t), 1, inf);
+	siz = fread(&sourceID, sizeof(uint32_t), 1, inf);
 	bytesReadTotal += sizeof(uint32_t);
 	bytesReadInBody += sizeof(uint32_t);
 
@@ -121,7 +121,7 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 	  printf("bytesReadTotal: %u, bytesReadInBody: %u\n", bytesReadTotal, bytesReadInBody);
 	}
 
-	fread(&fragPayloadSize, sizeof(uint32_t), 1, inf);
+	siz = fread(&fragPayloadSize, sizeof(uint32_t), 1, inf);
 	bytesReadTotal += sizeof(uint32_t);
 	bytesReadInBody += sizeof(uint32_t);
 
@@ -130,7 +130,7 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 	  printf("bytesReadTotal: %u, bytesReadInBody: %u\n", bytesReadTotal, bytesReadInBody);
 	}
 
-	fread(&barrier, sizeof(uint32_t), 1, inf);
+	siz = fread(&barrier, sizeof(uint32_t), 1, inf);
 	bytesReadTotal += sizeof(uint32_t);
 	bytesReadInBody += sizeof(uint32_t);
 
@@ -139,7 +139,7 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 	  printf("bytesReadTotal: %u, bytesReadInBody: %u\n", bytesReadTotal, bytesReadInBody);
 	}
 
-	fread(&sizeOfRingItem, sizeof(uint32_t), 1, inf);
+	siz = fread(&sizeOfRingItem, sizeof(uint32_t), 1, inf);
 	bytesReadTotal += sizeof(uint32_t);
 	bytesReadInBody += sizeof(uint32_t);
 
@@ -148,7 +148,7 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 	  printf("bytesReadTotal: %u, bytesReadInBody: %u\n", bytesReadTotal, bytesReadInBody);
 	}
 
-	fread(&typeOfRingItem, sizeof(uint32_t), 1, inf);
+	siz = fread(&typeOfRingItem, sizeof(uint32_t), 1, inf);
 	bytesReadTotal += sizeof(uint32_t);
 	bytesReadInBody += sizeof(uint32_t);
 
@@ -166,7 +166,7 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 	    case 30: /* Physics */
 	      {
 		if (NSCLDAQ11) {
-		  fread(&sizeOfBH, sizeof(uint32_t), 1, inf);
+		  size_t siz = fread(&sizeOfBH, sizeof(uint32_t), 1, inf);
 		  bytesReadTotal += sizeof(uint32_t);
 		  bytesReadInBody += sizeof(uint32_t);
 	
@@ -176,16 +176,16 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 		    printf("bytesReadTotal: %u, bytesReadInBody: %u\n", bytesReadTotal, bytesReadInBody);
 		  }
 
-		  fread(&timestampBH, sizeof(uint64_t), 1, inf);
+		  siz = fread(&timestampBH, sizeof(uint64_t), 1, inf);
 		  bytesReadTotal += sizeof(uint64_t);
 		  bytesReadInBody += sizeof(uint64_t);
 
 		  if(deBugFn) {
-		    printf("timestampBH = %lld\n", timestampBH); 
+		    printf("timestampBH = %lu\n", timestampBH); 
 		    printf("bytesReadTotal: %u, bytesReadInBody: %u\n", bytesReadTotal, bytesReadInBody);
 		  }
 
-		  fread(&sourceIDBH, sizeof(uint32_t), 1, inf);
+		  siz = fread(&sourceIDBH, sizeof(uint32_t), 1, inf);
 		  bytesReadTotal += sizeof(uint32_t);
 		  bytesReadInBody += sizeof(uint32_t);
 		  
@@ -194,7 +194,7 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 		    printf("bytesReadTotal: %u, bytesReadInBody: %u\n", bytesReadTotal, bytesReadInBody);
 		  }
 
-		  fread(&barrierBH, sizeof(uint32_t), 1, inf);
+		  siz = fread(&barrierBH, sizeof(uint32_t), 1, inf);
 		  bytesReadTotal += sizeof(uint32_t);
 		  bytesReadInBody += sizeof(uint32_t);
 
@@ -234,7 +234,7 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 	  break;
 	default:
 	  {
-	    fread(buffer08, sizeof(int8_t), sizeOfRingItem - 2*sizeof(uint32_t), inf);
+	    size_t size = fread(buffer08, sizeof(int8_t), sizeOfRingItem - 2*sizeof(uint32_t), inf);
 	    bytesReadTotal += (sizeOfRingItem - 2*sizeof(uint32_t))*sizeof(int8_t);
 	    bytesReadInBody += (sizeOfRingItem - 2*sizeof(uint32_t))*sizeof(int8_t);
 	  }
@@ -249,7 +249,7 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
   default:
     {
       count = sizeOfWholeThing - 2*sizeof(uint32_t);
-      fread(buffer08, sizeof(uint8_t), count / sizeof(uint8_t), inf);
+      size_t siz = fread(buffer08, sizeof(uint8_t), count / sizeof(uint8_t), inf);
     }
     break;
   }

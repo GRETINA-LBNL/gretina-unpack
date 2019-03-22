@@ -1011,7 +1011,7 @@ Int_t phosWallFull::InitializeParameters(TString fileName) {
   Int_t value, value2;
 
   while ( !feof(phosIn) ) {
-    fgets(line, 300, phosIn);
+    char * str = fgets(line, 300, phosIn);
     if (strlen(line) == 1) { continue; }
     if (strncmp(line, "#", 1) == 0) { continue; }
     if (strncmp(line, ";", 1) == 0) { continue; }

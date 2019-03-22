@@ -405,7 +405,7 @@ Int_t TrackCtrl::ReadChatFile(TString fileName) {
       printf ("TRACK: distToCrystal= %f (will be added)\n", distToCrystal);
       
       for (i = 0; i < i1; i++) {
-	fscanf (fp, "%f %f\n", &r1, &r2);
+	int match = fscanf (fp, "%f %f\n", &r1, &r2);
 	i2 = (int) (r1 * 1000 + 0.5);     /* now keV */
 	printf ("TRACK:  --> Max range at %6i keV ", i2);  fflush(stdout);
 	singleHitRange[i2] = r2 + distToCrystal;

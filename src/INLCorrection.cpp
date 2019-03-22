@@ -198,7 +198,7 @@ void INLCorrection::ReadRawINL() {
 	cerr << "Skipping it and moving on the next one... " << endl;
       } else {
 	cout << "Reading INL corrections from " << inlName.Data() << ". " << endl;
-	fread(inl[i][j*10], sizeof(inl), 1, inlIn);
+	size_t siz = fread(inl[i][j*10], sizeof(inl), 1, inlIn);
 	fclose(inlIn);
       }
 
