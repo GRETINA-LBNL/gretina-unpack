@@ -1,9 +1,11 @@
 /***** CHICO Definitions *****/
 
 #define PPAC_NUM 20
-#define PPACMATCH 10
+/*#define PPACMATCH 10*/
+#define PPACMATCH 5
 #define ANGNUM 49
-#define CH2NS 0.025
+/*#define CH2NS 0.025*/
+#define CH2NS 0.100
 
 #define ANODE_E_VSN 1
 #define ANODE_T_VSN 2
@@ -39,7 +41,21 @@
 
 
 
+#define beamE 1088.0
+//#define beamE 1028.5
+#define beamA 136.0
+#define targetA 198.0
+#define P0 16602.2
+//#define P0 16141.8
+#define Mtot 334.0
+#define BEAM 1
+#define TARGET 2
+#define LEFT 1
+#define RIGHT 2
 
 
 
+#define GTPosOffsetZ 5.334
+#define GTPosOffsetY1 14.71
+#define GTPosOffsetY2 -27.46
 

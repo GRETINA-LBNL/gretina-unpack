@@ -433,6 +433,7 @@ class g2CrystalEvent : public TObject {
   Float_t cc1, cc2, cc3, cc4;
   Float_t segSum;
   Float_t doppler;
+  Float_t dopplerT; /*20180517 CMC added for CHICO target-like gammas*/
   Float_t dopplerSeg;
   Float_t dopplerCrystal;
   vector<g2IntPt> intpts;

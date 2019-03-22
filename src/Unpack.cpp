@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
   chico->Initialize();
   chico->InitializeCHICOVariables("chicoCalibrations/ppacTheta.cal", 
 				  "chicoCalibrations/ppacPhi.cal", 
-                                  "chicoCalibrations/beta.dat");
+                                  "chicoCalibrations/betaE.dat");
   chico->offsetTarget = 15.8; 
 #endif
 

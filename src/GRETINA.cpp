@@ -719,6 +719,7 @@ void g2CrystalEvent::Reset() {
   ccCurrent = 0.0; ccPrior1 = 0.0; ccPrior2 = 0.0;
   deltaT1 = 0.0; deltaT2 = 0.0;
   doppler = 0.0; dopplerSeg = 0.0; dopplerCrystal = 0.0;
+  dopplerT = 0.0; /*20180517 CMC added for CHICO target-like gammas*/
 }
 
 /**************************************************************/

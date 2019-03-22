@@ -723,6 +723,8 @@ void counterVariables::PrintRunStatistics(Int_t pgh, Int_t withWAVE, Int_t super
       printf("  BGS headers:           %d\n", headerType[BGS]);
     if (headerType[CHICO] > 0) 
       printf("  CHICO headers:         %d\n", headerType[CHICO]);
+    if (headerType[DFMA] > 0)
+      printf("  DFMA headers:          %d\n", headerType[DFMA]);
     if (headerType[PWALL] > 0) 
       printf("  PhosWall headers:      %d\n", headerType[PWALL]);
     if (headerType[PWALLAUX] > 0) 

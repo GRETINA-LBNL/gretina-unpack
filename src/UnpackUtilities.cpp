@@ -354,29 +354,90 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
 	}
 #else /* WITH_S800 */
 #ifdef WITH_CHICO
-	TVector3 xyzL = gret->g2out.xtals[ui].maxIntPtXYZLab();        
-	if (chico->gotParticle) {
+	TVector3 xyzL = gret->g2out.xtals[ui].maxIntPtXYZLab();    
+
+	/*printf("xyzL.Y(),Z() before %f and %f ",xyzL.Y(),xyzL.Z());*/
+
+      	if (xyzL.Y()<0) xyzL.SetY(xyzL.Y() - GTPosOffsetY1) ;
+	else            xyzL.SetY(xyzL.Y() - GTPosOffsetY2) ;
+
+        xyzL.SetZ(xyzL.Z() - GTPosOffsetZ) ;
+
+	/*printf("and after %f and %f \n",xyzL.Y(),xyzL.Z());*/
+
+	Float_t chicoTheta = chico->particle.fThetaL/(TMath::Pi()) *180.;
+	if (chico->gotParticle && (chico->idParticle > 0)) {
 	  Float_t gTheta, gPhi;
 	  gTheta = xyzL.Theta();
 	  if (xyzL.Phi() < 0) { gPhi = xyzL.Phi() + 2*TMath::Pi(); } 
 	  else { gPhi = xyzL.Phi(); }
+
+	  /*
+	    printf("pgCosL, chico->particle.fThetaL %f chico->particle.fPhiL %f gTheta %f gPhi %f\n",chico->particle.fThetaL, chico->particle.fPhiL, gTheta, gPhi);
+	  */
+	  /* chico->idParticle defined as:
+	     1 : Target = Right, Projectile = Left
+	     2 : Target = Left , Projectile = Right
+	  */
+
+	  if (chico->idParticle == 1) {
+	    chico->particle.pgCosP = chico->calcCos(chico->particle.fThetaL, chico->particle.fPhiL, gTheta, gPhi);
+	    chico->particle.pgCosT = chico->calcCos(chico->particle.fThetaR, chico->particle.fPhiR, gTheta, gPhi);
+	  } else if (chico->idParticle == 2) {
+	    chico->particle.pgCosT = chico->calcCos(chico->particle.fThetaL, chico->particle.fPhiL, gTheta, gPhi);
+	    chico->particle.pgCosP = chico->calcCos(chico->particle.fThetaR, chico->particle.fPhiR, gTheta, gPhi);
+	  } else {
+	    printf("Unexpected chico->idParticle = %d\n", chico->idParticle);
+	  }
+
+	  /* not applicable for deep inelastic
+	     if (chicoTheta >=96. && chicoTheta <=180.) {
+	     lbeta = chico->betaB[(Int_t)chicoTheta];
+	     } else {
+	     lbeta = chico->betaP0 + chico->betaP1*chico->particle.fThetaL;
+	     lbeta += chico->betaP2*pow(chico->particle.fThetaL,2);
+	     lbeta += chico->betaP3*pow(chico->particle.fThetaL,3);
+	     lbeta += chico->betaP4*pow(chico->particle.fThetaL,4);
+	     lbeta += chico->betaP5*pow(chico->particle.fThetaL,5);
+	     }
+
+	     if (chicoTheta >=96. && chicoTheta <=180.) {
+	     lbeta = chico->betaB[(Int_t)chicoTheta];
+	     } else {
+	     lbeta = chico->betaT0 + chico->betaT1*chico->particle.fThetaL;
+	     lbeta += chico->betaT2*pow(chico->particle.fThetaL,2);
+	     lbeta += chico->betaT3*pow(chico->particle.fThetaL,3);
+	     lbeta += chico->betaT4*pow(chico->particle.fThetaL,4);
+	     lbeta += chico->betaT5*pow(chico->particle.fThetaL,5);
+	     }
+	  */
+
 	  
-	  chico->particle.pgCosL = chico->calcCos(chico->particle.fThetaL,
-						  chico->particle.fPhiL,
-						  gTheta, gPhi);
-	  Float_t lbeta = chico->betaP[(Int_t)(chico->particle.fThetaL/(TMath::Pi()*180.))];
-	  Float_t lgamma = 1/sqrt(1.-lbeta*lbeta);
-	  
-	  Float_t dopplerL = (lgamma*(1-lbeta*chico->particle.pgCosL));
+	  Float_t lbeta, lcosTheta, lgamma, ldoppler;
+
+	  lbeta = chico->particle.betaT;
+	  lcosTheta = chico->particle.pgCosT;
+
+	  lgamma = 1/sqrt(1.-lbeta*lbeta);	  
+	  ldoppler = (lgamma*(1-lbeta*lcosTheta));
           
-	  chico->particle.pgCosR = chico->calcCos(chico->particle.fThetaR,
-						  chico->particle.fPhiR,
-						  gTheta, gPhi);
-	  lbeta = chico->betaP[(Int_t)(chico->particle.fThetaR/(TMath::Pi()*180.))];
-	  lgamma = 1/sqrt(1.-lbeta*lbeta);
-	  Float_t dopplerR = (lgamma*(1-lbeta*chico->particle.pgCosR));
-	  gret->g2out.xtals[ui].doppler = dopplerL;
+	  gret->g2out.xtals[ui].dopplerT = ldoppler;
+
+	  lbeta = chico->particle.betaP;
+	  lcosTheta = chico->particle.pgCosP;
+
+	  lgamma = 1/sqrt(1.-lbeta*lbeta);	  
+	  ldoppler = (lgamma*(1-lbeta*lcosTheta));
+          
+	  gret->g2out.xtals[ui].doppler = ldoppler;
+
+
+	  /*
+	    printf("chico->particle.t %llu chico->particle.LEDts %llu chicoTheta %f chico->particle.fThetaL %f lbeta %f chico->particle.pgCosL %f dopplerL %f \n",chico->particle.t, chico->particle.LEDts, chicoTheta, chico->particle.fThetaL, lbeta, chico->particle.pgCosL, dopplerL);
+	  */
+
 	} else { /* No CHICO particle info -- simple doppler */
+	  gret->g2out.xtals[ui].dopplerT = 0.0;
 	  gret->g2out.xtals[ui].doppler = gret->getDopplerSimple(gret->g2out.xtals[ui].maxIntPtXYZLab(), gret->var.beta);
 	}
 #else
@@ -412,6 +473,9 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
       /* Reset Phoswall */
       phosWall->Reset();
       phosWall->aux.Reset();
+#endif
+#ifdef WITH_CHICO
+      chico->Reset();
 #endif
 #ifdef WITH_LENDA
       for (UInt_t ui=0; ui<ddasEv->getData().size(); ui++) {

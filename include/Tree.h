@@ -234,7 +234,7 @@ void InitializeTreeS800(controlVariables* ctrl) {
 #ifdef WITH_CHICO
 void InitializeTreeCHICO() {
   teb->Branch("particle.id", &(chico->particle.id), "particle.id/I");
-  teb->Branch("particle.t", &(chico->particle.t), "particle.t/D");
+  teb->Branch("particle.t", &(chico->particle.t), "particle.t/l");
   teb->Branch("particle.tof", &(chico->particle.tof), "particle.tof/D");
   teb->Branch("particle.mass", &(chico->particle.mass), "particle.mass/D");
   teb->Branch("particle.thetaL", &(chico->particle.thetaL), "particle.thetaL/I");
@@ -245,7 +245,19 @@ void InitializeTreeCHICO() {
   teb->Branch("particle.fThetaR", &(chico->particle.fThetaR), "particle.fThetaR/D");
   teb->Branch("particle.fPhiL", &(chico->particle.fPhiL), "particle.fPhiL/D");
   teb->Branch("particle.fPhiR", &(chico->particle.fPhiR), "particle.fPhiR/D");
+  // teb->Branch("particle.eL", &(chico->particle.eL), "particle.eL/I");
+  // teb->Branch("particle.eR", &(chico->particle.eR), "particle.eR/I");
   teb->Branch("particle.rf", &(chico->particle.rf), "particle.rf/D");
+  teb->Branch("particle.idParticle", &(chico->idParticle), "particle.idParticle/I");
+  teb->Branch("particle.dL", &(chico->particle.dL), "particle.dL/D");
+  teb->Branch("particle.dR", &(chico->particle.dR), "particle.dR/D");
+  teb->Branch("particle.massP", &(chico->particle.massP), "particle.massP/D");
+  teb->Branch("particle.massT", &(chico->particle.massT), "particle.massT/D");
+  teb->Branch("particle.betaP", &(chico->particle.betaP), "particle.betaP/D");
+  teb->Branch("particle.betaT", &(chico->particle.betaT), "particle.betaT/D");
+  teb->Branch("particle.Qvalue", &(chico->particle.Qvalue), "particle.Qvalue/D");
+  teb->Branch("particle.pgCosT", &(chico->particle.pgCosT), "particle.pgCosT/D");
+  teb->Branch("particle.pgCosP", &(chico->particle.pgCosP), "particle.pgCosP/D");
 }
 #endif /* WITH_CHICO */
 

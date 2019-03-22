@@ -5,9 +5,9 @@ import os
 PhosWall=0
 S800=0
 LENDA=0
-CHICO=0
+CHICO=1
 DFMA=0
-GODDESS=1
+GODDESS=0
 
 ########################### You shouldn't need to change anything past this point..... ########
 
@@ -205,6 +205,8 @@ if PhosWall==1:
    envUnpack.Append(LIBS=['phosWall'])
 if LENDA==1:
    envUnpack.Append(LIBS=['Lenda'])
+if CHICO==1:
+   envUnpack.Append(LIBS=['chico'])
 if GODDESS==1:
    envUnpack.Append(LIBS=['GODDESS'])
 

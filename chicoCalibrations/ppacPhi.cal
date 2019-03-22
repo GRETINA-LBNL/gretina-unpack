@@ -1,5 +1,5 @@
-ppac phi caliberations: 
-ch no.  offset          gain
+#ppac phi caliberations: 
+#ch no.  offset          gain
 0	17.90830	0.030568
 1	17.98425	0.031496
 2	17.78076	0.031320
@@ -20,3 +20,4 @@ ch no.  offset          gain
 17	18.61538	0.030769
 18	18.18502	0.030837
 19	18.31111	0.031111
+
