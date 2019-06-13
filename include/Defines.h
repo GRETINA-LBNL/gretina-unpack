@@ -48,7 +48,7 @@
 /********** Superpulse information **********/
 
 /*! Defines the tracelength to be used -- 108 samples, or 1.08us. */
-#define AVG_TR_LENGTH 100
+#define AVG_TR_LENGTH 108
 /*! Defines the assumed channels to have between waveform starts -- with 
     the definition of AVG_TR_LENGTH 108, this means two bins between
     channels in the .spn files. */

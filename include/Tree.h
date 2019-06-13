@@ -192,7 +192,8 @@ void InitializeTreeS800(controlVariables* ctrl) {
   }
   
  /* S800 FP Track */
-  if (ctrl->FP_TRACK_RAW) {
+  //  if (ctrl->FP_TRACK_RAW) {
+  if (1) { 
     teb->Branch("fp.track.xfp", &(s800->fp.track.xfp), "fp.track.xfp/D");
     teb->Branch("fp.track.afp", &(s800->fp.track.afp), "fp.track.afp/D");
     teb->Branch("fp.track.yfp", &(s800->fp.track.yfp), "fp.track.yfp/D");

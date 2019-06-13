@@ -260,24 +260,22 @@ Int_t SuperPulse::ReadParams(TString filename, const char *label,
  
 void SuperPulse::MakeSuperPulses() {
   for (Int_t i=0; i<MAXCRYSTALS; i++) {
-    if (mult[i] == 1 && crystalBuild[i] == 820) { /* Mult 1, 40 segments */
-      if (segE[i] >= lowE && ccE[i] >= lowE && segE[i] <= highE && ccE[i] <= highE) {
-	Int_t t0 = AlignCFD(i);
-	if (t0 >= 0) { /* CFD alignment was successful. */
-	  data4net[i][netSeg[i]]++;
-	  for (Int_t m=0; m<37; m++) { /* 36 segments + 1 CC only */
-	    for (Int_t j=0; j<AVG_TR_LENGTH; j++) {
-	      /* We fill one giant array with all 37 traces,
-		 with small gaps between waveforms. */
-	      averageTrace[i][netSeg[i]][m*(AVG_TR_STRIDE) + j] += waves[i][m][j];
-	    } /* Loop over waveform samples */
-	  } /* Loop over segments */
-	} /* if CFD alignment is OK */
-	for (Int_t m=0; m<36; m++) {
-	  // printf("%d - %d\n", m, data4net[i][m]);
-	}
-      } /* in energy window */
-    } /* if mult = 1 and 40 segments */
+    if (mult[i] != 0) 
+      if (mult[i] == 1 && crystalBuild[i] == 820) { /* Mult 1, 40 segments */
+	if (segE[i] >= lowE && ccE[i] >= lowE && segE[i] <= highE && ccE[i] <= highE) {
+	  Int_t t0 = AlignCFD(i);
+	  if (t0 >= 0) { /* CFD alignment was successful. */
+	    data4net[i][netSeg[i]]++;
+	    for (Int_t m=0; m<37; m++) { /* 36 segments + 1 CC only */
+	      for (Int_t j=0; j<AVG_TR_LENGTH; j++) {
+		/* We fill one giant array with all 37 traces,
+		   with small gaps between waveforms. */
+		averageTrace[i][netSeg[i]][m*(AVG_TR_STRIDE) + j] += waves[i][m][j];
+	      } /* Loop over waveform samples */
+	    } /* Loop over segments */
+	  } /* if CFD alignment is OK */
+	} /* in energy window */
+      } /* if mult = 1 and 40 segments */
   } /* loop over MAXCRYSTALS crystals */
 }
 

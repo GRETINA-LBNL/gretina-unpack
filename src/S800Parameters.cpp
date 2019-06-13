@@ -3941,4 +3941,7 @@ void S800Full::getPhysics(FILE *inf) {
   tof.obj = phys.s800Ph.tof_obj;
   fp.track.ata = phys.s800Ph.ata;
   fp.track.bta = phys.s800Ph.bta;
+  Double_t xsin = sin(fp.track.ata);
+  Double_t ysin = sin(fp.track.bta);
+  fp.track.scatter = asin(sqrt( (xsin*xsin) + (ysin*ysin) ))*1000; /* mrad */
 }

@@ -1512,7 +1512,6 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, counterVariables *cnt) {
       t89 = 1;
       g2_89.type = g2_78.type;
     } else { t78 = 1; }
-    
 
     if (t89) {
       siz = fread(&g2_89.crystal_id, (sizeof(struct mode2ABCD6789) - 
@@ -1629,7 +1628,7 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, counterVariables *cnt) {
       
       pt.Clear();
       for (Int_t m=0; m<MAX_INTPTS; m++) {
-	if (g2_78.intpts[m].e != 0) {
+	if (g2_78.intpts[m].e != 0 && g2_78.intpts[m].seg <= 35 && g2_78.intpts[m].seg >= 0) {
 	  pt.Clear();
 	  pt.segNum = g2_78.intpts[m].seg;
 	  pt.xyz.SetXYZ(g2_78.intpts[m].x,
@@ -1637,7 +1636,7 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, counterVariables *cnt) {
 			g2_78.intpts[m].z);
 	  pt.xyzLab = rot.crys2Lab(g2_78.crystal_id, pt.xyz);
 	  pt.xyzLabSeg = rot.crys2Lab(g2_78.crystal_id, TVector3(var.segCenter[0][0][pt.segNum], 
-								 var.segCenter[0][1][pt.segNum], 
+	  							 var.segCenter[0][1][pt.segNum], 
 								 var.segCenter[0][2][pt.segNum]));
 	  pt.xyzLabCrys = rot.crys2Lab(g2_78.crystal_id, TVector3(0., 0., 0.));
 	  pt.e = g2_78.intpts[m].e;
@@ -1793,13 +1792,13 @@ Int_t GRETINA::analyzeMode2(g2CrystalEvent *g2) {
     g2->doppler = getDopplerSimple(g2->maxIntPtXYZLab(), var.beta);
     if ((g2->crystalNum)%2 == 0) { // Position 2 or 4: A type (--> crystalNum numbers starting at 1)
       g2->dopplerSeg = getDopplerSimple(rot.crys2Lab(g2->crystalID,
-						     TVector3(var.segCenter[0][0][g2->maxIntPtSegNum()], 
-							      var.segCenter[0][1][g2->maxIntPtSegNum()], 
-							      var.segCenter[0][2][g2->maxIntPtSegNum()])),
-					var.beta);
+      						     TVector3(var.segCenter[0][0][g2->maxIntPtSegNum()], 
+      							      var.segCenter[0][1][g2->maxIntPtSegNum()], 
+      							      var.segCenter[0][2][g2->maxIntPtSegNum()])),
+      					var.beta);
     } else if ((g2->crystalNum)%2 == 1) { // Position 1 or 3: B type
       g2->dopplerSeg = getDopplerSimple(rot.crys2Lab(g2->crystalID,
-						     TVector3(var.segCenter[1][0][g2->maxIntPtSegNum()], 
+      						     TVector3(var.segCenter[1][0][g2->maxIntPtSegNum()], 
 							      var.segCenter[1][1][g2->maxIntPtSegNum()], 
 							      var.segCenter[1][2][g2->maxIntPtSegNum()])),
 					var.beta);
@@ -2106,8 +2105,8 @@ void GRETINA::checkSPIntegrity() {
     /* The trace was pulled and put into the waves array when
        the GRETINA data was first unpacked. */
     
-    sp.trLength = 100;
-
+    // sp.trLength = g3Temp[i].tracelength(); //100;
+   
     /* Adjust the trace baseline offset */
     Int_t s = 0;
     for (Int_t b=0; b<25; b++) {
@@ -2252,12 +2251,7 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
     if (tmpIntEnergy == 65536) { /* Guard against weird FPGA energy anomoly */
       g3ch.eRaw = 0.; 
     } else { g3ch.eRaw = (Float_t)(tmpIntEnergy/32.); }
-    
-  
-    //printf("ID %d, g3ch.eRaw = %f\n", g3ch.ID, g3ch.eRaw);
-
-
-
+      
 #ifdef AGATA_translated
     /* For AGATA translated data due to error in translation code... */
     if ((Int_t)(channel%10) == 9) {
@@ -2270,9 +2264,6 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
 
     //printf("-----> ID %d, g3ch.eRaw = %f\n", g3ch.ID, g3ch.eRaw);
 #endif
-
-
-
 
     hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
     hiEnergy = (dp->hdr[11] & 0x00ff);
