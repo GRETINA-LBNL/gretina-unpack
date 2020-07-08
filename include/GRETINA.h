@@ -463,7 +463,7 @@ class g2CrystalEvent : public TObject {
   Float_t gTheta();
   Float_t gPhi();
   Float_t CosDop();
-  Float_t cDoppler(Float_t beta);
+  Float_t cDoppler(Float_t beta, Float_t x, Float_t y, Float_t z);
   Float_t cDopplerSeg(Float_t beta);
   Float_t cDopplerCrystal(Float_t beta);
 
@@ -541,7 +541,7 @@ class g1GammaEvent : public TObject {
   Float_t phiCompton();
   Float_t intPtDistance();
   Float_t scatterAngle();
-  Float_t cDoppler(Float_t beta);
+  Float_t cDoppler(Float_t beta, Float_t x, Float_t y, Float_t z);
   
   ClassDef(g1GammaEvent, 1);
 

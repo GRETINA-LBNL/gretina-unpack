@@ -3147,6 +3147,12 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
 	  
 	  break;
 
+	case 0x5805 :
+	  {
+	    p += SubPktLen;
+	  }
+	  break;
+
 	default:
 	  cout << "Unexpected SubPktTag!! 0x" << std::hex << SubPktTag << std::dec << endl;
 	  p += SubPktLen;

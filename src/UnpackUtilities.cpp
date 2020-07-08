@@ -329,25 +329,30 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
 	     don't really know why we need to do this, but we do. It makes
 	     things better.  Probably something funny in the decomp bases.  */
 	  TVector3 xyz = gret->g2out.xtals[ui].maxIntPtXYZ();
-	  Double_t pR = xyz.XYvector().Mod();
-	  Double_t pTheta = TMath::ATan(xyz.Y()/xyz.X());
-	  Float_t xPrime = gret->var.radiusCor[gret->g2out.xtals[ui].crystalNum]*pR*TMath::Cos(pTheta);
-	  Float_t yPrime = gret->var.radiusCor[gret->g2out.xtals[ui].crystalNum]*pR*TMath::Sin(pTheta);
+	  //  Double_t pR = xyz.XYvector().Mod();
+	  // Double_t pTheta = TMath::ATan(xyz.Y()/xyz.X());
+	  //Float_t xPrime = gret->var.radiusCor[gret->g2out.xtals[ui].crystalNum]*pR*TMath::Cos(pTheta);
+	  //Float_t yPrime = gret->var.radiusCor[gret->g2out.xtals[ui].crystalNum]*pR*TMath::Sin(pTheta);
 	  
 	  /* This is a check against flipping the sign of the x/y coordinates...*/
-	  if (xyz.X() < 0 && xPrime > 0) { xPrime = -xPrime; }
-	  if (xyz.X() > 0 && xPrime < 0) { xPrime = -xPrime; }
-	  if (xyz.Y() < 0 && yPrime > 0) { yPrime = -yPrime; }
-	  if (xyz.Y() > 0 && yPrime < 0) { yPrime = -yPrime; }
-	  xyz.SetX(xPrime);  xyz.SetY(yPrime);
+	  //if (xyz.X() < 0 && xPrime > 0) { xPrime = -xPrime; }
+	  //if (xyz.X() > 0 && xPrime < 0) { xPrime = -xPrime; }
+	  //if (xyz.Y() < 0 && yPrime > 0) { yPrime = -yPrime; }
+	  //if (xyz.Y() > 0 && yPrime < 0) { yPrime = -yPrime; }
+	  //xyz.SetX(xPrime);  xyz.SetY(yPrime);
 	  
 	  /* And translate to world coordinates... */
 	  TVector3 xyzL = gret->rot.crys2Lab(gret->g2out.xtals[ui].crystalID, xyz);
+	  //printf("Here %f,%f,%f  ---> ", xyzL.X(), xyzL.Y(), xyzL.Z());
 	  xyzL -= gret->var.targetXYZ;      
+	  //printf("%f %f %f\n", xyzL.X(), xyzL.Y(), xyzL.Z());
 	  /* Calculate vector from target to interaction point, 
 	   including shifts in position (in cm). */
-	  
+
+
+
 	  gret->g2out.xtals[ui].doppler = s800->getDoppler(xyzL, gret->var.beta, &gret->var);
+	  //printf("Doppler %f\n", gret->g2out.xtals[ui].doppler);
 	  if (gret->g2out.xtals[ui].doppler == 0) { 
 	    gret->g2out.xtals[ui].doppler = gret->getDopplerSimple(gret->g2out.xtals[ui].maxIntPtXYZLab(), gret->var.beta); 
 	  }

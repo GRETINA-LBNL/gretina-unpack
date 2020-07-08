@@ -34,6 +34,10 @@ void SuperPulse::Initialize(controlVariables* ctrl, GRETINAVariables* gVar) {
       segsNet[i][j] = 0;
       segs[i][j] = 0;
       if (j<36) { data4net[i][j] = 0; }
+      for (Int_t k=0; k<4096; k++) {
+	averageTrace[i][j][k] = 0.0;
+	averageTraceINT[i][j][k] = 0;
+      }
     }
   }
 
@@ -68,10 +72,13 @@ Int_t SuperPulse::ReadDetMaps(char *fn, GRETINAVariables* gVar) {
   char directory[512];
   char filename[512];
 
-  for (Qnum = 0; Qnum <= MAXQUADS; Qnum++) {
-    for (posN = 1; posN <= 4; posN++) {
+  // for (Qnum = 1; Qnum <= MAXQUADS; Qnum++) {
+  for (Qnum = 13; Qnum <= 13; Qnum++) {
+    //   for (posN = 1; posN <= 4; posN++) {
+    for (posN = 2; posN <= 2; posN++) {
       for (ccNum = 0; ccNum < 4; ccNum++) {
-	for (fileFlag = 0; fileFlag < 2; fileFlag++) {
+	// for (fileFlag = 0; fileFlag < 2; fileFlag++) {
+	for (fileFlag = 0; fileFlag < 1; fileFlag++) {
 	  /* Set filename...loop over all CC */
 	  strcpy(directory, fn);
 	  strcat(directory, "/");
@@ -115,7 +122,9 @@ Int_t SuperPulse::ReadDetMaps(char *fn, GRETINAVariables* gVar) {
 		  sscanf(str, "%X %d %d %d %f %f", &bd, &ch, &i1, &seg, &off, &gn);
 		  Int_t segCh = (bd-3)*10 + ch;
 		  map[(Int_t)gIDstart/40][segCh] = seg;
-		  if (seg == 36) { map[(Int_t)gIDstart/40][segCh] = seg + ccNum; }
+		  if (seg == 36 && ccNum==2) { map[(Int_t)gIDstart/40][segCh] = seg; }
+		  else if (seg == 36 && ccNum==0) { map[(Int_t)gIDstart/40][segCh] = 38; }
+		  else if (seg == 36) { map[(Int_t)gIDstart/40][segCh] = seg + ccNum; }
 		  ehiGeOffset[(Int_t)segCh + gIDstart] = off;
 		  ehiGeGain[(Int_t)segCh + gIDstart] = gn;
 		  
@@ -222,7 +231,7 @@ Int_t SuperPulse::ReadParams(TString filename, const char *label,
       if (fin == NULL) {
 	//printf("Could not open \"%s\". --> Skipping!\n", fNames[xNum]);
       } else {
-	printf("Opened \"%s\".\n", fNames[xNum]);
+	//printf("Opened \"%s\".\n", fNames[xNum]);
 	while (fgets(s, max_length, fin) != 0) {
 	  tok0 = strtok(s, " ");
 	  if ((u = strchr(tok0, atoi(":"))) != 0) {
@@ -260,22 +269,21 @@ Int_t SuperPulse::ReadParams(TString filename, const char *label,
  
 void SuperPulse::MakeSuperPulses() {
   for (Int_t i=0; i<MAXCRYSTALS; i++) {
-    if (mult[i] != 0) 
-      if (mult[i] == 1 && crystalBuild[i] == 820) { /* Mult 1, 40 segments */
-	if (segE[i] >= lowE && ccE[i] >= lowE && segE[i] <= highE && ccE[i] <= highE) {
-	  Int_t t0 = AlignCFD(i);
-	  if (t0 >= 0) { /* CFD alignment was successful. */
-	    data4net[i][netSeg[i]]++;
-	    for (Int_t m=0; m<37; m++) { /* 36 segments + 1 CC only */
-	      for (Int_t j=0; j<AVG_TR_LENGTH; j++) {
-		/* We fill one giant array with all 37 traces,
-		   with small gaps between waveforms. */
-		averageTrace[i][netSeg[i]][m*(AVG_TR_STRIDE) + j] += waves[i][m][j];
-	      } /* Loop over waveform samples */
-	    } /* Loop over segments */
-	  } /* if CFD alignment is OK */
-	} /* in energy window */
-      } /* if mult = 1 and 40 segments */
+    if (mult[i] == 1 && crystalBuild[i] == 820) { /* Mult 1, 40 segments */
+      if (segE[i] >= lowE && ccE[i] >= lowE && segE[i] <= highE && ccE[i] <= highE) {
+	Int_t t0 = AlignCFD(i);
+	if (t0 >= 0) { /* CFD alignment was successful. */
+	  data4net[i][netSeg[i]]++;
+	  for (Int_t m=0; m<37; m++) { /* 36 segments + 1 CC only */
+	    for (Int_t j=0; j<AVG_TR_LENGTH; j++) {
+	      /* We fill one giant array with all 37 traces,
+		 with small gaps between waveforms. */
+	      averageTrace[i][netSeg[i]][m*(AVG_TR_STRIDE) + j] += waves[i][m][j];
+	    } /* Loop over waveform samples */
+	  } /* Loop over segments */
+	} /* if CFD alignment is OK */
+      } /* in energy window */
+    } /* if mult = 1 and 40 segments */
   } /* loop over MAXCRYSTALS crystals */
 }
 
@@ -287,7 +295,7 @@ Int_t SuperPulse::AlignCFD(Int_t crystalNum) {
 
   /* Find the time to align to. */
   for (j=0; j<40; j++) {
-    if (netSeg[crystalNum] == j || (j >= 36 && j<=37)) { /* Net segment or CC */
+    if (netSeg[crystalNum] == j || (j ==38)) { /* Net segment or CC */
       t = cfdTime(crystalNum, j);
       if (t < 0.0) { return -1; }
       t -= delay1[crystalNum][j]; /* DCR - there may be a question about - sign */
@@ -376,9 +384,17 @@ void SuperPulse::FinishSuperPulses() {
     for (Int_t j=0; j<36; j++) {
       Float_t scaleFactor = TR_SCALE / ((Float_t)averageTrace[i][j][36*AVG_TR_STRIDE + AVG_TR_LENGTH -1]);
       for (Int_t k=0; k<37; k++) {
-	for (Int_t m=0; m<AVG_TR_LENGTH; m++) {
-	  averageTrace[i][j][k*AVG_TR_STRIDE + m] = ((Float_t)averageTrace[i][j][k*AVG_TR_STRIDE + m])*scaleFactor/gain[i][k];
-	  averageTraceINT[i][j][k*AVG_TR_STRIDE + m] = (Int_t)averageTrace[i][j][k*AVG_TR_STRIDE + m];
+	if (k<36) {
+	  for (Int_t m=0; m<AVG_TR_LENGTH; m++) {
+	    averageTrace[i][j][k*AVG_TR_STRIDE + m] = ((Float_t)averageTrace[i][j][k*AVG_TR_STRIDE + m])*scaleFactor/gain[i][k];
+	    averageTraceINT[i][j][k*AVG_TR_STRIDE + m] = (Int_t)averageTrace[i][j][k*AVG_TR_STRIDE + m];
+	  }
+	} else {
+	  for (Int_t m=0; m<AVG_TR_LENGTH; m++) {
+	    averageTrace[i][j][k*AVG_TR_STRIDE + m] = ((Float_t)averageTrace[i][j][k*AVG_TR_STRIDE + m])*scaleFactor/gain[i][k];
+	    averageTraceINT[i][j][k*AVG_TR_STRIDE + m] = (Int_t)averageTrace[i][j][k*AVG_TR_STRIDE + m];
+	  }
+
 	}
       }
     }

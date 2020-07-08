@@ -920,9 +920,10 @@ Float_t g2CrystalEvent::CosDop() {
 
 /**************************************************************/
 
-Float_t g2CrystalEvent::cDoppler(Float_t beta) {
+Float_t g2CrystalEvent::cDoppler(Float_t beta, Float_t x=0., Float_t y=0., Float_t z=0.) {
   if (numIntPts() > 0) {
-    Float_t cosDop = maxIntPtXYZLab().CosTheta();
+    TVector3 target(x,y,z);
+    Float_t cosDop = (maxIntPtXYZLab()-target).CosTheta();
     Float_t gamma = 1/TMath::Sqrt(1. - beta*beta);
     return (gamma*(1. - beta*cosDop));
   } else {
@@ -1090,8 +1091,9 @@ Float_t g1GammaEvent::scatterAngle() {
 
 /**************************************************************/
 
-Float_t g1GammaEvent::cDoppler(Float_t beta) {
-  Float_t cosDop = xyzLab1.CosTheta();
+Float_t g1GammaEvent::cDoppler(Float_t beta, Float_t x=0., Float_t y=0., Float_t z=0.) {
+  TVector3 target(x, y, z);
+  Float_t cosDop = (xyzLab1-target).CosTheta();
   Float_t gamma = 1/TMath::Sqrt(1. - beta*beta);
   return (gamma*(1. - beta*cosDop));
 }
@@ -2094,19 +2096,18 @@ void GRETINA::checkSPIntegrity() {
       sp.segsNet[i][j] = -1;
     }
   }
-
+  
   UInt_t vecSize = g3Temp.size();
   for (UInt_t i=0; i<vecSize; i++) {
     Int_t xtalNum = (Int_t)(g3Temp[i].ID/40);
     Int_t segNum = sp.map[xtalNum][(Int_t)(g3Temp[i].ID%40)];
-    
     sp.segEventIndex[xtalNum][segNum] = i;
-
+    
     /* The trace was pulled and put into the waves array when
        the GRETINA data was first unpacked. */
     
     // sp.trLength = g3Temp[i].tracelength(); //100;
-   
+    
     /* Adjust the trace baseline offset */
     Int_t s = 0;
     for (Int_t b=0; b<25; b++) {
@@ -2124,7 +2125,7 @@ void GRETINA::checkSPIntegrity() {
       avg += TMath::Abs(sp.waves[xtalNum][segNum][b]);
     }
     avg /= 10;
-
+    
     if (avg > 20 && g3Temp[i].eCal > 30 && segNum < 36) { /* Net */
       if (g3Temp[i].eCal > sp.segE[xtalNum]) {
 	sp.segE[xtalNum] = g3Temp[i].eCal;
@@ -2144,10 +2145,10 @@ void GRETINA::checkSPIntegrity() {
     
     
     /* Pull out the CC energy -- use CC on last digitizer, totally arbitrary */
-    if (g3Temp[i].ID%40 == 19) {
+    if (g3Temp[i].ID%40 == 29) {
       sp.ccE[xtalNum] = g3Temp[i].eCal;
     }
-
+    
     /* Build up the hit pattern */
     sp.crystalBuild[xtalNum] += (segNum + 1);
   }
@@ -2169,7 +2170,7 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
     return 5;
   }
   cnt->Increment(evtLength);
-  
+
   /* Byte swapping, due to little/big endian problem */
   for (Int_t j=0; j<evtLength; j=j+2) {
     swap(*(gBuf + j), *(gBuf + j + 1));
@@ -2262,7 +2263,7 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
 
     if (g3ch.eRaw > 100000) { g3ch.eRaw = 0.; }
 
-    //printf("-----> ID %d, g3ch.eRaw = %f\n", g3ch.ID, g3ch.eRaw);
+    // printf("-----> ID %d, g3ch.eRaw = %f\n", g3ch.ID, g3ch.eRaw);
 #endif
 
     hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
@@ -2356,7 +2357,7 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
     else { calibrateMode3SP(&g3ch); }
     
     /* Transform the waveform, if needed */
-    if (ctrl->withWAVE || channel%10 == 9 || g3ch.eRaw > 100) {
+    if (ctrl->withWAVE || channel%10 == 9 || g3ch.eRaw > 100 || ctrl->superPulse) {
       g3ch.wf.raw.clear();
 
       for (Int_t j=0; j<TL+1; j=j+2) {
@@ -2380,15 +2381,14 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
       
       /* For the CC always get a baseline value from the minimum trace, which is 6 samples. */
       if (g3ch.wf.raw.size() >= 6) {  g3ch.baseline = g3ch.wf.BL(0, 6);  }
-
       g3ch.calcTime = g3ch.wf.CFD(0);
-
+      
     }
     
     if (ctrl->withWAVE) {
       if (ctrl->superPulse) {
-	for (Int_t j=0; j<sp.trLength; j++) {
-	  sp.waves[(Int_t)(g3ch.ID/40)][sp.map[(Int_t)(g3ch.ID/40)][(Int_t)(g3ch.ID%40)]][j] = g3ch.wf.raw[j];
+	  for (Int_t j=0; j<sp.trLength; j++) {
+	    sp.waves[(Int_t)(g3ch.ID/40)][sp.map[(Int_t)(g3ch.ID/40)][(Int_t)(g3ch.ID%40)]][j] = g3ch.wf.raw[j];
 	}
       }
     }
@@ -2406,7 +2406,7 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
     if (!ctrl->withWAVE) {
       g3ch.wf.Clear();
     }
-    
+
     g3Temp.push_back(g3ch);
     
     free(dp);
@@ -2656,15 +2656,20 @@ void GRETINA::analyzeMode3(controlVariables *ctrl) {
   
 }
 
-gHistos::gHistos() { ; }
+gHistos::gHistos() { 
+  for (Int_t m=0; m<MAXCHANNELS; m++) {
+    eRaw[m] = NULL;
+    eCal[m] = NULL;
+  }
+}
 
 gHistos::~gHistos() { ; }
 
 void gHistos::writeHistos(Int_t ctrl) {
   if (ctrl == 1) { /* calibration for energies */
     for (Int_t m=0; m<MAXCHANNELS; m++) {
-      if (eRaw[m]) { eRaw[m]->Write();  eRaw[m]->Delete(); }
-      if (eCal[m]) { eCal[m]->Write();  eCal[m]->Delete(); }
+      if (eRaw[m]!=NULL) { eRaw[m]->Write();  eRaw[m]->Delete(); }
+      if (eCal[m]!=NULL) { eCal[m]->Write();  eCal[m]->Delete(); }
     }
   } else if (ctrl == 2) { /* Cross-talk calibrations */
     for (Int_t m=0; m<MAXCHANNELS; m++) {
@@ -2687,7 +2692,8 @@ void GRETINA::fillHistos(Int_t ctrl) {
   if (ctrl == 1) { /* ctrl->calibration, so energy histos */
     for (UInt_t um=0; um<g3Temp.size(); um++) {
       if (g3Temp[um].ID < MAXCHANNELS) { 
-	if (!gHist.eRaw[g3Temp[um].ID]) {
+	//if (!gHist.eRaw[g3Temp[um].ID]) {
+	  if (gHist.eRaw[g3Temp[um].ID]==NULL) {
 	  printf("Need histogram with index: %d... building those now.\n", g3Temp[um].ID);
 	  char title[300];
 	  sprintf(title, "eRaw%d", g3Temp[um].ID);

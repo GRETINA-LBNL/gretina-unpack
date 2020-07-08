@@ -363,6 +363,8 @@ int main(int argc, char *argv[]) {
 	InitializeTreeGODDESS();
 #endif
       }
+
+      UInt_t counter = 0;
       
       // teb->SetMaxTreeSize(1000000000LL); /* Max tree size is 1GB */
 
@@ -434,7 +436,7 @@ int main(int argc, char *argv[]) {
 	  if (gHeader.timestamp != 0 && remaining != 5) { 
 	    GO_FOR_BUILD = 1; 
 	  } else { GO_FOR_BUILD = 0; }
-	  
+
 	  if (GO_FOR_BUILD) {
 	    
 	    /* Build events based on timestamp differences between the
@@ -452,10 +454,11 @@ int main(int argc, char *argv[]) {
 	      }
 	      
 	    } else { /* Time difference is big...old event should be closed. */
-	      
+
+	      counter++;
 	      /* We need to be careful of tracelengths in superPulse analysis... */
 	      if (ctrl->superPulse) {
-		if (gHeader.type == RAW) {
+		if (gHeader.type == RAW && gret->g3Temp.size()!=0) {
 		  gret->sp.trLength = gret->g3Temp[0].wf.raw.size();
 		}
 	      }
@@ -710,7 +713,9 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     }
     break;
   case GRETSCALER:
-    { gret->getScaler(inf, gHeader.length);  cnt->Increment(gHeader.length); }
+    { 
+      SkipData(inf, junk);//gret->getScaler(inf, gHeader.length);  
+      cnt->Increment(gHeader.length); }
     break;
   case G4SIM:
     { 
