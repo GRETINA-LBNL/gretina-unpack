@@ -53,55 +53,8 @@
 /* GRETINA-specific header files */
 #include "GRETINA.h"
 #include "SortingStructures.h"
-#include "INLCorrection.h"
 
 #include "UnpackUtilities.h"
-
-/* Tracking... */
-#include "Track.h"
-
-/* Phoswich Wall header files */
-#ifdef WITH_PWALL
-#include "PhosWall.h"
-#endif
-
-/* Goddess header files */
-#ifdef WITH_GOD
-#include "GODDESS.h"
-#endif
-
-/* CHICO header files */
-#ifdef WITH_CHICO
-#include "CHICO.h"
-#endif
-
-/* FMA header files */
-#ifdef WITH_DFMA
-#include "DFMA.h"
-#endif
-
-/* S800 header files */
-#ifdef WITH_S800
-#include "S800Parameters.h"
-#include "S800Definitions.h"
-#include "S800Functions.h"
-#endif
-
-#ifdef WITH_LENDA
-#include "ddasChannel.h"
-#include "LENDA-DDAS.h"
-#include "LENDA-Controls.h"
-#endif
-
-/* BGS header files */
-#ifdef WITH_BGS
-#include "BGSParamList.h"
-#include "BGSConditions.h"
-#include "BGSFPPositions.h"
-#include "BGSCalibrations.h"
-#include "BGSThresholds.h"
-#include "BGSAnalyze.h"
-#endif
 
 #include "Tree.h"
 
@@ -112,10 +65,8 @@
 void PrintHelpInformation();
 void PrintConditions();
 
-void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
-	     INLCorrection *inlCor, UShort_t junk[]);
+void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt, UShort_t junk[]);
 
-void ReadMario(FILE* inf);
 void SkipData(FILE* inf, UShort_t junk[]);
 
 /****************************************************/
@@ -156,21 +107,10 @@ int main(int argc, char *argv[]) {
   counterVariables *cnt = new counterVariables();
 
   /* Initialize the GRETINA data structures. */
-
   /* Superpulse analysis */
   gret->sp.Initialize(ctrl, &gret->var);
   
-  /* INL correction parameters */
-  INLCorrection *inlCor = new INLCorrection();
-  inlCor->Initialize(ctrl, &gret->var);
-   
-  /* Initialize tracking stuff. */
-  if (ctrl->doTRACK) {
-    gret->track.Initialize();
-  }
-
-  /* And data arrays... */
-  /* Throw-away/skip data */
+  /* And data arrays... for throwing away/skipping data */
   UShort_t junk[8192];
 
   /* Get the parameters for mapping from crystal coordinate frame
@@ -186,128 +126,7 @@ int main(int argc, char *argv[]) {
   }
   cout << endl;
 
-  /* And now the auxiliary detector system data structures.  In alphabetical order :) */
-
-  /* CHICO */
-#ifdef WITH_CHICO
-  chico = new CHICOFull();
-  chico->Initialize();
-  chico->InitializeCHICOVariables("chicoCalibrations/ppacTheta.cal", 
-				  "chicoCalibrations/ppacPhi.cal", 
-                                  "chicoCalibrations/betaE.dat");
-  chico->offsetTarget = 15.8; 
-#endif
-
-  /* GODDESS */
-#ifdef WITH_GOD
-  goddess = new goddessFull();
-  goddess->Initialize();
-#endif
-
-  /* DFMA */
-#ifdef WITH_DFMA
-  dfma = new DFMAFull();
-  dfma->Initialize();
-#endif
-  
-  /* Phoswich Wall */
-#ifdef WITH_PWALL
-  phosWall = new phosWallFull();
-  phosWall->InitializeParameters("phosWallCalibrations/phosParam.set");
-  phosWall->Initialize();
-  phosWall->SetPwallPositions();
-#endif
-
-  /* S800 */
-#ifdef WITH_S800
-  s800 = new S800Full();
-  s800->Initialize();
-
-  if (ctrl->s800File) {
-    ctrl->SetS800Controls(ctrl->s800ControlFile);
-    s800->InitializeS800Variables(ctrl->s800VariableFile);
-  } else { s800->InitializeS800Variables("s800Calibrations/s800.set"); }
-  
-  s800->fp.ic.BuildLookUp();
-  s800->fp.track.map.LoadInverseMap(s800->fp.track.map.mapFilename);
-  s800->fp.crdc1.calc.CheckBadPads();
-  s800->fp.crdc2.calc.CheckBadPads();
-  s800->fp.crdc1.pad.BuildLookUp();
-  s800->fp.crdc2.pad.BuildLookUp();
-#ifdef S800_LINK_IMAGE_TRACK
-  s800->im.track.map.LoadInverseMap(s800->im.track.map.imMapFilename);
-  s800->im.track.tppac1.CheckBadStrips();
-  s800->im.track.tppac2.CheckBadStrips();
-#endif
-
-  s800Scaler = new S800Scaler();
-  s800Scaler->Initialize();
-
-  s800Scaler->InitializeS800ScalerParameters("s800Calibrations/S800Scaler.definition");
-  cout << endl;
-#endif /* WITH_S800 */
-
-#ifdef WITH_LENDA
-  ddasEv = new ddasEvent();
-  lendaEv = new lendaEvent();
-  lendaSet = new lendaSettings();
-  lendaPack = new lendaPacker(lendaSet);
-  lendaPack->SetGates(25, 11, 25, 11);
-  lendaPack->SetTraceDelay(120);
-  lendaPack->SetSettingsandCorrections("lendaCalibrations/MapFile.txt", "lendaCalibrations/Corrections.txt");
-#endif /* WITH_LENDA */
-
   FILE *inf;
-  
-  FILE *generalOut = NULL;
-  if (ctrl->outputON) {
-    if (ctrl->outputName) {
-      generalOut = fopen(ctrl->outputFileName.Data(), "wb");
-      if (!generalOut) {
-	printf("Cannot open general output file: %s \n", ctrl->outputFileName.Data());
-	exit(2); 
-      }
-    } else {
-      generalOut = fopen("GeneralFile.out", "wb");
-      if (!generalOut) {
-	printf("Cannot open general output file: GeneralFile.out \n");
-	exit(2); 
-      }
-    }
-  }
-
-#ifdef WITH_S800
-  /* Here, read in ROOT gates (PID gates) that will be used to make 
-     filtered files, or just cut the crap we don't need out of the 
-     ROOT trees. */
-  TCutG *incomingBeam = new TCutG();
-  TCutG *outgoingBeam = new TCutG();
-
-  TCutG *incomingAll = new TCutG("incomingAll", 4);
-  incomingAll->SetVarX("tof.xfp");
-  incomingAll->SetVarY("tof.obj");
-  incomingAll->SetPoint(0, -100000, 100000);
-  incomingAll->SetPoint(1, 100000, 100000);
-  incomingAll->SetPoint(2, 100000, -100000);
-  incomingAll->SetPoint(3, -100000, -100000);
-  
-  TCutG *outgoingAll = new TCutG("outgoingAll", 4);
-  outgoingAll->SetVarX("tof.obje1");
-  outgoingAll->SetVarY("fp.ic.de");
-  outgoingAll->SetPoint(0, -100000, 100000);
-  outgoingAll->SetPoint(1, -100000, -100000);
-  outgoingAll->SetPoint(2, 100000, -100000);
-  outgoingAll->SetPoint(3, 100000, 100000);
-
-  incomingBeam = incomingAll;
-  outgoingBeam = outgoingAll;
-
-  /* For now, include the user gates here...eventually we need to pull this
-     out of the compiled code.  I need to think about this one... */
-#include "ROOTGates.var"
-
-#endif /* WITH_S800 */
-
   TStopwatch timer;
 
   /* Loop over each run given at the command line. */
@@ -328,14 +147,6 @@ int main(int argc, char *argv[]) {
       Int_t fileOK = OpenInputFile(&inf, ctrl, runNumber);
       if (fileOK != 0) { exit(2); }
       
-#ifdef WITH_S800
-      if (ctrl->fileType != "f") {
-	TString runVariableFileName = ctrl->directory + "Run" + runNumber + "/Run" + runNumber + ".var";
-	cout << "Looking for run variable file " << runVariableFileName.Data() << endl;
-	s800->UpdateS800RunVariables(runVariableFileName);
-      }
-#endif
-      
       /* Open output file, set up tree and/or histograms. */
       TFile *fout_root = NULL;
       if (ctrl->withTREE || ctrl->withHISTOS) {
@@ -349,25 +160,40 @@ int main(int argc, char *argv[]) {
       }
       
       if (ctrl->withTREE) { 
-	InitializeTree(); 
-#ifdef WITH_S800
-	InitializeTreeS800(ctrl);
-#endif
-#ifdef WITH_CHICO
-	InitializeTreeCHICO();
-#endif
-#ifdef WITH_PWALL
-	InitializeTreePhosWall();
-#endif
-#ifdef WITH_GOD
-	InitializeTreeGODDESS();
-#endif
+	InitializeTree();  
+	if (ctrl->scanning) {
+	  InitializeTreeScanning(ctrl);
+	  FILE *logFile;
+	  TString logName = ctrl->directory + "Run" + runNumber + "/measurement.log";
+	  if ( (logFile = fopen(logName.Data(), "r")) == NULL) {
+	    cerr << "measurement log file not found" << endl;
+	  }
+	  char line[300], junk[300];
+	  double value;
+	  while (!feof(logFile)) {
+	    char *chr = fgets(line, 300, logFile);
+	    if (strlen(line) == 1) { continue; }
+	    if (strncmp(line, "#", 1) == 0) { continue; }
+	    if (strncmp(line, "   Xpos", 7) == 0) {
+	      sscanf(line, "%s  %*s %lf", junk, &value);
+	      printf("value = %f\n", value);
+	      ctrl->collX = value;
+	    }
+	    if (strncmp(line, "   Ypos", 7) == 0) {
+	      sscanf(line, "%s %*s %lf", junk, &value);
+	      ctrl->collY = value;
+	    }
+	    if (strncmp(line, "   Zpos", 7) == 0) {
+	      sscanf(line, "%s %*s %lf", junk, &value);
+	      ctrl->collZ = value;
+	    }
+	  }
+	  fclose(logFile);
+	}
       }
 
       UInt_t counter = 0;
       
-      // teb->SetMaxTreeSize(1000000000LL); /* Max tree size is 1GB */
-
       cout << "********************************************************" << endl;
       cout << endl;
       
@@ -385,7 +211,7 @@ int main(int argc, char *argv[]) {
       Int_t atSTARTFile2 = 1; Int_t BonusMode3 = 0;
       
       /********************************************************/
-      /*  THE MAIN EVENT -- SORTING LOOP                      */
+      /*  THE MAIN EVENT -- SORTING LOOP                                    */
       /********************************************************/
       
       /* Loop over file, reading data, and building events... */
@@ -403,7 +229,7 @@ int main(int argc, char *argv[]) {
 
 	if (ctrl->noEB) { /* Just get the data, don't event build. */
 
-	  GetData(inf, ctrl, cnt, inlCor, junk);
+	  GetData(inf, ctrl, cnt, junk);
 
 	  /* Fill singles spectra as appropriate */
 	  if (ctrl->withHISTOS && ctrl->calibration && !ctrl->xtalkAnalysis) { 
@@ -445,7 +271,7 @@ int main(int argc, char *argv[]) {
 	    
 	    if (abs(deltaEvent) < EB_DIFF_TIME) {
 	      
-	      GetData(inf, ctrl, cnt, inlCor, junk);
+	      GetData(inf, ctrl, cnt, junk);
 	      
 	      if (ctrl->superPulse) {
 		if (gHeader.type == RAW) {
@@ -463,28 +289,8 @@ int main(int argc, char *argv[]) {
 		}
 	      }
 
-	      if (ctrl->gateTree) {
-#ifdef WITH_S800
-		Int_t pidOK = CheckS800PIDGates(incomingBeam, outgoingBeam);
-		if (pidOK) { 
-		  int evtOK = ProcessEvent(currTS, ctrl, cnt);
-		  if (evtOK < 0) { raise(SIGINT); }
-		}
-#endif
-	      } else {
-		Int_t evtOK = ProcessEvent(currTS, ctrl, cnt);
-		if (evtOK < 0) { raise(SIGINT); }
-	      }
-	      
-	      /* Check on gate conditions...do we write filtered output? */
-	      if (ctrl->outputON) {
-#ifdef WITH_S800
-		Int_t writeOK = CheckS800PIDGates(incomingBeam, outgoingBeam);
-		if (writeOK) { 
-		  // WriteS800PhysicsFile(generalOut); 
-		}
-#endif
-	      }
+	      Int_t evtOK = ProcessEvent(currTS, ctrl, cnt);
+	      if (evtOK < 0) { raise(SIGINT); }
 	      ResetEvent(ctrl, cnt);
 	      cnt->event = 0.0;
 	      
@@ -493,9 +299,10 @@ int main(int argc, char *argv[]) {
 	      currTS = gHeader.timestamp;
 	      deltaEvent = (Float_t)(gHeader.timestamp - currTS);
 	      
-	      GetData(inf, ctrl, cnt, inlCor, junk);
+	      GetData(inf, ctrl, cnt, junk);
 	      
 	    }
+
 	  } else { /* End of "if (GO_FOR_BUILD)" */	
 	    SkipData(inf, junk);
 	    cnt->Increment(gHeader.length);
@@ -520,26 +327,10 @@ int main(int argc, char *argv[]) {
 	gret->checkSPIntegrity();
 	gret->sp.MakeSuperPulses();
       }
-      
-      if (ctrl->outputON) {
-#ifdef WITH_S800
-	Int_t writeOK = CheckS800PIDGates(incomingBeam, outgoingBeam);
-	if (writeOK) { 
-	  //WriteS800PhysicsFile(generalOut); 
-	  //WriteS800GatedFile(generalOut, rawS800, s800Length); 
-	}
-#endif
-      }
+
       
       /* Write the last event... */
-      if (ctrl->gateTree) {
-#ifdef WITH_S800
-	Int_t pidOK = CheckS800PIDGates(incomingBeam, outgoingBeam);
-	if (pidOK && ctrl->withTREE) { teb->Fill();  cnt->treeWrites++; }	
-#endif
-      } else {
-	if (ctrl->withTREE) { teb->Fill();  cnt->treeWrites++; }
-      }
+      if (ctrl->withTREE) { teb->Fill();  cnt->treeWrites++; }
       
       timer.Stop();
       
@@ -553,9 +344,6 @@ int main(int argc, char *argv[]) {
       if (ctrl->withTREE) { 
 	cout << endl << "Writing ROOT tree..." << endl;
 	teb->Write(); 
-#ifdef WITH_S800
-	//scaler->Write();
-#endif
 	if (ctrl->withWAVE) {
 	  if (ctrl->WITH_TRACETREE) {
 	    wave->Write();
@@ -569,7 +357,6 @@ int main(int argc, char *argv[]) {
       }
       if (ctrl->withHISTOS || ctrl->withTREE) {
 	printf("ROOT file \"%s\" closing...\n", ctrl->outfileName.Data());
-	//fout_root->Write();
 	fout_root->Close();
       }
       
@@ -585,13 +372,6 @@ int main(int argc, char *argv[]) {
     gret->sp.FinishSuperPulses();
     gret->sp.WriteSuperPulses();
   }
-
-  if (ctrl->outputON) {
-    cout << endl;
-    cout << "Closing output file...";
-    fclose(generalOut);
-    cout << "Done. " << endl;    
-  }
   
   /* Declare victory!!! */
   cout << endl;
@@ -602,8 +382,7 @@ int main(int argc, char *argv[]) {
 
 /****************************************************/
 
-void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
-	     INLCorrection *inlCor, UShort_t junk[]) {
+void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt, UShort_t junk[]) {
   
   cnt->Increment(sizeof(struct globalHeader));
 
@@ -653,41 +432,9 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
       gret->getMode3History(inf, gHeader.length, gHeader.timestamp, cnt); 
     }
     break;
-#ifdef WITH_BGS
   case BGS:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
-#else 
-  case BGS:
-    { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
-    break;
-#endif
-#ifdef WITH_S800
-  case S800:
-    { s800->getAndProcessS800(inf, gHeader.length);  cnt->Increment(gHeader.length); }
-    break;
-  case S800AUX:
-    {
-      Bool_t scalerPacket = s800Scaler->getAndProcessS800Aux(inf, gHeader.length, gHeader.timestamp);
-      if (scalerPacket && ctrl->withTREE) { /* scaler->Fill(); */ }
-      cnt->Increment(gHeader.length);
-    }
-    break;
-  case S800AUX_TS:
-    {
-      Bool_t scalerPacket = s800Scaler->getAndProcessS800Aux(inf, gHeader.length, gHeader.timestamp);
-      if (scalerPacket && ctrl->withTREE) { /* scaler->Fill(); */ }
-      cnt->Increment(gHeader.length);
-    }
-    break;
-  case S800PHYSICS:
-    {
-      s800->phys.Reset();
-      s800->getPhysics(inf);
-      cnt->Increment(gHeader.length);
-    }
-    break; 
-#else 
   case S800:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
@@ -700,7 +447,6 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
   case S800PHYSICS:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
-#endif
   case BANK88:
     { 
       if (cnt->headerType[BANK88] == 0 && ctrl->withTREE) {
@@ -714,7 +460,7 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     break;
   case GRETSCALER:
     { 
-      SkipData(inf, junk);//gret->getScaler(inf, gHeader.length);  
+      SkipData(inf, junk);  //gret->getScaler(inf, gHeader.length);  
       cnt->Increment(gHeader.length); }
     break;
   case G4SIM:
@@ -729,89 +475,27 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
     } 
     //gret->getSimulated(inf);  cnt->Increment(gHeader.length); }
     break;
-#ifdef WITH_CHICO
-  case CHICO: { chico->getAndUnpackCHICO(inf, gHeader.length);  cnt->Increment(gHeader.length); }
-    break;
-#else
   case CHICO:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
-#endif
-#ifdef WITH_PWALL
-  case PWALL:
-    {
-      phosWall->getAndUnpackPhosWall(inf, gHeader.length);
-      phosWall->ProcessPhosWall();
-      phosWall->timestamp = gHeader.timestamp;
-      cnt->Increment(gHeader.length);
-    }
-    break;
-  case PWALLAUX:
-    {
-      phosWall->getAndUnpackPhosWallAux(inf, gHeader.length);
-      phosWall->ProcessPhosWallAux();
-      cnt->Increment(gHeader.length);
-    }
-    break;
-#else 
   case PWALL:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
   case PWALLAUX:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
-#endif
-#ifdef WITH_GOD
-  case GODDESS:
-    { 
-      goddess->ts = (uint64_t)gHeader.timestamp;
-      goddess->getAnalogGoddess(inf, gHeader.length); 
-      goddess->ProcessEvent();
-      //goddess->printAnalogRawEvent();
-      cnt->Increment(gHeader.length);
-    }
-    break;
-#else
   case GODDESS:
     { SkipData(inf, junk);  cnt->Increment(gHeader.length); }
     break;
-#endif
-#ifdef WITH_LENDA
-  case LENDA:
-    {
-      ddasEv->getEvent(inf, gHeader.length);
-      lendaPack->MakeLendaEvent(lendaEv, ddasEv, 0);
-      lendaEv->Finalize();
-      cnt->Increment(gHeader.length);
-    }
-    break;
-#else
   case LENDA:
     { SkipData(inf, junk); cnt->Increment(gHeader.length); }
     break;
-#endif
-#ifdef WITH_DFMA
-  case DFMA:
-    {
-      dfma->ts = gHeader.timestamp;
-      cnt->Increment(gHeader.length);
-    }
-    break;
-#else
   case DFMA:
     { SkipData(inf, junk); cnt->Increment(gHeader.length); }
     break;
-#endif
   case 0:
     {
       cout << "GlobalHeader type = 0.  Ignoring." << endl;
-      cnt->Increment(gHeader.length);
-    }
-    break;
-  case 100:
-    {
-      cout << "GlobalHeader Mario found. " << endl;
-      ReadMario(inf);
       cnt->Increment(gHeader.length);
     }
     break;
@@ -831,24 +515,6 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
   if (gHeader.type == RAWHISTORY) {
     cnt->setEventBit(RAW);
     cnt->headerType[RAW]++;
-  }
-}
-
-/****************************************************/
-
-struct out4Mario {
-  float ccEnergy;
-  float segEnergy[36];
-  float pad;
-  short wf[37][300];
-};
-
-void ReadMario(FILE* inf) {
-  out4Mario mario;
-  size_t siz = fread(&mario, 1, sizeof(struct out4Mario), inf);
-  cout << mario.ccEnergy << endl;
-  for (Int_t i=0; i<36; i++) {
-    cout << mario.segEnergy[i] << endl;
   }
 }
 
@@ -881,30 +547,19 @@ void PrintHelpInformation() {
   printf("                       -superPulse <lowE> <highE> <detMapFile directory> <XtalkFile>\n");
   printf("                               (turns off tree and histograms, builds superpulse .spn files)\n");
   printf("                       -noSeg (DISABLE segment analysis, i.e. segment summing; default is ON \n");   
-#ifdef WITH_S800
-  printf("                       -s800File (define the s800 control file; without default is s800.set\n                                  for S800 parameters, and NO s800 included in ROOT tree)\n");
-#endif
-  printf("                       -track (do tracking, such as it is -- options specified in track.chat)\n");
-#ifdef WITH_S800
-  printf("                       -outputON (write output file, with S800Physics, gated on PID)\n");
-#endif
   printf("                       -zip (compressed data file, will append .gz to filename)\n");
   printf("                       -bzip (compressed data file, will append .bz2 to filename)\n");
   printf("                       -withHistos (turn ON histograms, as defined in Histos.h, default is OFF)\n");
   printf("                       -noTree (turn OFF root tree, default is ON)\n");
   printf("                       -noHFC (turn OFF HFC presort piping; default is ON)\n");
-  printf("                       -dopplerSimple (use simple GRETINA decomp position for Doppler correction)\n");
   printf("                       -suppressTS (suppress TS error warnings in analysis)\n");
   /* 2015-04-21 CMC added command-line flag descriptions, as I understand them, feel free to correct or update */
-  printf("                       -outputName <FILENAME> (set the PID-gated output event file name)\n");
   printf("                       -rootName <FILENAME> (set the output ROOT file name)\n");
   printf("                       -analyze2and3 (analyze Mode2 and Mode3, matching by timestamps)\n");
   printf("                       -gateTree (gates tree and histogramm by a PID gate)\n");
   printf("                       -readCal <FILENAME> (read in a calibration file)\n");
   printf("                       -xtalkAnalysis <ID> <lowE> <highE> \n");
   printf("                               (turns off tree, builds histograms for segment cross-talk analysis)\n");
-  printf("                       -INLcorrect <INLCConly> <digMapFileName> \n");
-  printf("                               (turns on waveform analysis, attempts to correct energy filter INL)\n");
   printf("\n");
 }
 
@@ -912,28 +567,5 @@ void PrintHelpInformation() {
 
 void PrintConditions() {
   printf("\n***************************************************************************\n\n");
-  printf("    Initializing -- GRETINA ");
-#ifdef WITH_BGS
-  printf("+ BGS ");
-#endif
-#ifdef WITH_CHICO
-  printf("+ CHICO2 ");
-#endif
-#ifdef WITH_PWALL
-  printf("+ PHOSWALL ");
-#endif
-#ifdef WITH_S800
-  printf("+ S800 ");
-#endif
-#ifndef WITH_BGS
-#ifndef WITH_CHICO
-#ifndef WITH_PWALL
-#ifndef WITH_S800
-  printf("only ");
-#endif
-#endif
-#endif
-#endif
-  printf("sort...\n");
-
+  printf("    Initializing -- GRETINA stand-alone analysis\n");
 }

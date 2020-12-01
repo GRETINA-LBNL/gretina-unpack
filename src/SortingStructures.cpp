@@ -46,6 +46,11 @@ controlVariables::controlVariables() {
   superPulse = 0;
   xtalkAnalysis = 0;
 
+  scanning = 0;
+  collX = 0;
+  collY = 0;
+  collZ = 0;
+
   INLcorrection = 0;
   INLCConly = 0;
   digMapFileName = "";
@@ -72,31 +77,6 @@ controlVariables::controlVariables() {
   BASIC_ENERGY = 0;
   INL_CORRECT = 0;
   
-  //#ifdef WITH_S800
-  s800File = 0;
-  s800ControlFile = "";
-  
-  S800_DIAG=0;
-  E1_RAW=0; E1_CAL=0; E2_RAW=0; E2_CAL=0; E3_RAW=0; E3_CAL=0;
-  IC_RAW=0; IC_CAL=0; IC_SUMS=0;
-  CRDC1_RAW_PADS=0; CRDC1_RAW_CALC=0; CRDC1_CALC=0;
-  CRDC2_RAW_PADS=0; CRDC2_RAW_CALC=0; CRDC2_CALC=0;
-  FP_TRACK_RAW=0; FP_TRACK_COR=0;
-  HODO_RAW=0; HODO_CAL=0;
-  TARGET_PPAC_RAW=0; TARGET_PPAC_CALC=0;
-  TARGET_PIN1_RAW=0; TARGET_PIN1_CAL=0;
-  TARGET_PIN2_RAW=0; TARGET_PIN2_CAL=0;
-  TARGET_TOTAL=0;
-  IMAGE_CALC=0;
-  IMAGE_TPPAC1_RAW=0; IMAGE_TPPAC1_CALC=0;
-  IMAGE_TPPAC2_RAW=0; IMAGE_TPPAC2_CALC=0;
-  IMAGE_TRACK=0;
-  IMAGE_PPAC1_RAW=0; IMAGE_PPAC1_CALC=0;
-  IMAGE_PPAC2_RAW=0; IMAGE_PPAC2_CALC=0;
-  OBJECT_PIN_RAW=0; OBJECT_PIN_CAL=0;
-  TRIGGER=0; S800_TIMESTAMP=0;
-  TOF=0;
-  //#endif
 }
 
 /****************************************************/
@@ -128,6 +108,11 @@ void controlVariables::Initialize() {
   noEB = 0;
   calibration = 0;
 
+  scanning = 0;
+  collX = 0;
+  collY = 0;
+  collZ = 0;
+
   INLcorrection = 0;
   digMapFileName = "";
 
@@ -152,32 +137,7 @@ void controlVariables::Initialize() {
   FPGA_ENERGY = 0;
   BASIC_ENERGY = 0;
   INL_CORRECT = 0;
-  
-  //#ifdef WITH_S800
-  s800File = 0;
-  s800ControlFile = "";
-  S800_DIAG=0;
-  E1_RAW=0; E1_CAL=0; E2_RAW=0; E2_CAL=0; E3_RAW=0; E3_CAL=0;
-  IC_RAW=0; IC_CAL=0; IC_SUMS=0;
-  CRDC1_RAW_PADS=0; CRDC1_RAW_CALC=0; CRDC1_CALC=0;
-  CRDC2_RAW_PADS=0; CRDC2_RAW_CALC=0; CRDC2_CALC=0;
-  FP_TRACK_RAW=0; FP_TRACK_COR=0;
-  HODO_RAW=0; HODO_CAL=0;
-  TARGET_PPAC_RAW=0; TARGET_PPAC_CALC=0;
-  TARGET_PIN1_RAW=0; TARGET_PIN1_CAL=0;
-  TARGET_PIN2_RAW=0; TARGET_PIN2_CAL=0;
-  TARGET_TOTAL=0;
-  IMAGE_CALC=0;
-  IMAGE_TPPAC1_RAW=0; IMAGE_TPPAC1_CALC=0;
-  IMAGE_TPPAC2_RAW=0; IMAGE_TPPAC2_CALC=0;
-  IMAGE_TRACK=0;
-  IMAGE_PPAC1_RAW=0; IMAGE_PPAC1_CALC=0;
-  IMAGE_PPAC2_RAW=0; IMAGE_PPAC2_CALC=0;
-  OBJECT_PIN_RAW=0; OBJECT_PIN_CAL=0;
-  TRIGGER=0; S800_TIMESTAMP=0;
-  TOF=0;
-  //#endif
-  
+    
 }
 
 /****************************************************/
@@ -201,11 +161,6 @@ Int_t controlVariables::InterpretCommandLine(int argc, char *argv[]) {
       }
       i++;
     }
-    else if (strcmp(argv[i], "-track") == 0) {
-      doTRACK = 1;
-      cout << "Tracking enabled. " << endl;
-      i++;
-    }
     else if (strcmp(argv[i], "-wf") == 0) {
       withWAVE = 1;
       WITH_TRACETREE = 1;
@@ -216,18 +171,6 @@ Int_t controlVariables::InterpretCommandLine(int argc, char *argv[]) {
       withSEG = 0;
       cout << "Segment analysis disabled. " << endl;
       i++;
-    }
-    else if (strcmp(argv[i], "-outputON") == 0) {
-      outputON = 1;
-      cout << "Will write S800Physics + GRETINA output according to gate conditions. " << endl;
-      i++;
-    }
-    else if (strcmp(argv[i], "-outputName") == 0) {
-      outputName = 1; outputON = 1;
-      cout << "Will write output called ";
-      i++;
-      outputFileName = argv[i]; i++;
-      cout << outputFileName << endl;
     }
     else if (strcmp(argv[i], "-outputSuffix") == 0) {
       i++;
@@ -244,10 +187,6 @@ Int_t controlVariables::InterpretCommandLine(int argc, char *argv[]) {
       analyze2AND3 = 1;
       withWAVE = 1;
     }
-    else if (strcmp(argv[i], "-gateTree") == 0) {
-      gateTree = 1;
-      i++;
-    }
     else if (strcmp(argv[i], "-zip") == 0) {
       compressedFile = 1;
       i++;
@@ -262,6 +201,10 @@ Int_t controlVariables::InterpretCommandLine(int argc, char *argv[]) {
     }
     else if (strcmp(argv[i], "-noTree") == 0) {
       withTREE = 0;
+      i++;
+    }
+    else if (strcmp(argv[i], "-scanning") == 0) {
+      scanning = 1;
       i++;
     }
     else if (strcmp(argv[i], "-d") == 0) {
@@ -282,11 +225,6 @@ Int_t controlVariables::InterpretCommandLine(int argc, char *argv[]) {
     else if (strcmp(argv[i], "-suppressTS") == 0) {
       suppressTS = 1;
       i++;
-    }
-    else if (strcmp(argv[i], "-s800File") == 0) {
-      s800File = 1;
-      s800ControlFile = argv[i+1];
-      i+=2;
     }
     else if (strcmp(argv[i], "-preGH2") == 0) {
       pgh = 2;
@@ -327,12 +265,6 @@ Int_t controlVariables::InterpretCommandLine(int argc, char *argv[]) {
       xtLowE = atoi(argv[i]); i++;
       xtHighE = atoi(argv[i]); i++;
       withTREE = 0;
-    } else if (strcmp(argv[i], "-INLcorrect") == 0) {
-      INLcorrection = 1; i++;
-      INLCConly = atoi(argv[i]); i++;
-      digMapFileName = argv[i]; i++; 
-      withWAVE = 1;
-      WITH_TRACETREE = 1;
     } else {
       cout << "Error -- unrecognized input flag: " << argv[i] << endl;
       return -1;
@@ -397,204 +329,10 @@ Int_t controlVariables::ReportRunFlags() {
   if (!noHFC && !suppressTS) {
     cout << "     Will use Dirk's GEB_HFC resorter code, and will ignore TS order errors. " << endl;
   }
-  if (doTRACK) { 
-    cout << "     Will try really hard to do tracking, using Torben's code. " << endl;
-  }
   if (withWAVE) {
     cout << "     Will do some waveform analysis on GRETINA waveforms, as specified with flags in Unpack.h. " << endl;
   }
-  if (outputON) {
-    cout << "     Will generate combined output data file with processed aux data where appropriate (i.e. mode9 S800Physics) " << endl;
-  }
   return(1);
-}
-
-void controlVariables::SetS800Controls(TString fileName) {
-  FILE *controlINPUT;
-  if ( (controlINPUT = fopen(fileName.Data(), "r")) == NULL ) {
-    cerr << "S800 control file " << fileName.Data() << " could not be opened." << endl;
-  }
-  cout << "Setting S800 controls based on " << fileName.Data() << endl;
-  
-  char line[300];
-  char junk[300];
-  char filename[300];
-  int value;
-
-  while ( !feof(controlINPUT) ) {
-    char* chr = fgets(line, 300, controlINPUT);
-    if (strlen(line) == 1) { continue; }
-    if (strncmp(line, "#", 1) == 0) { continue; }
-    if (strncmp(line, "VariableFile", 12) == 0) {
-      sscanf(line, "%s %s", junk, filename);
-      s800VariableFile = filename;
-    }
-    if (strncmp(line, "S800_DIAG", 9) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      S800_DIAG = value;
-    }
-    if (strncmp(line, "E1_RAW", 6) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      E1_RAW = value;
-    }
-    if (strncmp(line, "E1_CAL", 6) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      E1_CAL = value;
-    }  
-    if (strncmp(line, "E2_RAW", 6) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      E2_RAW = value;
-    }
-    if (strncmp(line, "E2_CAL", 6) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      E2_CAL = value;
-    }    
-    if (strncmp(line, "E3_RAW", 6) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      E3_RAW = value;
-    }
-    if (strncmp(line, "E3_CAL", 6) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      E3_CAL = value;
-    }    
-    if (strncmp(line, "IC_RAW", 6) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IC_RAW = value;
-    }
-    if (strncmp(line, "IC_CAL", 6) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IC_CAL = value;
-    } 
-    if (strncmp(line, "CRDC1_RAW_PADS", 14) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      CRDC1_RAW_PADS = value;
-    } 
-    if (strncmp(line, "CRDC1_RAW_CALC", 14) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      CRDC1_RAW_CALC = value;
-    } 
-    if (strncmp(line, "CRDC1_CALC", 10) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      CRDC1_CALC = value;
-    } 
-    if (strncmp(line, "CRDC2_RAW_PADS", 14) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      CRDC2_RAW_PADS = value;
-    } 
-    if (strncmp(line, "CRDC2_RAW_CALC", 14) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      CRDC2_RAW_CALC = value;
-    } 
-    if (strncmp(line, "CRDC2_CALC", 10) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      CRDC2_CALC = value;
-    } 
-    if (strncmp(line, "S800_TIMESTAMP", 14) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      S800_TIMESTAMP = value;
-    }
-    if (strncmp(line, "FP_TRACK_RAW", 12) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      FP_TRACK_RAW = value;
-    } 
-    if (strncmp(line, "FP_TRACK_COR", 12) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      FP_TRACK_COR = value;
-    } 
-    if (strncmp(line, "HODO_RAW", 8) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      HODO_RAW = value;
-    } 
-    if (strncmp(line, "HODO_CAL", 8) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      HODO_CAL = value;
-    } 
-    if (strncmp(line, "TARGET_PPAC_RAW", 15) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      TARGET_PPAC_RAW = value;
-    } 
-    if (strncmp(line, "TARGET_PPAC_CALC", 16) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      TARGET_PPAC_CALC = value;
-    } 
-    if (strncmp(line, "TARGET_PIN1_RAW", 15) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      TARGET_PIN1_RAW = value;
-    } 
-    if (strncmp(line, "TARGET_PIN1_CAL", 15) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      TARGET_PIN1_CAL = value;
-    } 
-    if (strncmp(line, "TARGET_PIN2_RAW", 15) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      TARGET_PIN2_RAW = value;
-    } 
-    if (strncmp(line, "TARGET_PIN2_CAL", 15) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      TARGET_PIN2_CAL = value;
-    } 
-    if (strncmp(line, "TARGET_TOTAL", 12) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      TARGET_TOTAL = value;
-    } 
-    if (strncmp(line, "IMAGE_CALC", 10) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IMAGE_CALC = value;
-    } 
-    if (strncmp(line, "IMAGE_TPPAC1_RAW", 16) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IMAGE_TPPAC1_RAW = value;
-    } 
-    if (strncmp(line, "IMAGE_TPPAC1_CALC", 17) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IMAGE_TPPAC1_CALC = value;
-    } 
-    if (strncmp(line, "IMAGE_TPPAC2_RAW", 16) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IMAGE_TPPAC2_RAW = value;
-    } 
-    if (strncmp(line, "IMAGE_TPPAC2_CALC", 17) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IMAGE_TPPAC2_CALC = value;
-    } 
-    if (strncmp(line, "IMAGE_TRACK", 11) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IMAGE_TRACK = value;
-    } 
-    if (strncmp(line, "IMAGE_PPAC1_RAW", 15) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IMAGE_PPAC1_RAW = value;
-    } 
-    if (strncmp(line, "IMAGE_PPAC1_CALC", 16) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IMAGE_PPAC1_CALC = value;
-    } 
-    if (strncmp(line, "IMAGE_PPAC2_RAW", 15) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IMAGE_PPAC2_RAW = value;
-    } 
-    if (strncmp(line, "IMAGE_PPAC2_CALC", 16) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      IMAGE_PPAC2_CALC = value;
-    } 
-    if (strncmp(line, "OBJECT_PIN_RAW", 14) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      OBJECT_PIN_RAW = value;
-    } 
-    if (strncmp(line, "OBJECT_PIN_CAL", 14) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      OBJECT_PIN_CAL = value;
-    } 
-    if (strncmp(line, "TRIGGER", 7) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      TRIGGER = value;
-    } 
-    if (strncmp(line, "TOF", 3) == 0) {
-      sscanf(line, "%s %d", junk, &value);
-      TOF = value;
-    } 
-  }
-  fclose(controlINPUT);
 }
 
 /****************************************************/

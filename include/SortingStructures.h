@@ -51,6 +51,9 @@ class controlVariables : public TObject {
   Int_t xtalkAnalysis;
   Int_t xtalkID; 
   Int_t xtLowE, xtHighE;
+
+  Int_t scanning;
+  Double_t collX, collY, collZ;
   
   /* Superpulse information */
   Bool_t superPulse;
@@ -87,40 +90,12 @@ class controlVariables : public TObject {
   Bool_t analyze2AND3;
   TString fileName2;
 
-  //#ifdef S800
-  Int_t s800File;
-  TString s800ControlFile;
-  TString s800VariableFile;
-  
-  Bool_t S800_DIAG;
-  Bool_t E1_RAW, E1_CAL, E2_RAW, E2_CAL, E3_RAW, E3_CAL;
-  Bool_t IC_RAW, IC_CAL, IC_SUMS;
-  Bool_t CRDC1_RAW_PADS, CRDC1_RAW_CALC, CRDC1_CALC;
-  Bool_t CRDC2_RAW_PADS, CRDC2_RAW_CALC, CRDC2_CALC;
-  Bool_t FP_TRACK_RAW, FP_TRACK_COR;
-  Bool_t HODO_RAW, HODO_CAL;
-  Bool_t TARGET_PPAC_RAW, TARGET_PPAC_CALC;
-  Bool_t TARGET_PIN1_RAW, TARGET_PIN1_CAL;
-  Bool_t TARGET_PIN2_RAW, TARGET_PIN2_CAL;
-  Bool_t TARGET_TOTAL;
-  Bool_t IMAGE_CALC;
-  Bool_t IMAGE_TPPAC1_RAW, IMAGE_TPPAC1_CALC;
-  Bool_t IMAGE_TPPAC2_RAW, IMAGE_TPPAC2_CALC;
-  Bool_t IMAGE_TRACK;
-  Bool_t IMAGE_PPAC1_RAW, IMAGE_PPAC1_CALC;
-  Bool_t IMAGE_PPAC2_RAW, IMAGE_PPAC2_CALC;
-  Bool_t OBJECT_PIN_RAW, OBJECT_PIN_CAL;
-  Bool_t TRIGGER, S800_TIMESTAMP;
-  Bool_t TOF;
-  //#endif
-
  public:
   controlVariables();
   ~controlVariables() { ; }
   void Initialize();
   Int_t InterpretCommandLine(int argc, char *argv[]);  
   Int_t ReportRunFlags();
-  void SetS800Controls(TString fileName);
   
   private:  
     ClassDef(controlVariables, 1);

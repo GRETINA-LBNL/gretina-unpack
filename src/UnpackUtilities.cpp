@@ -206,8 +206,9 @@ Int_t OpenInputFile(FILE** inf, controlVariables* ctrl, TString runNumber) {
     printf("Opened: %s \n", ctrl->fileName.Data());  
     
     if (ctrl->fileType != "f" && ctrl->fileType != "f1" && ctrl->fileType != "f2") {
-      ctrl->outfileName = (ctrl->directory + "Run" + runNumber + "/Run" + runNumber +
-			   ctrl->outputSuffix + ".root");
+      ctrl->outfileName = "Run" + runNumber + ctrl->outputSuffix + ".root";
+      //      ctrl->outfileName = (ctrl->directory + "Run" + runNumber + "/Run" + runNumber +
+      //			   ctrl->outputSuffix + ".root");
     } else {
       
       if (ctrl->outfileName == "") {
@@ -236,18 +237,6 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
   }
 
   if (gret->g3Temp.size() > 0) { gret->analyzeMode3(ctrl); }
-
-  if (gret->g2out.crystalMult() > 0) {
-    if (ctrl->doTRACK) {
-      Int_t error = gret->fillShell2Track();
-      if (error != 8) {
-	gret->track.findTargetPos();
-	Int_t trackStatus;
-	trackStatus = gret->track.trackEvent();
-	gret->fillMode1(trackStatus);
-      }
-    }
-  }
 
   if (badCrystal >= 0) {
     if (ctrl->analyze2AND3) {
@@ -317,154 +306,6 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
     } /* End of analyze2AND3 */
   }
   
-  /* Do particle-gamma type things -- i.e. correct Doppler
-     for particle trajectories, etc. */
-  if (!ctrl->dopplerSimple) {
-    if (gret->g2out.crystalMult() > 0) {
-      for (UInt_t ui=0; ui<gret->g2out.crystalMult(); ui++) {
-#ifdef WITH_S800
-	if ((cnt->event & 0x10) || (cnt->event & 0x100)) {
-	  
-	  /* First scale the radius... this trick comes from Dirk.  We still
-	     don't really know why we need to do this, but we do. It makes
-	     things better.  Probably something funny in the decomp bases.  */
-	  TVector3 xyz = gret->g2out.xtals[ui].maxIntPtXYZ();
-	  //  Double_t pR = xyz.XYvector().Mod();
-	  // Double_t pTheta = TMath::ATan(xyz.Y()/xyz.X());
-	  //Float_t xPrime = gret->var.radiusCor[gret->g2out.xtals[ui].crystalNum]*pR*TMath::Cos(pTheta);
-	  //Float_t yPrime = gret->var.radiusCor[gret->g2out.xtals[ui].crystalNum]*pR*TMath::Sin(pTheta);
-	  
-	  /* This is a check against flipping the sign of the x/y coordinates...*/
-	  //if (xyz.X() < 0 && xPrime > 0) { xPrime = -xPrime; }
-	  //if (xyz.X() > 0 && xPrime < 0) { xPrime = -xPrime; }
-	  //if (xyz.Y() < 0 && yPrime > 0) { yPrime = -yPrime; }
-	  //if (xyz.Y() > 0 && yPrime < 0) { yPrime = -yPrime; }
-	  //xyz.SetX(xPrime);  xyz.SetY(yPrime);
-	  
-	  /* And translate to world coordinates... */
-	  TVector3 xyzL = gret->rot.crys2Lab(gret->g2out.xtals[ui].crystalID, xyz);
-	  //printf("Here %f,%f,%f  ---> ", xyzL.X(), xyzL.Y(), xyzL.Z());
-	  xyzL -= gret->var.targetXYZ;      
-	  //printf("%f %f %f\n", xyzL.X(), xyzL.Y(), xyzL.Z());
-	  /* Calculate vector from target to interaction point, 
-	   including shifts in position (in cm). */
-
-
-
-	  gret->g2out.xtals[ui].doppler = s800->getDoppler(xyzL, gret->var.beta, &gret->var);
-	  //printf("Doppler %f\n", gret->g2out.xtals[ui].doppler);
-	  if (gret->g2out.xtals[ui].doppler == 0) { 
-	    gret->g2out.xtals[ui].doppler = gret->getDopplerSimple(gret->g2out.xtals[ui].maxIntPtXYZLab(), gret->var.beta); 
-	  }
-	}
-#else /* WITH_S800 */
-#ifdef WITH_CHICO
-	TVector3 xyzL = gret->g2out.xtals[ui].maxIntPtXYZLab();    
-
-	/*printf("xyzL.Y(),Z() before %f and %f ",xyzL.Y(),xyzL.Z());*/
-
-      	if (xyzL.Y()<0) xyzL.SetY(xyzL.Y() - GTPosOffsetY1) ;
-	else            xyzL.SetY(xyzL.Y() - GTPosOffsetY2) ;
-
-        xyzL.SetZ(xyzL.Z() - GTPosOffsetZ) ;
-
-	/*printf("and after %f and %f \n",xyzL.Y(),xyzL.Z());*/
-
-	Float_t chicoTheta = chico->particle.fThetaL/(TMath::Pi()) *180.;
-	if (chico->gotParticle && (chico->idParticle > 0)) {
-	  Float_t gTheta, gPhi;
-	  gTheta = xyzL.Theta();
-	  if (xyzL.Phi() < 0) { gPhi = xyzL.Phi() + 2*TMath::Pi(); } 
-	  else { gPhi = xyzL.Phi(); }
-
-	  /*
-	    printf("pgCosL, chico->particle.fThetaL %f chico->particle.fPhiL %f gTheta %f gPhi %f\n",chico->particle.fThetaL, chico->particle.fPhiL, gTheta, gPhi);
-	  */
-	  /* chico->idParticle defined as:
-	     1 : Target = Right, Projectile = Left
-	     2 : Target = Left , Projectile = Right
-	  */
-
-	  if (chico->idParticle == 1) {
-	    chico->particle.pgCosP = chico->calcCos(chico->particle.fThetaL, chico->particle.fPhiL, gTheta, gPhi);
-	    chico->particle.pgCosT = chico->calcCos(chico->particle.fThetaR, chico->particle.fPhiR, gTheta, gPhi);
-	  } else if (chico->idParticle == 2) {
-	    chico->particle.pgCosT = chico->calcCos(chico->particle.fThetaL, chico->particle.fPhiL, gTheta, gPhi);
-	    chico->particle.pgCosP = chico->calcCos(chico->particle.fThetaR, chico->particle.fPhiR, gTheta, gPhi);
-	  } else {
-	    printf("Unexpected chico->idParticle = %d\n", chico->idParticle);
-	  }
-
-	  /* not applicable for deep inelastic
-	     if (chicoTheta >=96. && chicoTheta <=180.) {
-	     lbeta = chico->betaB[(Int_t)chicoTheta];
-	     } else {
-	     lbeta = chico->betaP0 + chico->betaP1*chico->particle.fThetaL;
-	     lbeta += chico->betaP2*pow(chico->particle.fThetaL,2);
-	     lbeta += chico->betaP3*pow(chico->particle.fThetaL,3);
-	     lbeta += chico->betaP4*pow(chico->particle.fThetaL,4);
-	     lbeta += chico->betaP5*pow(chico->particle.fThetaL,5);
-	     }
-
-	     if (chicoTheta >=96. && chicoTheta <=180.) {
-	     lbeta = chico->betaB[(Int_t)chicoTheta];
-	     } else {
-	     lbeta = chico->betaT0 + chico->betaT1*chico->particle.fThetaL;
-	     lbeta += chico->betaT2*pow(chico->particle.fThetaL,2);
-	     lbeta += chico->betaT3*pow(chico->particle.fThetaL,3);
-	     lbeta += chico->betaT4*pow(chico->particle.fThetaL,4);
-	     lbeta += chico->betaT5*pow(chico->particle.fThetaL,5);
-	     }
-	  */
-
-	  
-	  Float_t lbeta, lcosTheta, lgamma, ldoppler;
-
-	  lbeta = chico->particle.betaT;
-	  lcosTheta = chico->particle.pgCosT;
-
-	  lgamma = 1/sqrt(1.-lbeta*lbeta);	  
-	  ldoppler = (lgamma*(1-lbeta*lcosTheta));
-          
-	  gret->g2out.xtals[ui].dopplerT = ldoppler;
-
-	  lbeta = chico->particle.betaP;
-	  lcosTheta = chico->particle.pgCosP;
-
-	  lgamma = 1/sqrt(1.-lbeta*lbeta);	  
-	  ldoppler = (lgamma*(1-lbeta*lcosTheta));
-          
-	  gret->g2out.xtals[ui].doppler = ldoppler;
-
-
-	  /*
-	    printf("chico->particle.t %llu chico->particle.LEDts %llu chicoTheta %f chico->particle.fThetaL %f lbeta %f chico->particle.pgCosL %f dopplerL %f \n",chico->particle.t, chico->particle.LEDts, chicoTheta, chico->particle.fThetaL, lbeta, chico->particle.pgCosL, dopplerL);
-	  */
-
-	} else { /* No CHICO particle info -- simple doppler */
-	  gret->g2out.xtals[ui].dopplerT = 0.0;
-	  gret->g2out.xtals[ui].doppler = gret->getDopplerSimple(gret->g2out.xtals[ui].maxIntPtXYZLab(), gret->var.beta);
-	}
-#else
-	/* Nothing to do, no particle information available. */
-#endif
-#endif
-      }
-    } /* End of Mode2 data? */
-    if (gret->g1out.gammaMult() > 0) {
-      for (UInt_t ui=0; ui<gret->g1out.gammaMult(); ui++) {
-#ifdef WITH_S800
-	gret->g1out.gammas[ui].doppler = s800->getDoppler(gret->g1out.gammas[ui].xyzLab1, gret->var.beta, &gret->var);
-	if (gret->g1out.gammas[ui].doppler == 0) {
-	  gret->g1out.gammas[ui].doppler = gret->getDopplerSimple(gret->g1out.gammas[ui].xyzLab1, gret->var.beta);
-	}
-#else
-	/* Nothing to do, no particle information available. */
-#endif
-      }
-    }
-  } /* End of !ctrl->dopplerSimple */    
-
   /* Write the histograms/tree */
   if (currTS > 0 && badCrystal >= 0) {
     if (ctrl->withHISTOS && ctrl->calibration && !ctrl->xtalkAnalysis) { 
@@ -474,24 +315,6 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
     }
     if (ctrl->withTREE) { 
       teb->Fill(); cnt->treeWrites++;
-#ifdef WITH_PWALL
-      /* Reset Phoswall */
-      phosWall->Reset();
-      phosWall->aux.Reset();
-#endif
-#ifdef WITH_CHICO
-      chico->Reset();
-#endif
-#ifdef WITH_LENDA
-      for (UInt_t ui=0; ui<ddasEv->getData().size(); ui++) {
-	delete ddasEv->getData()[ui];
-      }
-      ddasEv->getData().clear();
-      lendaEv->Clear();
-#endif
-#ifdef WITH_GOD
-      goddess->Clear();
-#endif
     }
   } 
   
@@ -506,14 +329,6 @@ void ResetEvent(controlVariables* ctrl, counterVariables* cnt) {
       (cnt->getEventBit(TRACK)) || (cnt->getEventBit(GRETSCALER))) {
     gret->Reset();
   }
-  /* Reset temporary crystal event structures. */
-#ifdef WITH_S800
-  if ((cnt->event & 0x10) || (cnt->event & 0x100)) { s800->Reset(); }
-#endif
-#ifdef WITH_CHICO
-  if (cnt->event & 0x800) { chico->Reset(); }
-#endif
-  
   cnt->event = 0x0000;
 }
 

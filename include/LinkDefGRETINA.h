@@ -58,22 +58,7 @@
 /* SuperPulse.h / SuperPulse.cpp */
 #pragma link C++ class SuperPulse+;
 
-/* INLCorrections.h / INLCorrections.cpp */
-#pragma link C++ class INLCorrection+;
-
 /* Histos.h / Histos.cpp */
 #pragma link C++ class Histos+;
-
-/* Track.h / Track.cpp */
-#pragma link C++ struct PM+;
-
-#pragma link C++ struct TrackClusterIP+;
-#pragma link C++ struct TrackCluster+;
-#pragma link C++ struct TrackShell+;
-#pragma link C++ struct TrackCtrl+;
-#pragma link C++ struct TrackStat+;
-#pragma link C++ struct TrackPerm+;
-#pragma link C++ struct Track+;
-
 
 #endif

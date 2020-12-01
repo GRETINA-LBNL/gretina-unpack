@@ -8,18 +8,6 @@
 #include "GRETINA.h"
 #include "GRETINAWavefunction.h"
 
-#include "Track.h"
-
-#ifdef WITH_S800
-#include "S800Parameters.h"
-#include "S800Definitions.h"
-#endif
-
-#ifdef WITH_CHICO
-#include "CHICO.h"
-#include "CHICODefinitions.h"
-#endif
-
 /*************************************************/
 /****            Global variables             ****/
 /*************************************************/
@@ -53,20 +41,6 @@ extern GRETINA *gret;
 
 extern g4Sim_abcd1234 g4sim;
 extern g4SimOUT *gSimOUT;
-
-extern Track *track;
-
-/*------ CHICO DATA STRUCTURES ------*/
-#ifdef WITH_CHICO
-extern CHICOFull *chico;
-#endif
-
-/*------ S800 DATA STRUCTURES ------*/
-
-#ifdef WITH_S800
-extern S800Full *s800;
-extern S800Scaler *s800Scaler;
-#endif
 
 /*------ ROOT TREES ------*/
 extern TTree *teb;

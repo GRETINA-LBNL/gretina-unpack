@@ -17,7 +17,6 @@
 #include <stdlib.h>
 #include <signal.h>
 
-#include "Track.h"
 #include "SortingStructures.h"
 #include "Defines.h"
 #include "colors.h"
@@ -787,8 +786,6 @@ class GRETINA : public TObject {
   
   Bank88 b88;
 
-  Track track;
-
   gHistos gHist;
 
  public:
@@ -834,9 +831,6 @@ class GRETINA : public TObject {
   void fillHistos(Int_t ctrl);
 
   void checkSPIntegrity();
-
-  Int_t fillShell2Track();
-  void fillMode1(Int_t trackStatus);
 
  public:
   ClassDef(GRETINA, 1);
