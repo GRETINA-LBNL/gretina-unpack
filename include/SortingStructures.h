@@ -31,6 +31,7 @@ class controlVariables : public TObject {
   Int_t dopplerSimple;
 
   Int_t startRun;
+  Int_t endRun;
   TString fileType;
   TString fileName;
   TString outputSuffix;

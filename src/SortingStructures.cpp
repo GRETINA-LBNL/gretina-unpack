@@ -29,6 +29,7 @@ controlVariables::controlVariables() {
   calibrationFile = "";
   
   startRun = 0;
+  endRun = 0;
   fileType = "";
   directory = "";
   outputSuffix = "";
@@ -93,6 +94,7 @@ void controlVariables::Initialize() {
   calibrationFile = "";
   
   startRun = 0;
+  endRun = 0;
   fileType = "";
   directory = "";
   outputON = 0;
@@ -213,6 +215,12 @@ Int_t controlVariables::InterpretCommandLine(int argc, char *argv[]) {
     }
     else if (strcmp(argv[i], "-run") == 0) {
       startRun = i+1;
+      endRun = i+1;
+      if (strcmp(argv[i+2], "-") == 0) {
+	startRun = atoi(argv[i+1]);
+	endRun = atoi(argv[i+3]);
+      }
+      printf("start, end = %d %d\n", startRun, endRun);
     }
     else if (strcmp(argv[i], "-noHFC") == 0) {
       noHFC = 1;

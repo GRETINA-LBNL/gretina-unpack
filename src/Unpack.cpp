@@ -135,14 +135,33 @@ int main(int argc, char *argv[]) {
     ctrl->startRun = 0; argc = 1; 
   } /* For specific file name, once through loop only. */
   
+  /* Looping over a range, count them... */
+  Int_t runIndex = -1;
+  if (ctrl->startRun != ctrl->endRun && ctrl->startRun != 0) {
+    runIndex = 0;
+    argc = ctrl->startRun+10;
+  }
+
   for (Int_t mm = ctrl->startRun; mm<argc; mm++) {
     if (!gotsignal) { /* We haven't aborted for some reason. */
       
       timer.Reset(); timer.Start();
       cnt->ResetRunCounters();
       
-      TString runNumber = argv[mm];
-      cnt->runNum = atoi(argv[mm]);
+      TString runNumber;
+      if (ctrl->startRun == ctrl->endRun && ctrl->startRun != 0) {
+	runNumber = argv[mm];
+	cnt->runNum = atoi(argv[mm]);
+      } else if (ctrl->startRun != 0) {
+	runNumber = Form("0%d", ctrl->startRun+runIndex);
+	cnt->runNum = ctrl->startRun + runIndex;
+	if (ctrl->startRun + runIndex < ctrl->endRun) { 
+	  mm = ctrl->startRun-1;
+	} else if (ctrl->startRun + runIndex == ctrl->endRun) {
+	  mm = argc;
+	}
+	runIndex++;
+      }
       
       Int_t fileOK = OpenInputFile(&inf, ctrl, runNumber);
       if (fileOK != 0) { exit(2); }
@@ -176,7 +195,6 @@ int main(int argc, char *argv[]) {
 	    if (strncmp(line, "#", 1) == 0) { continue; }
 	    if (strncmp(line, "   Xpos", 7) == 0) {
 	      sscanf(line, "%s  %*s %lf", junk, &value);
-	      printf("value = %f\n", value);
 	      ctrl->collX = value;
 	    }
 	    if (strncmp(line, "   Ypos", 7) == 0) {
