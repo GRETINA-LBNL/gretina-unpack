@@ -1432,7 +1432,10 @@ void GRETINA::Reset() {
   g2out.Reset();  g2out.Clear();
   g1out.Reset();  g1out.Clear();
   gSimOut.Reset();  gSimOut.Clear();
-  b88.chn.clear();
+  //  b88.chn.clear();
+  b88.rings.clear();
+  b88.sectors.clear();
+  b88.pixels.clear();
   b88.timestamp = 0;  b88.wfCFD = 0;
   b88.Clear();
 };
@@ -2926,103 +2929,98 @@ Int_t GRETINA::getBank88(FILE *inf, Int_t evtLength, counterVariables *cnt) {
     cnt->b88i += (TL * sizeof(UShort_t)) / 2;
     tmp = (gBuf + cnt->b88i*2);
   
-    // g3ch.ID = channel;
+    g3ch.ID = channel;
 
-    // Int_t hiEnergy = 0;
-    // hiEnergy = (dp->hdr[7] & 0x00ff);
-    // UInt_t tmpEnergy = 0;  Int_t tmpIntEnergy = 0;
-    // tmpEnergy = ((UInt_t)(hiEnergy) << 16);
-    // tmpEnergy += dp->hdr[4];
-    // tmpIntEnergy = (Int_t)tmpEnergy;
-    // if (sign) {
-    //   tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
-    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-    //   }
-    // } else {
-    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-    //   }
-    // }
-    // if (tmpIntEnergy == 65536) { /* Guard against weird FPGA energy anomoly */
-    //   g3ch.eRaw = 0.; 
-    // } else { g3ch.eRaw = (Float_t)(tmpIntEnergy/32.); }
+    Int_t hiEnergy = 0;
+    hiEnergy = (dp->hdr[7] & 0x00ff);
+    UInt_t tmpEnergy = 0;  Int_t tmpIntEnergy = 0;
+    tmpEnergy = ((UInt_t)(hiEnergy) << 16);
+    tmpEnergy += dp->hdr[4];
+    tmpIntEnergy = (Int_t)tmpEnergy;
+    if (sign) {
+       tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+       if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+    	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+       }
+     } else {
+       if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+     	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+       }
+     }
+     if (tmpIntEnergy == 65536) { /* Guard against weird FPGA energy anomoly */
+       g3ch.eRaw = 0.; 
+     } else { g3ch.eRaw = (Float_t)(tmpIntEnergy/32.); }
     
-    // hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
-    // hiEnergy = (dp->hdr[11] & 0x00ff);
-    // sign = (dp->hdr[11] & 0x0100);
-    // tmpEnergy = ((UInt_t)(hiEnergy) << 16);
-    // tmpEnergy += dp->hdr[8];
-    // tmpIntEnergy = (Int_t)(tmpEnergy);
-    // if (sign) {
-    //   tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
-    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-    //   }
-    // } else {
-    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-    //   }
-    // }
-    // g3ch.eCalPO = (Float_t)(tmpIntEnergy/32.);
+     hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
+     hiEnergy = (dp->hdr[11] & 0x00ff);
+     sign = (dp->hdr[11] & 0x0100);
+     tmpEnergy = ((UInt_t)(hiEnergy) << 16);
+     tmpEnergy += dp->hdr[8];
+     tmpIntEnergy = (Int_t)(tmpEnergy);
+     if (sign) {
+       tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+       if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+     	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+       }
+     } else {
+       if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+     	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+       }
+     }
+     g3ch.eCalPO = (Float_t)(tmpIntEnergy/32.);
 
-    // hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
-    // hiEnergy = (dp->hdr[13] & 0x0001);
-    // sign = (dp->hdr[13] & 0x0002);
-    // tmpEnergy = ((UInt_t)(hiEnergy) << 23);
-    // tmpEnergy += ((UInt_t)(dp->hdr[10]) << 7);
-    // tmpEnergy += ((UInt_t)(dp->hdr[11] & 0xfe00) >> 9);
-    // tmpIntEnergy = (Int_t)(tmpEnergy);
-    // if (sign) {
-    //   tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
-    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-    //   }
-    // } else {
-    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-    //   }
-    // }
-    // g3ch.prevE1 = (Float_t)(tmpIntEnergy/32.);
+     hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
+     hiEnergy = (dp->hdr[13] & 0x0001);
+     sign = (dp->hdr[13] & 0x0002);
+     tmpEnergy = ((UInt_t)(hiEnergy) << 23);
+     tmpEnergy += ((UInt_t)(dp->hdr[10]) << 7);
+     tmpEnergy += ((UInt_t)(dp->hdr[11] & 0xfe00) >> 9);
+     tmpIntEnergy = (Int_t)(tmpEnergy);
+     if (sign) {
+       tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+       if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+     	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+       }
+     } else {
+       if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+     	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+       }
+     }
+     g3ch.prevE1 = (Float_t)(tmpIntEnergy/32.);
     
-    // hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
-    // hiEnergy = (dp->hdr[12] & 0x03ff);
-    // sign = (dp->hdr[12] & 0x0400);
-    // tmpEnergy = ((UInt_t)(hiEnergy) << 14);
-    // tmpEnergy += ((UInt_t)(dp->hdr[13] & 0xfffc) >> 2);
-    // tmpIntEnergy = (Int_t)(tmpEnergy);
-    // if (sign) {
-    //   tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
-    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-    //   }
-    // } else {
-    //   if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-    // 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-    //   }
-    // }
-    // g3ch.prevE2 = (Float_t)(tmpIntEnergy/32.);
-    // g3ch.PZrollover = ((UInt_t)(dp->hdr[12] & 0xf800) >> 11);
+     hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
+     hiEnergy = (dp->hdr[12] & 0x03ff);
+     sign = (dp->hdr[12] & 0x0400);
+     tmpEnergy = ((UInt_t)(hiEnergy) << 14);
+     tmpEnergy += ((UInt_t)(dp->hdr[13] & 0xfffc) >> 2);
+     tmpIntEnergy = (Int_t)(tmpEnergy);
+     if (sign) {
+       tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
+       if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+     	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+       }
+     } else {
+       if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+     	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
+       }
+     }
+     g3ch.prevE2 = (Float_t)(tmpIntEnergy/32.);
+     g3ch.PZrollover = ((UInt_t)(dp->hdr[12] & 0xf800) >> 11);
 
-    // /* Transform the waveform */
-    // g3ch.wf.raw.clear();
-    // for (Int_t j=0; j<TL+1; j=j+2) {
-    //   if (dp->waveform[j+1] & 0x8000) {
-    // 	g3ch.wf.raw.push_back(dp->waveform[j+1] - std::numeric_limits<unsigned int>::max());
-    //   } else {
-    // 	g3ch.wf.raw.push_back(dp->waveform[j+1]);
-    //   }
-    //   if (dp->waveform[j] & 0x8000) {
-    // 	g3ch.wf.raw.push_back(dp->waveform[j] - std::numeric_limits<unsigned int>::max());
-    //   } else {
-    // 	g3ch.wf.raw.push_back(dp->waveform[j]);
-    //   } 
-    // }
-
-    // /* For the CC always get a baseline value from the minimum trace, which is 6 samples. */
-    // if (g3ch.wf.raw.size() >= 6) {  g3ch.baseline = g3ch.wf.BL(0, 6);  }
-    
-    // g3ch.calcTime = g3ch.wf.CFD(0);
+     /* Transform the waveform */
+     g3ch.wf.raw.clear();
+     for (Int_t j=0; j<TL+1; j=j+2) {
+       if (dp->waveform[j+1] & 0x8000) {
+     	g3ch.wf.raw.push_back(dp->waveform[j+1] - std::numeric_limits<unsigned int>::max());
+       } else {
+     	g3ch.wf.raw.push_back(dp->waveform[j+1]);
+       }
+       if (dp->waveform[j] & 0x8000) {
+     	g3ch.wf.raw.push_back(dp->waveform[j] - std::numeric_limits<unsigned int>::max());
+       } else {
+     	g3ch.wf.raw.push_back(dp->waveform[j]);
+       } 
+     }
 
     g3ch.timestamp = (ULong64_t)( ((ULong64_t)(dp->hdr[3])) + 
 				  ((ULong64_t)(dp->hdr[2]) << 16) +
@@ -3034,7 +3032,41 @@ Int_t GRETINA::getBank88(FILE *inf, Int_t evtLength, counterVariables *cnt) {
     g3ch.deltaT2 = (UShort_t)(dp->hdr[9]);
    
     b88.timestamp = g3ch.timestamp; 
-    b88.chn.push_back(g3ch);
+
+    g3ch.ID = (g3ch.boardID()-3)*8 + g3ch.chanID()+1;
+
+    /* For the ANL Coulex experiments... */
+    TRandom1 *gRandom = new TRandom1();
+    // Double_t mapForSectors[32] = {10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,1,2,3,4,5,6,7,8,9};
+    // Double_t mapForSectors[32] = {25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,32,31,30,29,28,27,26};
+    Double_t mapForSectors[32] = {25,26,27,28,29,30,31,32,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
+    Double_t mapForRings[24] = {7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,6,5,4,3,2,1,24,23};
+    // Double_t mapForRings[24] = {22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,24,23};
+    if ((Int_t)(g3ch.module()/4) == 124 && g3ch.chanID()<8 && g3ch.ID<=24) { /* Rings */
+      g3ch.eRaw *= -1;
+      g3ch.phi = 0.;
+      g3ch.theta = 0.;
+      g3ch.eCal = g3ch.eRaw*rGain[g3ch.ID-1];
+      Int_t id = g3ch.ID-1;
+      g3ch.ID = mapForRings[id];
+      Float_t detectorDistance = 90; // mm
+      g3ch.theta = TMath::RadToDeg()*TMath::ATan((((70.-22.)/24.)*(g3ch.ID-0.5)+22.)/detectorDistance);
+      if (g3ch.eCal > 0.3) { // Threshold to get out of the noise
+	b88.rings.push_back(g3ch);
+      }
+    } else if ((Int_t)(g3ch.module()/4) == 125 && g3ch.chanID()<8) { /* Sectors */
+      g3ch.theta = 0.;
+      Int_t id = g3ch.ID-1;
+      g3ch.ID = mapForSectors[id];
+      g3ch.eCal = g3ch.eRaw*sGain[g3ch.ID-1];
+      /* S3 has 32 sectors, each spanning 11.25 degrees; phi up = 90degrees */
+      g3ch.phi = 0.0 + ((Double_t)g3ch.ID-1.0)*11.25 - gRandom->Uniform(-1.0,1.0)*5.5;// + 180.;
+      if (g3ch.eCal > 0.1) { // Threshold to get out of the noise
+	b88.sectors.push_back(g3ch);
+      }
+    }
+
+    //b88.chn.push_back(g3ch);
 
     free(dp);
 
@@ -3044,4 +3076,226 @@ Int_t GRETINA::getBank88(FILE *inf, Int_t evtLength, counterVariables *cnt) {
   
   return (0);
   
+}
+
+void GRETINA::analyzeBank88() {
+  b88p.Clear();
+
+  Int_t sUsed[32] = {0};
+  Int_t rUsed[16] = {0};
+
+  //cout << "******* Rings: " << b88.rings.size() << " Sectors: " << b88.sectors.size() << endl;
+  //for (Int_t r=0; r<b88.rings.size(); r++) {
+  //  cout << "Ring: " << b88.rings[r].ID << ", e = " << b88.rings[r].eCal << endl;
+  //}
+  //for (Int_t s=0; s<b88.sectors.size(); s++) {
+  //  cout << "Sector: " << b88.sectors[s].ID << ", e = " << b88.sectors[s].eCal << endl;
+  //}
+
+  if (b88.rings.size() > 0 && b88.sectors.size() > 0) {
+  
+    // Loop over rings looking for matching sectors
+    for (Int_t r=0; r<b88.rings.size(); r++) {
+      for (Int_t s=0; s<b88.sectors.size(); s++) {
+	if ((b88.rings.size() == 1 && b88.sectors.size() == 1) || // Only one ring, and one sector, must correspond
+	    ((TMath::Abs(b88.rings[r].eCal - b88.sectors[s].eCal) < 0.250) && sUsed[s] == 0 && rUsed[r] == 0)) {
+	  TRandom1 *gRandom = new TRandom1();
+	  b88p.theta = b88.rings[r].theta;
+	  /* S3 has 32 sectors, each spanning 11.25 degrees; phi up = 90degrees */
+	  b88p.phi = b88.sectors[s].phi;
+	  /* S3 is 22mm inner, 70mm outer radius, 24 rings -- each ring is 2 mm wide */
+	  b88p.radius = 22. + (b88.rings[r].ID-0.5)*(2.);
+	  b88p.radius += gRandom->Uniform(-1.0,1.0)*0.85;
+	  b88p.eRing = b88.rings[r].eCal;
+	  b88p.eSector = b88.sectors[s].eCal;
+	  b88p.x = b88p.radius*TMath::Cos(b88p.phi*TMath::DegToRad());
+	  b88p.y = b88p.radius*TMath::Sin(b88p.phi*TMath::DegToRad());
+	  b88p.iRing = b88.rings[r].ID;
+	  b88p.iSector = b88.sectors[s].ID;
+	  b88.pixels.push_back(b88p);
+	  sUsed[s] = 1;  rUsed[r] = 1;
+	  // cout << "Raw match " << r << ", " << s << endl;
+	}
+      }
+    }
+    
+    for (Int_t r=0; r<b88.rings.size(); r++) {
+      if (rUsed[r] == 0) { // No sector found with a good energy match, look for energy sharing
+	if (b88.sectors.size() == 2) {
+	  if (TMath::Abs(b88.sectors[0].ID - b88.sectors[1].ID) == 1) {
+	    if ((TMath::Abs(b88.rings[r].eCal - (b88.sectors[0].eCal+b88.sectors[1].eCal) < 0.500)) 
+		&& sUsed[0] == 0 && sUsed[1] == 0) {
+	      TRandom1 *gRandom = new TRandom1();
+	      Int_t s=0; 
+	      if (b88.sectors[0].eCal > b88.sectors[1].eCal) { s = 0; } else { s = 1; }
+	      b88p.theta = b88.rings[r].theta;
+	      /* S3 has 32 sectors, each spanning 11.25 degrees; phi up = 90degrees */
+	      b88p.phi = b88.sectors[s].phi;
+	      /* S3 is 22mm inner, 70mm outer radius, 24 rings -- each ring is 2 mm wide */
+	      b88p.radius = 22. + (b88.rings[r].ID-0.5)*(2.);
+	      b88p.radius += gRandom->Uniform(-1.0,1.0)*0.85;
+	      b88p.eRing = b88.rings[r].eCal;
+	      b88p.eSector = b88.sectors[s].eCal;
+	      b88p.x = b88p.radius*TMath::Cos(b88p.phi*TMath::DegToRad());
+	      b88p.y = b88p.radius*TMath::Sin(b88p.phi*TMath::DegToRad());
+	      b88p.iRing = b88.rings[r].ID;
+	      b88p.iSector = b88.sectors[s].ID;
+	      b88.pixels.push_back(b88p);
+	      sUsed[0] = 1;  sUsed[1] = 1;
+	      rUsed[r] = 1;
+	      // cout << "Sharing sector match " << r << ", " << b88.sectors[0].eCal+b88.sectors[1].eCal << endl;
+	    }
+	  }
+	}	  
+      }
+    }
+    
+    for (Int_t s=0; s<b88.sectors.size(); s++) {
+      if (sUsed[s] == 0) { // No ring found with a good energy match, look for energy sharing
+	if (b88.rings.size() == 2) {
+	  if (TMath::Abs(b88.rings[0].ID - b88.rings[1].ID) == 1) {
+	    if ((TMath::Abs(b88.sectors[s].eCal - (b88.rings[0].eCal+b88.rings[1].eCal) < 0.500)) 
+		&& rUsed[0] == 0 && rUsed[1] == 0) {
+	      TRandom1 *gRandom = new TRandom1();
+	      Int_t r=0; 
+	      if (b88.rings[0].eCal > b88.rings[1].eCal) { r = 0; } else { r = 1; }
+	      b88p.theta = b88.rings[r].theta;
+	      /* S3 has 32 sectors, each spanning 11.25 degrees; phi up = 90degrees */
+	      b88p.phi = b88.sectors[s].phi;
+	      /* S3 is 22mm inner, 70mm outer radius, 24 rings -- each ring is 2 mm wide */
+	      b88p.radius = 22. + (b88.rings[r].ID-0.5)*(2.);
+	      b88p.radius += gRandom->Uniform(-1.0,1.0)*0.85;
+	      b88p.eRing = b88.rings[r].eCal;
+	      b88p.eSector = b88.sectors[s].eCal;
+	      b88p.x = b88p.radius*TMath::Cos(b88p.phi*TMath::DegToRad());
+	      b88p.y = b88p.radius*TMath::Sin(b88p.phi*TMath::DegToRad());
+	      b88p.iRing = b88.rings[r].ID;
+	      b88p.iSector = b88.sectors[s].ID;
+	      b88.pixels.push_back(b88p);
+	      rUsed[0] = 1;  rUsed[1] = 1;
+	      sUsed[s] = 1;
+	      // cout << "Sharing ring match " << s << ", " << b88.rings[0].eCal+b88.rings[1].eCal <<  endl;
+	    }
+	  }
+	}	  
+      }
+    }
+    
+    Int_t pause = 0;
+    
+    for (Int_t r=0; r<b88.rings.size(); r++) {
+      if (rUsed[r] == 0) { // No sector found with a good energy match, check if it might be in the dead one?
+	pause = 1;
+	for (Int_t s=0; s<b88.sectors.size(); s++) {
+	  if ((sUsed[s] == 0) && (b88.sectors[s].ID == 10 || b88.sectors[s].ID == 24)) {
+	    Int_t realSec = 0;
+	    if (b88.sectors[s].ID == 10) { realSec = 9; } else if (b88.sectors[s].ID == 24) { realSec = 25; }
+	    TRandom1 *gRandom = new TRandom1();
+	    b88p.theta = b88.rings[r].theta;
+	    /* S3 has 32 sectors, each spanning 11.25 degrees; phi up = 90degrees */
+	    b88p.phi = 0.0 + ((Float_t)realSec-1.0)*11.25 - gRandom->Uniform(-1.0,1.0)*5.5;;
+	    /* S3 is 22mm inner, 70mm outer radius, 24 rings -- each ring is 2 mm wide */
+	    b88p.radius = 22. + (b88.rings[r].ID-0.5)*(2.);
+	    b88p.radius += gRandom->Uniform(-1.0,1.0)*0.85;
+	    b88p.eRing = b88.rings[r].eCal;
+	    b88p.eSector = -1;
+	    b88p.x = b88p.radius*TMath::Cos(b88p.phi*TMath::DegToRad());
+	    b88p.y = b88p.radius*TMath::Sin(b88p.phi*TMath::DegToRad());
+	    b88p.iRing = b88.rings[r].ID;
+	    b88p.iSector = realSec;
+	    b88.pixels.push_back(b88p);
+	    sUsed[s] = 1;  rUsed[r] = 1;
+	  }
+	}
+      }
+    }
+    
+    for (Int_t s=0; s<b88.sectors.size(); s++) {
+      if (sUsed[s] == 0 && b88.sectors[s].ID != 25) { // No ring found, look if it could be one of 
+	                                              // the missing rings (23/24)
+	pause = 1; 
+	for (Int_t r=0; r<b88.rings.size(); r++) {
+	  if ((rUsed[r] == 0) && (b88.rings[r].ID == 22 || b88.rings[r].ID == 23 || b88.rings[r].ID==24)) {
+	    Int_t realRing = 23;
+	    TRandom1 *gRandom = new TRandom1();
+	    b88p.theta = b88.rings[r].theta;
+	    /* S3 has 32 sectors, each spanning 11.25 degrees; phi up = 90degrees */
+	    b88p.phi = b88.sectors[s].phi;
+	    /* S3 is 22mm inner, 70mm outer radius, 24 rings -- each ring is 2 mm wide */
+	    b88p.radius = 22. + (realRing-0.5)*(2.);
+	    b88p.radius += gRandom->Uniform(-1.0,1.0)*0.85;
+	    b88p.eRing = -1;
+	    b88p.eSector = b88.sectors[s].eCal;
+	    b88p.x = b88p.radius*TMath::Cos(b88p.phi*TMath::DegToRad());
+	    b88p.y = b88p.radius*TMath::Sin(b88p.phi*TMath::DegToRad());
+	    b88p.iRing = realRing;
+	    b88p.iSector = b88.sectors[s].ID;
+	    b88.pixels.push_back(b88p);
+	    sUsed[s] = 1;  rUsed[r] = 1;
+	    for (Int_t rr=0; rr<b88.rings.size(); rr++) {
+	      if (b88.rings[rr].ID >= 22) { rUsed[rr] = 1; }
+	    }
+	  }
+	}
+      }
+    }
+    
+    
+
+    // for (Int_t i=0; i<b88.pixels.size(); i++) {
+    //   if (b88.pixels[i].iRing > 22 && b88.pixels[i].iSector==25) {
+    // 	cout << "Pixel with edge ring: " << endl;
+    // 	cout << "Ring: " << b88.pixels[i].iRing << ", Sector: " << b88.pixels[i].iSector << endl;     	
+    // 	for (Int_t r=0; r<b88.rings.size(); r++) 
+    //  	  cout << "Ring: "<< b88.rings[r].ID << ", e = " << b88.rings[r].eCal << endl;
+    //  	for (Int_t s=0; s<b88.sectors.size(); s++) 
+    // 	  cout << "Sector: " << b88.sectors[s].ID << ", e = " << b88.sectors[s].eCal << endl;
+    	
+    //   }
+    // }
+    // cout << endl;
+    // if (pause) cin.get();
+    // pause = 0;
+  }
+}
+
+void GRETINA::readSiCalibrations(TString file) {
+  FILE *fp;
+
+  Float_t f1;
+  Int_t id;
+  Int_t nn = 0;
+  char *st, str[256];
+  
+  fp = fopen(file.Data(), "r");
+  if (fp == NULL) {
+    printf("Could not open \"%s\".\n", file.Data());
+    exit(1);
+  } else {
+    printf("\"%s\" open...", file.Data());
+  }
+  
+  nn = 0;
+  st = fgets(str, 256, fp);
+  while (st != NULL) {
+    if (str[0] == 35) {
+      /* '#' comment line, do nothing */
+    } else if (str[0] == 59) {
+      /* ';' comment line, do nothing */
+    } else if (str[0] == 10) {
+      /* Empty line, do nothing */
+    } else {
+      sscanf(str, "%i %f", &id, &f1);
+      if (nn<32) { sGain[id-1] = 9.00/f1; }
+      else { rGain[id-1] = 9.00/f1; }
+      nn++;
+    }
+    /* Attempt to read the next line */
+    st = fgets(str, 256, fp);
+  }
+  
+  printf("Read %i Si calibration coefficients.\n", nn);
+
+  /* Done! */
+  fclose(fp);
 }

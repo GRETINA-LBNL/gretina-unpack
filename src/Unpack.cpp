@@ -152,6 +152,7 @@ int main(int argc, char *argv[]) {
   gret->Initialize();
   gret->var.Initialize();
   gret->var.InitializeGRETINAVariables("gretina.set");
+  gret->readSiCalibrations("SiGains.dat");
 
   counterVariables *cnt = new counterVariables();
 

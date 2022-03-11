@@ -236,6 +236,7 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
   }
 
   if (gret->g3Temp.size() > 0) { gret->analyzeMode3(ctrl); }
+  gret->analyzeBank88();
 
   if (gret->g2out.crystalMult() > 0) {
     if (ctrl->doTRACK) {
