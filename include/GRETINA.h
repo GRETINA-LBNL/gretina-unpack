@@ -165,6 +165,7 @@ class g3ChannelEvent : public TObject {
   Float_t eCalPO, prevE1, prevE2;
   UShort_t deltaT1, deltaT2;
   UShort_t PZrollover;
+  Float_t theta, phi;
 
   Float_t eCalc;
   Float_t calcTime;
@@ -280,10 +281,29 @@ class g3HistoryEvent : public TObject {
   ClassDef(g3HistoryEvent, 1);
 };
 
+class Bank88Pixel : public TObject {
+
+ public:
+  Float_t theta, phi;
+  Float_t eRing, eSector;
+  Float_t radius;
+  Float_t x,y;
+  Int_t iRing, iSector;
+
+ public:
+  Bank88Pixel() { ; }
+  ~Bank88Pixel() { ; }
+
+  ClassDef(Bank88Pixel, 1);
+};
+
 class Bank88 : public TObject {
  
  public:
-  vector<g3ChannelEvent> chn;
+  // vector<g3ChannelEvent> chn;
+  vector<g3ChannelEvent> rings;
+  vector<g3ChannelEvent> sectors;
+  vector<Bank88Pixel> pixels;
   long long int timestamp;
   long long int wfCFD;
 
@@ -775,7 +795,10 @@ class GRETINA : public TObject {
   g2CrystalEvent g2X; g2IntPt pt;
   g3CrystalEvent g3X; g3ChannelEvent g3ch;
   vector<g3ChannelEvent> g3Temp;
+  Bank88Pixel b88p;
   historyEvent gH; 
+
+  Double_t sGain[32], rGain[24];
 
   unsigned char gBuf[32*32*1024];
 
@@ -830,6 +853,7 @@ class GRETINA : public TObject {
   void analyzeMode3(controlVariables *ctrl);
   void calibrateMode3(g3ChannelEvent *g3);
   void calibrateMode3SP(g3ChannelEvent *g3);
+  void analyzeBank88();
 
   void fillHistos(Int_t ctrl);
 
@@ -837,6 +861,7 @@ class GRETINA : public TObject {
 
   Int_t fillShell2Track();
   void fillMode1(Int_t trackStatus);
+  void readSiCalibrations(TString file);
 
  public:
   ClassDef(GRETINA, 1);
