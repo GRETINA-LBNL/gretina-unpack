@@ -108,7 +108,7 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 	bytesReadInBody += sizeof(uint64_t);
 
 	if(deBugFn) {
-	  printf("timestamp = %lu\n", timestamp);
+	  printf("timestamp = %llu\n", timestamp);
 	  printf("bytesReadTotal: %u, bytesReadInBody: %u\n", bytesReadTotal, bytesReadInBody);
 	}
 
@@ -181,7 +181,7 @@ void ddasEvent::getEvent(FILE *inf, Int_t length) {
 		  bytesReadInBody += sizeof(uint64_t);
 
 		  if(deBugFn) {
-		    printf("timestampBH = %lu\n", timestampBH); 
+		    printf("timestampBH = %llu\n", timestampBH); 
 		    printf("bytesReadTotal: %u, bytesReadInBody: %u\n", bytesReadTotal, bytesReadInBody);
 		  }
 

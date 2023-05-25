@@ -2681,6 +2681,16 @@ void gHistos::writeHistos(Int_t ctrl) {
 	if (mult2Pair[n][m]) { mult2Pair[n][m]->Write(); mult2Pair[n][m]->Delete(); }
       }
     }
+  } else if (ctrl == 0) {  /* Physics spectra */
+    for (Int_t m=0; m<MAXCRYSTALS; m++) {
+      if (eCal[m]) { eCal[m]->Write();  eCal[m]->Delete(); }
+    }
+    if (ccSummary) { ccSummary->Write();  ccSummary->Delete(); }
+    if (ccTotal) { ccTotal->Write();  ccTotal->Delete(); }
+    if (dT_SG) { dT_SG->Write();  dT_SG->Delete(); }
+    if (dT_SL) { dT_SL->Write();  dT_SL->Delete(); }
+    if (dT_LG) { dT_LG->Write();  dT_LG->Delete(); }
+    
   }
   
 }
@@ -2696,9 +2706,9 @@ void GRETINA::fillHistos(Int_t ctrl) {
 	  if (gHist.eRaw[g3Temp[um].ID]==NULL) {
 	  printf("Need histogram with index: %d... building those now.\n", g3Temp[um].ID);
 	  char title[300];
-	  sprintf(title, "eRaw%d", g3Temp[um].ID);
+	  snprintf(title, 10, "eRaw%d", g3Temp[um].ID);
 	  gHist.eRaw[g3Temp[um].ID] = new TH1F(title, title, 30000, 0, 60000);
-	  sprintf(title, "eCal%d", g3Temp[um].ID);
+	  snprintf(title, 10, "eCal%d", g3Temp[um].ID);
 	  gHist.eCal[g3Temp[um].ID] = new TH1F(title, title, 5000, 0, 5000);
 	} else { ; }
 	gHist.eRaw[g3Temp[um].ID]->Fill(g3Temp[um].eRaw*0.25); 
@@ -2714,9 +2724,9 @@ void GRETINA::fillHistos(Int_t ctrl) {
    	if (!gHist.eRaw[g3out.xtals[0].chn[um].ID]) {
 	  printf("Need histogram with index: %d... building those now.\n", g3out.xtals[0].chn[um].ID);
 	  char title[300];
-	  sprintf(title, "eRaw%d", g3out.xtals[0].chn[um].ID);
+	  snprintf(title, 10, "eRaw%d", g3out.xtals[0].chn[um].ID);
 	  gHist.eRaw[g3out.xtals[0].chn[um].ID] = new TH1F(title, title, 30000, 0, 60000);
-	  sprintf(title, "eCal%d", g3out.xtals[0].chn[um].ID);
+	  snprintf(title, 10, "eCal%d", g3out.xtals[0].chn[um].ID);
 	  gHist.eCal[g3out.xtals[0].chn[um].ID] = new TH1F(title, title, 5000, 0, 5000);
 	} else { ; }
 	gHist.eRaw[g3out.xtals[0].chn[um].ID]->Fill(g3out.xtals[0].chn[um].eRaw*0.25); 
@@ -2736,11 +2746,35 @@ void GRETINA::fillHistos(Int_t ctrl) {
       }
       if (!gHist.mult2Pair[segNum[0]][segNum[1]]) {
 	char title[300];
-	sprintf(title, "mult2Pair_%d_%d", segNum[0], segNum[1]);
+	snprintf(title, 20, "mult2Pair_%d_%d", segNum[0], segNum[1]);
 	printf("Need pair histogram: %s\n", title);
 	gHist.mult2Pair[segNum[0]][segNum[1]] = new TH1F(title, title, 5000, 0, 5000);
       }
       gHist.mult2Pair[segNum[0]][segNum[1]]->Fill(segE[0]+segE[1]);
+    }
+  } else if (ctrl == 0) { /* Physics histograms */
+
+    // GRETINA only 
+    for (UInt_t um=0; um<g2out.xtals.size(); um++) {
+      if (g2out.xtals[um].crystalNum < MAXCRYSTALS) { 
+	if (gHist.eCal[g2out.xtals[um].crystalNum]==NULL) {
+	  printf("Creating histogram ecal%d\n", g2out.xtals[um].crystalNum);
+	  char title[300];
+	  snprintf(title, 10, "eCal%d", g2out.xtals[um].crystalNum);
+	  gHist.eCal[g2out.xtals[um].crystalNum] = new TH1F(title, title, 5000, 0, 5000);
+	} else { ; }
+	gHist.eCal[g2out.xtals[um].crystalNum]->Fill(g2out.xtals[um].cc); 
+	if (gHist.ccSummary==NULL) {
+	  printf("Creating ccSummary histogram.\n");
+	  gHist.ccSummary = new TH2F("ccSummary", "ccSummary", 5000, 0, 5000, 120, 0, 120);
+	} else { ; }
+	gHist.ccSummary->Fill(g2out.xtals[um].cc, g2out.xtals[um].crystalNum);
+	if (gHist.ccTotal==NULL) {
+	  printf("Creating ccTotal histogram.\n");
+	  gHist.ccTotal = new TH1F("ccTotal", "ccTotal", 5000, 0, 5000);
+	} else { ; }
+	gHist.ccTotal->Fill(g2out.xtals[um].cc);
+      }
     }
   }
 }

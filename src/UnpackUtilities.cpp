@@ -469,9 +469,45 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
   if (currTS > 0 && badCrystal >= 0) {
     if (ctrl->withHISTOS && ctrl->calibration && !ctrl->xtalkAnalysis) { 
       gret->fillHistos(1);
-    } else if (ctrl->withHISTOS) {
+    } else if (ctrl->withHISTOS && ctrl->xtalkAnalysis) {
       gret->fillHistos(2);
+    } else if (ctrl->withHISTOS && !ctrl->calibration && !ctrl->xtalkAnalysis) {
+      // Fill the GRETINA only histograms for physics case...
+      gret->fillHistos(0);
     }
+
+    if (ctrl->withHISTOS && !ctrl->calibration && !ctrl->xtalkAnalysis) {
+      // We'll fill 'combined' histograms here.
+#ifdef WITH_S800
+#ifdef WITH_LENDA
+      // Timestamp differences
+      if ((lendaEv->etime > 0) && (s800->ts.timestamp > 0)) {
+	if (gret->gHist.dT_SL==NULL) {
+	  printf("Creating S800-LENDA delta T histogram.\n");
+	  gret->gHist.dT_SL = new TH1F("dT-S800-LENDA", "dT-S800-LENDA", 1000,-500,500);
+	}
+	gret->gHist.dT_SL->Fill(s800->ts.timestamp - lendaEv->etime);
+      }
+
+      if ((gret->b88.timestamp > 0) && (lendaEv->etime > 0)) {
+	if (gret->gHist.dT_LG==NULL) {
+	  printf("Creating LENDA-GRETINA delta T histogram.\n");
+	  gret->gHist.dT_LG = new TH1F("dT-LENDA-GRETINA", "dT-LENDA-GRETINA", 1000,-500,500);
+	}
+	gret->gHist.dT_LG->Fill(lendaEv->etime - gret->b88.timestamp);
+      }
+#endif
+      if ((gret->b88.timestamp > 0) && (s800->ts.timestamp > 0)) {
+	if (gret->gHist.dT_SG==NULL) {
+	  printf("Creating S800-GRETINA delta T histogram.\n");
+	  gret->gHist.dT_SG = new TH1F("dT-S800-GRETINA", "dT-S800-GRETINA", 1000,-500,500);
+	}
+	gret->gHist.dT_SG->Fill(s800->ts.timestamp - gret->b88.timestamp);
+      }      
+#endif
+
+    }
+    
     if (ctrl->withTREE) { 
       teb->Fill(); cnt->treeWrites++;
 #ifdef WITH_PWALL

@@ -186,7 +186,7 @@ void INLCorrection::ReadRawINL() {
 
   for (Int_t i=0; i<MAXCRYSTALS; i++) {
     for (Int_t j=0; j<4; j++) {
-      sprintf(serialN, "%X", crystalSN[i][j]);
+      snprintf(serialN, 10, "%X", crystalSN[i][j]);
       serN = serialN;
 
       TString inlName;

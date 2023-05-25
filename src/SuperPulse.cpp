@@ -88,9 +88,9 @@ Int_t SuperPulse::ReadDetMaps(char *fn, GRETINAVariables* gVar) {
 	    strcpy(filename, "tr_gain_Q");
 	  }
 	  char number[10];
-	  sprintf(number, "%dpos", Qnum);
+	  snprintf(number, 10, "%dpos", Qnum);
 	  strcat(filename, number);
-	  sprintf(number, "%d", posN);
+	  snprintf(number, 10, "%d", posN);
 	  strcat(filename, number);
 	  if (ccNum == 0) { strcat(filename, "_CC9.txt"); }
 	  else if (ccNum == 1) { strcat(filename, "_CC19.txt"); }
@@ -407,7 +407,7 @@ void SuperPulse::WriteSuperPulses() {
   for (Int_t i=0; i<MAXCRYSTALS; i++) {
     if (data4net[i][0] > 0 || data4net[i][1] > 0) {
       char filenameOut[1024];
-      sprintf(filenameOut, "SPCrystal%d_%d.spn", i, (Int_t)((lowE + highE)/2));
+      snprintf(filenameOut, 50, "SPCrystal%d_%d.spn", i, (Int_t)((lowE + highE)/2));
       cout << "Writing superpulses to " << filenameOut << endl;
       
       FILE *spOut = fopen(filenameOut, "wb");

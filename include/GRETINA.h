@@ -610,6 +610,10 @@ class gHistos : public TObject {
   TH1F *eRaw[MAXCHANNELS], *eCal[MAXCHANNELS];
   TH1F *mult2Pair[40][40];
 
+  TH1F *ccTotal;
+  TH2F *ccSummary;
+  TH1F *dT_SG, *dT_LG, *dT_SL;
+  
  public:
   gHistos();
   ~gHistos();

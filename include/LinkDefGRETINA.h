@@ -61,9 +61,6 @@
 /* INLCorrections.h / INLCorrections.cpp */
 #pragma link C++ class INLCorrection+;
 
-/* Histos.h / Histos.cpp */
-#pragma link C++ class Histos+;
-
 /* Track.h / Track.cpp */
 #pragma link C++ struct PM+;
 

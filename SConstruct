@@ -4,7 +4,7 @@ import os
 # Define the sub-systems to be included in analysis.
 PhosWall=0
 S800=1
-LENDA=0
+LENDA=1
 CHICO=0
 DFMA=0
 GODDESS=0
@@ -104,7 +104,7 @@ try:
     env.ParseConfig('root-config --cflags')
     env.ParseConfig('root-config --glibs')
 except OSError:
-    print "scons: ROOT not found!"
+    print ("scons: ROOT not found!")
     exit(1)
 
 env.Append(CPPPATH=['.', './include', './src', './src/hfc/', './src/GODDESSsrc/'])
@@ -119,7 +119,7 @@ envClover = env.Clone()
 gretinaDictTarget = 'lib/GRETINADict.cpp'
 gretinaDictHeaders = ['include/GRETINA.h', 'include/SortingStructures.h', 
 		      'include/GRETINAWavefunction.h',
-		      'include/INLCorrection.h', 'include/Histos.h', 
+		      'include/INLCorrection.h', 
 		      'include/Track.h', 'include/LinkDefGRETINA.h']
 env.RootCint(gretinaDictTarget, gretinaDictHeaders)
 
@@ -127,7 +127,7 @@ gretinaLibTarget = 'lib/GRETINA'
 gretinaLibSources = ['lib/GRETINADict.cpp', 'src/GRETINA.cpp', 
 		     'src/SortingStructures.cpp', 'src/SuperPulse.cpp', 
 		     'src/INLCorrection.cpp', 'src/G3Waveform.cpp',
-		     'src/Histos.cpp', 'src/Track.cpp']
+		     'src/Track.cpp']
 env.SharedLibrary(target = gretinaLibTarget, source = gretinaLibSources, 
                   SHLIBPREFIX='lib')
 

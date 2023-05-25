@@ -779,6 +779,12 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
 #ifdef WITH_LENDA
   case LENDA:
     {
+      if (cnt->headerType[LENDA] == 0 && ctrl->withTREE) {
+	InitializeTreeLENDA();
+	for (Int_t i=0; i<cnt->treeWrites; i++) {
+	  teb->FindBranch("lenda")->Fill();
+	}
+      }
       ddasEv->getEvent(inf, gHeader.length);
       lendaPack->MakeLendaEvent(lendaEv, ddasEv, 0);
       lendaEv->Finalize();

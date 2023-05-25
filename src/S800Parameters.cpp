@@ -3093,7 +3093,7 @@ void S800Full::getAndProcessS800(FILE *inf, Int_t length) {
 	    if (lastEvtNumber && reportEvtIncrease!= 0) {
 	      if ((lastEvtNumber+1) != uint64_evt) {
 		printf("S800 event number increase error!\n");
-		printf("  Last: %f, current: %lu\n", lastEvtNumber, uint64_evt);
+		printf("  Last: %f, current: %llu\n", lastEvtNumber, uint64_evt);
 	      }
 	      lastEvtNumber = uint64_evt;
 	    }
