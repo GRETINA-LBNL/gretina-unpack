@@ -2661,6 +2661,16 @@ gHistos::gHistos() {
     eRaw[m] = NULL;
     eCal[m] = NULL;
   }
+  for (Int_t m=0; m<40; m++) {
+    for (Int_t n=0; n<40; n++) {
+      mult2Pair[m][n] = NULL;
+    }
+  }
+  ccTotal = NULL;
+  ccSummary = NULL;
+  dT_SG = NULL;
+  dT_SL = NULL;
+  dT_LG = NULL;
 }
 
 gHistos::~gHistos() { ; }

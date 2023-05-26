@@ -562,11 +562,15 @@ int main(int argc, char *argv[]) {
 	  }
 	}
       }
-      
-      if (ctrl->withHISTOS) { 
+
+      if (ctrl->withHISTOS && ctrl->calibration && !ctrl->xtalkAnalysis) {
 	cout << "Writing histograms..." << endl;
 	gret->gHist.writeHistos(1); 
+      } else if (ctrl->withHISTOS) { 
+	cout << "Writing histograms..." << endl;
+	gret->gHist.writeHistos(0); 
       }
+      
       if (ctrl->withHISTOS || ctrl->withTREE) {
 	printf("ROOT file \"%s\" closing...\n", ctrl->outfileName.Data());
 	//fout_root->Write();

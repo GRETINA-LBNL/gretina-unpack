@@ -484,7 +484,7 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
       if ((lendaEv->etime > 0) && (s800->ts.timestamp > 0)) {
 	if (gret->gHist.dT_SL==NULL) {
 	  printf("Creating S800-LENDA delta T histogram.\n");
-	  gret->gHist.dT_SL = new TH1F("dT-S800-LENDA", "dT-S800-LENDA", 1000,-500,500);
+	  gret->gHist.dT_SL = new TH1F("dT_S800_LENDA", "dT_S800_LENDA", 1000,-500,500);
 	}
 	gret->gHist.dT_SL->Fill(s800->ts.timestamp - lendaEv->etime);
       }
@@ -492,7 +492,7 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
       if ((gret->b88.timestamp > 0) && (lendaEv->etime > 0)) {
 	if (gret->gHist.dT_LG==NULL) {
 	  printf("Creating LENDA-GRETINA delta T histogram.\n");
-	  gret->gHist.dT_LG = new TH1F("dT-LENDA-GRETINA", "dT-LENDA-GRETINA", 1000,-500,500);
+	  gret->gHist.dT_LG = new TH1F("dT_LENDA_GRETINA", "dT_LENDA_GRETINA", 1000,-500,500);
 	}
 	gret->gHist.dT_LG->Fill(lendaEv->etime - gret->b88.timestamp);
       }
@@ -500,7 +500,7 @@ int ProcessEvent(Float_t currTS, controlVariables* ctrl, counterVariables* cnt) 
       if ((gret->b88.timestamp > 0) && (s800->ts.timestamp > 0)) {
 	if (gret->gHist.dT_SG==NULL) {
 	  printf("Creating S800-GRETINA delta T histogram.\n");
-	  gret->gHist.dT_SG = new TH1F("dT-S800-GRETINA", "dT-S800-GRETINA", 1000,-500,500);
+	  gret->gHist.dT_SG = new TH1F("dT_S800_GRETINA", "dT_S800_GRETINA", 1000,-500,500);
 	}
 	gret->gHist.dT_SG->Fill(s800->ts.timestamp - gret->b88.timestamp);
       }      
