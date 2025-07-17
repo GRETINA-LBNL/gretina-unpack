@@ -6,7 +6,7 @@ ClassImp(globalHeader);
 ClassImp(mode3DataPacket);
 
 ClassImp(ipOLD);
-ClassImp(ip);
+ClassImp(ipNew);
 ClassImp(mode2Old);
 ClassImp(mode2ABCD1234);
 ClassImp(mode2ABCD5678);
@@ -1440,7 +1440,7 @@ void GRETINA::Reset() {
 /**************************************************************/
 
 Int_t GRETINA::getMode1(FILE* inf, counterVariables *cnt) {
-  
+
   Int_t siz = 0;
   trackedGamma g1;
   Int_t remaining = 0;
@@ -1453,6 +1453,8 @@ Int_t GRETINA::getMode1(FILE* inf, counterVariables *cnt) {
     cnt->Increment(2*sizeof(Int_t));
     remaining = 1;
   }
+
+
   
   while (remaining) {
     
@@ -1637,6 +1639,16 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, counterVariables *cnt) {
 			g2_78.intpts[m].y,
 			g2_78.intpts[m].z);
 	  pt.xyzLab = rot.crys2Lab(g2_78.crystal_id, pt.xyz);
+	  // HACK FOR OPENING ARRAY
+	  if (g2_78.crystal_id >= 112) {
+	    pt.xyzLab.SetY(pt.xyzLab.Y() - 300.);
+	  } else  {
+	      pt.xyzLab.SetY(pt.xyzLab.Y() + 300.);
+	  }
+
+
+	  //  cout << g2_78.crystal_id << endl;
+	  
 	  pt.xyzLabSeg = rot.crys2Lab(g2_78.crystal_id, TVector3(var.segCenter[0][0][pt.segNum], 
 	  							 var.segCenter[0][1][pt.segNum], 
 								 var.segCenter[0][2][pt.segNum]));

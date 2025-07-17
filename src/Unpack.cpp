@@ -729,9 +729,10 @@ void GetData(FILE* inf, controlVariables* ctrl, counterVariables* cnt,
 	  teb->FindBranch("gSim")->Fill();
 	}
       }
-      SkipData(inf, junk);  cnt->Increment(gHeader.length); 
+      gret->getSimulated(inf);  cnt->Increment(gHeader.length); 
+      // SkipData(inf, junk);  cnt->Increment(gHeader.length); 
     } 
-    //gret->getSimulated(inf);  cnt->Increment(gHeader.length); }
+
     break;
 #ifdef WITH_CHICO
   case CHICO: { chico->getAndUnpackCHICO(inf, gHeader.length);  cnt->Increment(gHeader.length); }

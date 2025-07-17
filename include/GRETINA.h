@@ -299,7 +299,7 @@ class Bank88 : public TObject {
 /*--------------------------------------------------------*/
 
 /* Single interaction point structure */
-struct ip { 
+struct ipNew { 
   Float_t x, y, z, e; /* Here, e refers to the fraction. */
   Int_t seg; /* Segment hit. */
   Float_t seg_energy; /* Energy of hit segment. */
@@ -333,7 +333,7 @@ struct mode2ABCD1234 {
   Float_t norm_chisq;
   Float_t baseline;
   Int_t pad; /* To ensure 8-byte alignment of struct. */
-  ip intpts[MAX_INTPTS];
+  ipNew intpts[MAX_INTPTS];
 };
 
 struct mode2ABCD5678 {
@@ -352,7 +352,7 @@ struct mode2ABCD5678 {
   Float_t prestep;
   Float_t poststep;
   Int_t pad;
-  ip intpts[MAX_INTPTS];
+  ipNew intpts[MAX_INTPTS];
 };
 
 struct mode2ABCD6789 {
@@ -376,7 +376,7 @@ struct mode2ABCD6789 {
   Float_t prestep;
   Float_t poststep;
   Int_t pad;
-  ip intpts[MAX_INTPTS];
+  ipNew intpts[MAX_INTPTS];
 
 };
 
@@ -502,7 +502,7 @@ struct trackedGamma {
   long long int timestamp; /* timestamp of first interaction point */
   Float_t x0, y0, z0, e0; /* first interaction point */
   Float_t x1, y1, z1, e1; /* second interaction point */
-  //Short_t fCryHit; /* First crystal hit ID */
+  Short_t fCryHit; /* First crystal hit ID */
 };
 
 class GTrackEvent : public TObject {
