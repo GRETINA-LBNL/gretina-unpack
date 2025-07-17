@@ -4,7 +4,7 @@ import os
 # Define the sub-systems to be included in analysis.
 PhosWall=0
 S800=1
-LENDA=1
+LENDA=0
 CHICO=0
 DFMA=0
 GODDESS=0
