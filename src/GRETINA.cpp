@@ -235,7 +235,7 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
       }
     }
-    g3ch.eCalPO = (Float_t)(tmpIntEnergy/32.);
+    g3ch.eRawPO = (Float_t)(tmpIntEnergy/32.);
 
     /* Last previous energy extraction */
     hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
@@ -373,7 +373,7 @@ void GRETINA::analyzeMode3(controlVariables *ctrl) {
   for (UInt_t ui = 0; ui<g3out.bankMult(); ui++) {
 
     g3out.xtals[ui].OrderChannels();
-    g3out.xtals[ui].bankNum += 1; /* And now crystalNum goes from 1 */
+    g3out.xtals[ui].bankNum += 1; /* And now bankNum goes from 1 */
       
   } /* Loop over hit crystals */
   

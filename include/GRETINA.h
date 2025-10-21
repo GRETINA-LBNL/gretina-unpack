@@ -86,7 +86,7 @@ class g3ChannelEvent : public TObject {
   Int_t segNum;
   Float_t eRaw, eCal;
   /* These are for event history, available in firmware 2.00_006f and beyond. */
-  Float_t eCalPO, prevE1, prevE2;
+  Float_t eRawPO, eCalPO, prevE1, prevE2;
   UShort_t deltaT1, deltaT2;
   UShort_t PZrollover;
 
@@ -156,7 +156,6 @@ struct historyEvent{
   Float_t energy;
   long long int TS;
   Int_t BLpreSum;
-  // 2016-07-23 CMC added module to gH to differentiate between digitizers
   Int_t module;
 };
 
