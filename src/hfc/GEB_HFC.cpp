@@ -233,7 +233,7 @@ int main(int argc, char** argv) {
       }
     }
   } else if (zipflag && !bzipflag) {
-    string zfilename = "zcat " + filename;
+    string zfilename = "gzcat " + filename;
     in = popen(zfilename.c_str(), "r");
     if (!in) {
       if (!pipeflag) {
