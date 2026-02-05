@@ -206,11 +206,11 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
     tmpIntEnergy = (Int_t)tmpEnergy;
     if (sign) {
       tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+      if (tmpIntEnergy < 0) { /* Not the safest way to do this, but good enough */
 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
       }
     } else {
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
+      if (tmpIntEnergy < 0) { /* Same comment as above.. */
 	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
       }
     }
@@ -236,46 +236,6 @@ Int_t GRETINA::getMode3(FILE *inf, Int_t evtLength, counterVariables *cnt,
       }
     }
     g3ch.eRawPO = (Float_t)(tmpIntEnergy/32.);
-
-    /* Last previous energy extraction */
-    hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
-    hiEnergy = (dp->hdr[13] & 0x0001);
-    sign = (dp->hdr[13] & 0x0002);
-    tmpEnergy = ((UInt_t)(hiEnergy) << 23);
-    tmpEnergy += ((UInt_t)(dp->hdr[10]) << 7);
-    tmpEnergy += ((UInt_t)(dp->hdr[11] & 0xfe00) >> 9);
-    tmpIntEnergy = (Int_t)(tmpEnergy);
-    if (sign) {
-      tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    } else {
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    }
-    g3ch.prevE1 = (Float_t)(tmpIntEnergy/32.);
-
-    /* Second last previous energy extraction */
-    hiEnergy = 0;  sign = 0;  tmpEnergy = 0;  tmpIntEnergy = 0;
-    hiEnergy = (dp->hdr[12] & 0x03ff);
-    sign = (dp->hdr[12] & 0x0400);
-    tmpEnergy = ((UInt_t)(hiEnergy) << 14);
-    tmpEnergy += ((UInt_t)(dp->hdr[13] & 0xfffc) >> 2);
-    tmpIntEnergy = (Int_t)(tmpEnergy);
-    if (sign) {
-      tmpIntEnergy = (Int_t)(tmpIntEnergy - (Int_t)0x01000000);
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    } else {
-      if ( (Int_t)(channel%10) != 9 ) { /* Not a CC */
-	tmpIntEnergy = -(Int_t)(tmpIntEnergy);
-      }
-    }
-    g3ch.prevE2 = (Float_t)(tmpIntEnergy/32.);
-    g3ch.PZrollover = ((UInt_t)(dp->hdr[12] & 0xf800) >> 11);
 
     /* Transform the waveform, if needed */
     if (ctrl->withWAVE) {
