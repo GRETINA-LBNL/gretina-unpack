@@ -1,0 +1,52 @@
+GRETINA
+Doppler Correction
+bbeta 0.024
+ATAcor 0.204
+BTAcor -0.168
+targetX 0.
+targetY 0.
+targetZ 0.2
+# radial corrections => crystal# factor
+28
+1 1.05
+2 1.02
+3 1.05
+4 1.05
+5 1.05
+6 1.08
+7 1.1
+8 1.05
+9 1.0
+10 1.0
+11 1.0
+12 1.0
+13 1.04
+14 1.12
+15 1.02
+16 1.0
+17 1.14
+18 1.15
+19 1.05
+20 1.1
+21 1.12
+22 1.09
+23 1.1
+24 1.11
+25 1.06
+26 1.06
+27 1.06
+28 1.09
+
+# MSU Scanning -- makes the data appear from ID 160 through 199
+Geometry
+# QNumber OrderNumber (from 0)
+1
+1 6
+
+
+Electronics Order
+# QNumber OrderNumber (from 0)
+1
+1 1
+
+
