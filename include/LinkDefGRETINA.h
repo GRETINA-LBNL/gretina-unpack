@@ -6,6 +6,8 @@
 
 #pragma link C++ class rotationMatrix+;
 
+#pragma link C++ class vector<TVector3>+;
+
 #pragma link C++ struct globalHeader+;
 
 #pragma link C++ struct mode3DataPacket+;

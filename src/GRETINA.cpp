@@ -98,6 +98,11 @@ TVector3 rotationMatrix::crys2Lab(Int_t crystalID, TVector3 xyz) {
   Int_t detectorPosition = ((crystalID & 0xfffc)>>2);
   Int_t crystalNumber = (crystalID & 0x0003);
 
+  //  printf("detectorPosition %d crystal %d\n", detectorPosition, crystalNumber);
+
+  // In GRETINA crystalID runs from 4 to 124; e.g. detectorPosition from 1 to 30
+  // But crmat is indexed 0 to 29, so we need to subtract 1 from detectorPosition
+
   detectorPosition -= 1;
 
   TVector3 xyzLab;
@@ -1000,7 +1005,7 @@ Float_t g2OUT::calorimeterDoppler(Float_t beta) {
 Float_t g2OUT::calorimeterE(Float_t thresh) {
   Float_t sum = 0.;
   for (UInt_t ui=0; ui<crystalMult(); ui++) {
-    if (xtals[ui].cc3 > thresh) { sum += xtals[ui].cc3; }
+    if (xtals[ui].cc > thresh) { sum += xtals[ui].cc; }
   }
   return sum;
 }
@@ -1640,11 +1645,11 @@ Int_t GRETINA::getMode2(FILE* inf, Int_t evtLength, counterVariables *cnt) {
 			g2_78.intpts[m].z);
 	  pt.xyzLab = rot.crys2Lab(g2_78.crystal_id, pt.xyz);
 	  // HACK FOR OPENING ARRAY
-	  if (g2_78.crystal_id >= 112) {
-	    pt.xyzLab.SetY(pt.xyzLab.Y() - 300.);
-	  } else  {
-	      pt.xyzLab.SetY(pt.xyzLab.Y() + 300.);
-	  }
+	  // if (g2_78.crystal_id >= 112) {
+	  //  pt.xyzLab.SetY(pt.xyzLab.Y() - 300.);
+	  // } else  {
+	  //    pt.xyzLab.SetY(pt.xyzLab.Y() + 300.);
+	  // }
 
 
 	  //  cout << g2_78.crystal_id << endl;
@@ -1741,12 +1746,15 @@ Int_t GRETINA::analyzeMode2(g2CrystalEvent *g2) {
 
   /* Figure out the basics...what detector is this in terms of quads? */
   Int_t detectorFound = 0;  Int_t crystal = -1;
+
+  g2->crystalNum = g2->crystalID-3; // For GRETINA only - crystalID goes 4 to 123; we want 1 to 120 for sanity
+  
   for (Int_t index=0; index<MAXQUADS; index++) {
     if ((Int_t)(g2->crystalID/4) == var.hole[index]) {
       detectorFound = 1;
-      crystal = ((var.electronicsOrder[index]*4) + 
-   		 (Int_t)(g2->crystalID%4));
-      g2->crystalNum = crystal+1; /* crystal starts from 0; crystalNum goes from 1 */
+      //      crystal = ((var.electronicsOrder[index]*4) + 
+      //		 (Int_t)(g2->crystalID%4));
+      // g2->crystalNum = crystal+1; /* crystal starts from 0; crystalNum goes from 1 */
       g2->quadNum = index+1;
     }
   }
@@ -1755,8 +1763,8 @@ Int_t GRETINA::analyzeMode2(g2CrystalEvent *g2) {
      but crystalNum gets set big (over edge of maximum of 120), and quadNum similarly 
      gets set to represent holeNumber + 30 */
   if (detectorFound == 0) {  
-    g2->crystalNum = g2->crystalID + 120; 
-    crystal = g2->crystalNum - 1;
+    // g2->crystalNum = g2->crystalID + 120; 
+    // crystal = g2->crystalNum - 1;
     g2->quadNum = (g2->crystalNum/4) + 30; /* quadNum = holeNum + 30 */
   }
 
